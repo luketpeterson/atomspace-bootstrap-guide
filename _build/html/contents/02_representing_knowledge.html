@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Representing Knowledge &#8212; Luke&#39;s Atomspace Quickstart Guide 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Getting Oriented &amp; Basic Concepts" href="01_getting_oriented.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p id="representing-knowledge">Previous Chapter: <a class="reference internal" href="01_getting_oriented.html#getting-oriented"><span class="std std-ref">Getting Oriented</span></a></p>
+<div class="section" id="id1">
+<h1>Representing Knowledge<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>In the last chapter, we learned how we can think of the Atomspace as a database of documents.  Each Atom is like a document that can contain a set of key-value pairs.
+But document-store database solutions are already plentiful and the value of the Atomspace comes from other capabilities.</p>
+<p>So now we’ll begin to explore the Atomspace as a knowledge representation format, or <em>Knowledge Base</em>; Often abbreviated as <em>KB</em>.</p>
+<p>KBs hold a collection of concepts and define them in relationship to other concepts.  KBs are a relatively old idea, not unique to the Atomspace, and there is a Wikipedia page covering the basics: <a class="reference external" href="https://en.wikipedia.org/wiki/Knowledge_base">https://en.wikipedia.org/wiki/Knowledge_base</a></p>
+<p>This guide and nearly every other piece of documentation on KBs I’ve encountered describe the primitives of knowledge representation using concrete examples from the real world, such as “A dog is an animal.”  This is helpful for learning the particulars of the KB because the fundamental conceptual relationships are already familiar.
+However, I believe a large amount of the value of KBs and ontologies come from the ability to reason within an abstract systems of precise relationships where that precision has been imposed elsewhere, at another level, or where ambiguity never existed to begin with.  For example, a KB could be used to reason about the behavior of a computer program, given a hypothetical set of inputs.</p>
+<p>In general, strictly regular KBs have many limitations when representing data from real world.  For example, the <a class="reference external" href="https://wiki.opencog.org/w/InheritanceLink">InheritanceLink</a> documentation points out the difference between Extensional vs Intentional Inheritance.  I’d argue this is just the tip of the iceberg when trying to formalize knowledge about the fuzzy real world into a crisp ontology.
+That being said, the Atomspace is better than most other KB formats, because of the tools it provides for expressing nuance, partial truth and uncertainty.  All the same, in my opinion, a symbolic KB alone is not sufficient for many aspects of real-world knowledge representation.  Regardless, I’ll attempt to refrain from injecting too much of my own personal opinions and conclusions into this guide dedicated to understanding the Atomspace.</p>
+<p>Ultimately, any formal language is only as precise as the axioms and definitions it is built upon, and you will have to define your own grammar.  Personally I view the Atomspace less as a language and instead as the building-blocks out of which a language can be created.</p>
+<div class="section" id="predicatenode-links-to-make-statements">
+<h2>PredicateNode &amp; Links to make statements<a class="headerlink" href="#predicatenode-links-to-make-statements" title="Permalink to this headline">¶</a></h2>
+<p>We touched on <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> in the last chapter when we used them as keys for values we associated with other atoms.
+In grammar, a statement is divided into subject(s) and a predicate.  “The dog barks.”  ‘Barks” is the predicate.
+In the statement: “The dog is happy”, “is happy” is the predicate.</p>
+<p>The important thing about predicates is that they allow assertions to be made.  Concepts by themselves don’t say anything, they merely exist, but predicates allow for statements.</p>
+<p>In the Atomspace, a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> provides a label for these predicate concepts.
+A more formal description of a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> in the Atomspace is here: <a class="reference external" href="https://wiki.opencog.org/w/PredicateNode">https://wiki.opencog.org/w/PredicateNode</a></p>
+<p>As seen in last chapter, the below Scheme snippet tells the Atomspace that “Fido the Dog’s weight is 12.5kg”.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mf">12.5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now, I can retrieve the <code class="code docutils literal notranslate"><span class="pre">weight_in_kg</span></code> using the <code class="code docutils literal notranslate"><span class="pre">cog-value</span></code> command, as demonstrated previously, but I cannot search for all dogs whose weight is under 15kg.
+Values associated with atoms are not searchable.  If I have the atom, I can get a value attached to it, but if I am looking for atoms with an associated value that meets some criteria, this approach won’t work.</p>
+<p>Here is another way to express the statement “Fido the Dog’s weight in kg is 12.5”.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">StateLink</span>
+   <span class="p">(</span><span class="nf">ListLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mf">12.5</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s break down exactly what we just did.  We created two new link atoms and a new <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> node atom.</p>
+<a class="reference internal image-reference" href="../_images/fidos_weight.svg"><img alt="Fido's Weight Graphic" class="align-center" height="300px" src="../_images/fidos_weight.svg" width="450px" /></a>
+<p>Here is a graphical representation of the atom relationships we just expressed.</p>
+<p>In the inner-part of the expression, we created a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom that references <code class="code docutils literal notranslate"><span class="pre">(Concept</span> <span class="pre">&quot;Fido</span> <span class="pre">the</span> <span class="pre">Dog&quot;)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(Predicate</span> <span class="pre">&quot;weight_in_kg&quot;)</span></code>.
+This <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> is just a simple association between the other two node atoms.</p>
+<p>The formal description of <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> tells us we should think of this as an argument list, and from a programming language perspective this makes sense.
+Personally, however, I prefer to think about it from a natural language perspective.
+By definition, this particular <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom is <em>the</em> <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom that references <code class="code docutils literal notranslate"><span class="pre">(Concept</span> <span class="pre">&quot;Fido</span> <span class="pre">the</span> <span class="pre">Dog&quot;)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(Predicate</span> <span class="pre">&quot;weight_in_kg&quot;)</span></code> in that order.
+Therefore, in this context, you can think of it as the atom that means “Fido the Dog’s weight in kg”.
+Basically, a single atom, i.e. our new link atom, is able to represent a compound concept created by combining two other atoms.</p>
+<p>The documentation for <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/ListLink">https://wiki.opencog.org/w/ListLink</a>, if you want to understand it more precisely.</p>
+<p>Moving on, the outer part of the expression creates a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>.  The <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom that we just made references our newly-created <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> and a newly-created <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> that has the “label” of “12.5”.
+A <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is like a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> insofar as it also references other atoms and provides a way to reference this newly combined concept as an atom itself.</p>
+<p>The main feature of a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is that there can be only one <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> for each referant in position 0 of the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>’s outbound set.
+So, referring back to our example, “Fido the Dog’s weight in kg” can only have one <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> associated with it.
+In plain English, “Fido the Dog’s weight in kg” can only be one thing at a time.  His weight can’t simultaneously be 12.5kg and 15kg.  Setting it to 15kg will update the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom that’s already there, rather than creating a new atom.</p>
+<p>The documentation for <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/StateLink">https://wiki.opencog.org/w/StateLink</a>.</p>
+<p>In addition, more documentation and examples along these lines can be found in these OpenCog examples: <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/state.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/state.scm</a> &amp; <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/property.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/property.scm</a></p>
+</div>
+<div class="section" id="a-simple-query-using-getlink-variablenode">
+<h2>A Simple Query using GetLink &amp; VariableNode<a class="headerlink" href="#a-simple-query-using-getlink-variablenode" title="Permalink to this headline">¶</a></h2>
+<p>So, I’ve told the Atomspace that “Fido the Dog’s weight in kg is 12.5”.  How can I retrieve that information?  How do I ask “What is Fido the Dog’s weight in kg?”</p>
+<p>Like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">GetLink</span>
+      <span class="p">(</span><span class="nf">StateLink</span>
+         <span class="p">(</span><span class="nf">ListLink</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ll go through what we just did, step by step.  But first, I want to rewrite the above statement so our code can be a little less verbose and we can focus on what really matters.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">fidos_weight_link</span> <span class="p">(</span><span class="nf">List</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Since Fido’s weight is something we’re referencing often, we can use Scheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">define</span></span></code> feature to create a single token to refer to it.</p>
+<p>Now our query looks like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Get</span>
+      <span class="p">(</span><span class="nf">State</span>
+         <span class="nv">fidos_weight_link</span>
+         <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Just like we abbreviated <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> and <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> earlier, we can abbreviate <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> as just <code class="code docutils literal notranslate"><span class="pre">List</span></code> and <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> as <code class="code docutils literal notranslate"><span class="pre">State</span></code>.
+Now that I’ve introduced them, I’ll also start abbreviating <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> as <code class="code docutils literal notranslate"><span class="pre">Get</span></code>, <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> as <code class="code docutils literal notranslate"><span class="pre">Variable</span></code>, etc.  You get the idea, so I won’t explicitly explain abbreviations from here onward.</p>
+<p>Anyway, let’s get to the meat of what we just did.  First, notice the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> function call.
+This is invoking an OpenCog function which tells the Atomspace to execute a link.  What does it mean to execute a link?</p>
+<p>So far, the links we’ve seen, like the <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> we used above have just been declarative.
+But other types of links are “executable”, meaning they perform a function and can alter the Atomspace.
+Executing a link can create new atoms in the Atomspace or even delete existing atoms.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> is one of the executable link types.  Executing a <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> performs a query in the Atomspace, and returns the atoms found by the query.</p>
+<p>Let’s look at the atom that our <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> is referencing.  This atom is our query:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">State</span>
+   <span class="nv">fidos_weight_link</span>
+   <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This can be thought of as a “Match Expression”, because executing the <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> will search the Atomspace for all atoms that match this atom we provided.
+The <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> can then be thought of as the wildcard.  The wildcard can match any other atom.
+If you are familiar with <a class="reference external" href="https://www.regular-expressions.info/quickstart.html">Regular Expressions</a>, this is the same principle.</p>
+<p>So, you might interpret this query expression as saying “Find all the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atoms that connect <code class="code docutils literal notranslate"><span class="pre">fidos_weight</span></code> to <em>something</em>.
+What are all the <em>somethings</em> that you found?”</p>
+<p>When we execute our query, it should return:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">SetLink</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;12.5&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>You probably spotted our <code class="code docutils literal notranslate"><span class="pre">(NumberNode</span> <span class="pre">&quot;12.5&quot;)</span></code> atom.  That was matched by the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> in the query atom, but what’s with the <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code>?</p>
+<p><code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> returns a <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> to us, which is similar to a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> except that <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> is unordered.
+<code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> returns a <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> instead of a “naked” node atom because a query may match more than one atom and there is no way to know the number of results that will be found, in the general case.</p>
+<p>Lastly, let’s get our query result back into Scheme.  The Scheme snippet below adds 50 to Fido’s weight, just like the example from the previous chapter.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">+</span>
+   <span class="p">(</span><span class="nf">cog-number</span>
+      <span class="p">(</span><span class="nf">car</span>
+         <span class="p">(</span><span class="nf">cog-outgoing-set</span>
+            <span class="p">(</span><span class="nf">cog-execute!</span>
+               <span class="p">(</span><span class="nf">GetLink</span>
+                  <span class="p">(</span><span class="nf">State</span>
+                     <span class="nv">fidos_weight_link</span>
+                     <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+   <span class="p">)</span>  <span class="p">)</span>  <span class="p">)</span>  <span class="p">)</span>  <span class="p">)</span>  <span class="p">)</span>
+   <span class="mi">50</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Because <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> returns a <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> to us, we must get the first element of the <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code>, which will be a <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code>.  We can extract our numerical value from that <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code>.
+We use the <code class="code docutils literal notranslate"><span class="pre">cog-outgoing-set</span></code> OpenCog function to convert the <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> into a Scheme list, and then use <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">car</span></span></code> to extract the first element of that list.</p>
+<p>Finally, we can use the <code class="code docutils literal notranslate"><span class="pre">cog-number</span></code> OpenCog function to convert the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> into a Scheme number, before performing the arithmetic in Scheme.</p>
+<p>That’s probably enough on this simple query.  If you want a more complete explanation, the documentation for <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/VariableNode">https://wiki.opencog.org/w/VariableNode</a> and the documentation for <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/GetLink">https://wiki.opencog.org/w/GetLink</a></p>
+</div>
+<div class="section" id="more-elaborate-queries-with-other-link-types">
+<h2>More Elaborate Queries with Other Link Types<a class="headerlink" href="#more-elaborate-queries-with-other-link-types" title="Permalink to this headline">¶</a></h2>
+<p>This is a good place to introduce the concepts of <em>Grounded</em> vs <em>Ungrounded</em> expressions.
+The formal definition is that ungrounded expressions contain 1 or more <em>Free</em> <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms, while grounded expressions don’t contain any.
+Personally, the way I think about it is that grounded expressions are statements and ungrounded expressions are questions.</p>
+<p>Just as in English, questions and statements can take a similar gramatical form.  Consider this example.
+Statement: “The man is running.”  Question: “Who is running?” Answer: “The man”.</p>
+<p>The question-word “Who” in this example is like a <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code>.
+When the question is matched against the statement, the relative gramatical position of the word “Who” indicates which part of the statement will appropriately answer the question.</p>
+<p>So, another intuition for <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> is that it takes an ungrounded expression and returns a grounded expression.
+Or said another way, it takes a question and returns an answer.</p>
+<p>So let’s flip our previous question inside out.  Consider this query:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Get</span>
+      <span class="p">(</span><span class="nf">State</span>
+         <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Number</span> <span class="mf">12.5</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Our previous question was: “What is Fido the Dog’s weight in kg?”.  Now our question is: “What value is 12.5?”.
+Executing that snippet should return our <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> that represents Fido’s weight.</p>
+<p>You’ve probably noticed the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atom’s label, <code class="code docutils literal notranslate"><span class="pre">&quot;$v1&quot;</span></code>.  This is just an arbitrary label, no different than the other labels we’ve used such as “Fido the Dog”.
+The Atomspace allows you to use multiple <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms to compose compound questions.
+For example the English question: “What cities in Germany are on the river Danube?” is a compound question because it has two parts, “In Germany” and “On the river Danube”.</p>
+<p>We’re getting to the uses for multiple <code class="code docutils literal notranslate"><span class="pre">Variable</span></code> nodes within a query.
+Right now, let’s give Fido a friend by executing this Scheme snippet:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">StateLink</span>
+   <span class="p">(</span><span class="nf">ListLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fluffy the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">17</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, I want to ask the Atomspace to find the dog that has a weight over 15kg.  My query looks like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Bind</span>
+      <span class="p">(</span><span class="nf">And</span>
+         <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">List</span>
+               <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">GreaterThan</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Number</span> <span class="mi">15</span><span class="p">)</span>
+         <span class="p">)</span>
+      <span class="p">)</span>
+      <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We found Fluffy!</p>
+<p>Now, let’s go over the new Link types I just introduced, and I’ll explain the query along the way.</p>
+<div class="section" id="bindlink">
+<h3>BindLink<a class="headerlink" href="#bindlink" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> is another way to execute a query.  It is just like the <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> atom, that we used in the previous examples, except that <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> allows us to declare the format for the query results.</p>
+<p>To understand this better, try this nearly identical version of the query using <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Get</span>
+      <span class="p">(</span><span class="nf">And</span>
+         <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">List</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">))</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">GreaterThan</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">15</span><span class="p">))</span>
+<span class="p">)</span>  <span class="p">)</span>  <span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see, it also returns the “Fluffy the Dog”.  But unlike the <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> version, the returned atom is a bit more cluttered.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> version returns:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">SetLink</span>
+   <span class="p">(</span><span class="nf">ListLink</span>
+      <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Fluffy the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;17&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>While the <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> version returns:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">SetLink</span>
+   <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Fluffy the Dog&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>That is because we explicitly told the <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> atom that we were interested in <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dog_node&quot;)</span></code> as our result.  On the other hand, the <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> atom created a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> of all <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms in the query.</p>
+<p>You can think of <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> as performing two operations in sequence.  A query to search for matching atoms, and then a subsequent step to format the results as new atoms.</p>
+<p>In fact, the “get-put.scm” OpenCog example demonstrates how a <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> can be composed from a <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> and a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.  I recommend going through that example as well as the “bindlink.scm” example, which can be found here: <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm</a> &amp; <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm</a></p>
+</div>
+<div class="section" id="andlink">
+<h3>AndLink<a class="headerlink" href="#andlink" title="Permalink to this headline">¶</a></h3>
+<p>BORIS</p>
+</div>
+<div class="section" id="greaterthanlink">
+<h3>GreaterThanLink<a class="headerlink" href="#greaterthanlink" title="Permalink to this headline">¶</a></h3>
+<p>BORIS</p>
+<p>BORIS, split the query section in two.  Create a query that returns just Fido’s concept node, then fluffy and fido together.
+Query in such a way that only Fido is found
+Query to find both dogs
+BORIS</p>
+<p>BORIS HERE IS WHERE WE ADD GREATER THAN Links
+ALSO THROW IN An AND for good measure</p>
+<p>I recommend exploring queries and executable links further by going through the “assert-retract.scm” OpenCog example here: <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm</a></p>
+</div>
+</div>
+<div class="section" id="truthvalues-evaluationlinks">
+<h2>TruthValues &amp; EvaluationLinks<a class="headerlink" href="#truthvalues-evaluationlinks" title="Permalink to this headline">¶</a></h2>
+<p>In the previous section, we showed how <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> could execute certain types of links, resulting in an atom being returned.  Now we’ll look at the <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> OpenCog function.</p>
+<p>Now that we know how to ask the Atomspace about Fido’s weight, the next logical step is to see if we can ask it a yes/no (true/false) question.  “Is Fido the Dog’s weight greater than 10kg?”  I phrase that question like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">fidos_weight_query</span>
+   <span class="p">(</span><span class="nf">GetLink</span>
+      <span class="p">(</span><span class="nf">State</span>
+         <span class="nv">fidos_weight_link</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+   <span class="p">(</span><span class="nf">GreaterThanLink</span>
+      <span class="nv">fidos_weight_query</span>
+      <span class="p">(</span><span class="nf">NumberNode</span> <span class="mf">10.0</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>BORIS explain how to interpret the (stv 1 1) that is returned
+BORIS What to say about EvaluationLink??  We’ve already introduced them above, GreaterThanLink is an EvalLink.</p>
+<p>BORIS MEMBERLINK!!!!</p>
+</div>
+<div class="section" id="a-few-simple-links-inheritancelink-memberlink-listlink">
+<h2>A Few Simple Links - InheritanceLink, MemberLink, ListLink<a class="headerlink" href="#a-few-simple-links-inheritancelink-memberlink-listlink" title="Permalink to this headline">¶</a></h2>
+<p>Every KB that I’m aware of has two special link types for specialization and generalization.  Atomspace is no different.
+They are called <em>InheritanceLink</em> and <em>SubsetLink</em></p>
+<p>InheritanceLink is the specialization link.  It is essentially equivalent to the “Is a” statement.  e.g. a dog is an animal.
+The name “Inheritance” is appropriate even if it feels a little odd at first. Consider making the dog statement in a more verbose form; you might say “All statements about an animal are also true about a dog.”, or alternatively, “A dog inherits the relationships of an animal.”
+InheritanceLink is described in more detail here: <a class="reference external" href="https://wiki.opencog.org/w/InheritanceLink">https://wiki.opencog.org/w/InheritanceLink</a></p>
+<p>Here is an example Scheme snippet to create an InheritanceLink.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Inheritance</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Animal&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Executing the above Scheme code creates or references the ConceptNodes, “Dog” and “Animal”, and then creates an InheritanceLink between them.  So the Atomspace will have at least 3 atoms after executing the above code, two ConceptNodes and one InheritanceLink.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>“Inheritance” is an abbreviated alias of “InheritanceLink”, and “Concept” is an alias of “ConceptNode”.  They are functionally identical.</p>
+</div>
+<p>SubsetLink is the generalization link, making it the inverse of the InheritanceLink.  For example, you could say “one type of animal is a dog.”  More documentation on SubsetLink is here: <a class="reference external" href="https://wiki.opencog.org/w/SubsetLink">https://wiki.opencog.org/w/SubsetLink</a></p>
+<p>Here is an example Scheme snippet to create a SubsetLink.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">SubsetLink</span>
+   <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Animal&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>While they may make complimentary assertions, the referant order for SubsetLink and InheritanceLink is the same.  This trips me up sometimes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION for someone smarter than me: Why doesn’t a SubsetLink imply an InheritanceLink?  What’s the point of two separate link types at all? It seems that a more regularized structure would have the same link appear as both depending on the query.</p>
+</div>
+<p>BORIS, Ordered list link, colors of the rainbow</p>
+</div>
+<div class="section" id="logical-inference">
+<h2>Logical Inference<a class="headerlink" href="#logical-inference" title="Permalink to this headline">¶</a></h2>
+<p>BORIS</p>
+<p>Let’s start out by assigning a property to some concepts.  In this case, let’s define the number of wheels each object has with this Scheme snippet.</p>
+<p>BORIS HOW to EXPRESS SOME statements, e.g. how many wheels does something have.  Bicycle: 2. Car 4. Animal 0.</p>
+<p>BORIS HOW TO query the number of wheels.</p>
+<p>BORIS EvaluationLink???</p>
+<p>A dog has 0 wheels.  Dog implies Animal, Animal has 0 wheels.</p>
+</div>
+<div class="section" id="querying-the-atomspace">
+<h2>Querying the Atomspace<a class="headerlink" href="#querying-the-atomspace" title="Permalink to this headline">¶</a></h2>
+<p>BORIS Answering a simple question</p>
+</div>
+<div class="section" id="evaluationlink-truth-values">
+<h2>EvaluationLink &amp; Truth Values<a class="headerlink" href="#evaluationlink-truth-values" title="Permalink to this headline">¶</a></h2>
+<p>BORIS BORIS, How do I query whether something is part of another set????</p>
+</div>
+<div class="section" id="defining-new-types">
+<h2>Defining new Types<a class="headerlink" href="#defining-new-types" title="Permalink to this headline">¶</a></h2>
+<p>Building up our own grammar.
+BORIS Defining some</p>
+<p>A DefineLink??? <a class="reference external" href="https://wiki.opencog.org/w/DefineLink">https://wiki.opencog.org/w/DefineLink</a></p>
+<p>It is advised to use an EquivalenceLink instead of a DefineLink
+<a class="reference external" href="https://wiki.opencog.org/w/EquivalenceLink">https://wiki.opencog.org/w/EquivalenceLink</a></p>
+<p>Is TypedAtomLink the way???  <a class="reference external" href="https://wiki.opencog.org/w/TypedAtomLink">https://wiki.opencog.org/w/TypedAtomLink</a>
+Or SignatureLink??  <a class="reference external" href="https://wiki.opencog.org/w/SignatureLink">https://wiki.opencog.org/w/SignatureLink</a></p>
+</div>
+<div class="section" id="truth-values-and-values-in-general">
+<h2>Truth Values and Values in General<a class="headerlink" href="#truth-values-and-values-in-general" title="Permalink to this headline">¶</a></h2>
+<p>BORIS.  Some operations result in less truth or less certainty</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Luke's Atomspace Quickstart Guide</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Representing Knowledge</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#predicatenode-links-to-make-statements">PredicateNode &amp; Links to make statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-simple-query-using-getlink-variablenode">A Simple Query using GetLink &amp; VariableNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-elaborate-queries-with-other-link-types">More Elaborate Queries with Other Link Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#truthvalues-evaluationlinks">TruthValues &amp; EvaluationLinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-few-simple-links-inheritancelink-memberlink-listlink">A Few Simple Links - InheritanceLink, MemberLink, ListLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logical-inference">Logical Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#querying-the-atomspace">Querying the Atomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluationlink-truth-values">EvaluationLink &amp; Truth Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-new-types">Defining new Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#truth-values-and-values-in-general">Truth Values and Values in General</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="01_getting_oriented.html" title="previous chapter">Getting Oriented &amp; Basic Concepts</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Luke Peterson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/contents/02_representing_knowledge.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

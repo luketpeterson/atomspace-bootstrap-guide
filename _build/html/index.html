@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luke’s Atomspace Quickstart Guide &#8212; Luke&#39;s Atomspace Quickstart Guide 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Oriented &amp; Basic Concepts" href="contents/01_getting_oriented.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="luke-s-atomspace-quickstart-guide">
+<h1>Luke’s Atomspace Quickstart Guide<a class="headerlink" href="#luke-s-atomspace-quickstart-guide" title="Permalink to this headline">¶</a></h1>
+<p>I wrote… more truthfully I should say, I am writing this quick start guide for people coming to the Atomspace cold, without the context and background to make sense of the documentation that is available elsewhere on the OpenCog wiki and GitHub repositories.
+My intention is to clear up some of the the questions and misunderstandings that gave me trouble at first, and map out a path for getting up to speed reasonably quickly.</p>
+<p>The Atomspace examples on Github are already designed to be an introduction.  They can be found here: <a class="reference external" href="https://github.com/opencog/atomspace/tree/master/examples/atomspace">https://github.com/opencog/atomspace/tree/master/examples/atomspace</a></p>
+<p>Personally, I felt like the examples alone were not able to answer many of my questions, either because they assumed some prior knowledge or vocabulary I didn’t have or because the ordering of topics didn’t fit with the way I was able to grok the information.
+Therefore, I am attempting to fill in the gaps where I got hung up.</p>
+<p>This guide certainly duplicates many concepts that are also covered in the examples, because I also wanted the guide to be able to stand alone.
+That said, I tried to focus the guide on the places where I felt the examples missed something important, or waited too long to introduce a critical concept.</p>
+<p>Perhaps you will find this guide to be complimentary to the examples, and progressing through both in parallel might be the best approach.</p>
+<p>Let’s begin.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contents/01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#poking-around-in-scheme">Poking around in Scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#creating-some-node-atoms">Creating some Node Atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#values-associated-with-atoms">Values associated with Atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#other-value-types">Other Value Types</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contents/02_representing_knowledge.html">Representing Knowledge</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#predicatenode-links-to-make-statements">PredicateNode &amp; Links to make statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#a-simple-query-using-getlink-variablenode">A Simple Query using GetLink &amp; VariableNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#more-elaborate-queries-with-other-link-types">More Elaborate Queries with Other Link Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#truthvalues-evaluationlinks">TruthValues &amp; EvaluationLinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#a-few-simple-links-inheritancelink-memberlink-listlink">A Few Simple Links - InheritanceLink, MemberLink, ListLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#logical-inference">Logical Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#querying-the-atomspace">Querying the Atomspace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#evaluationlink-truth-values">EvaluationLink &amp; Truth Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#defining-new-types">Defining new Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#truth-values-and-values-in-general">Truth Values and Values in General</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>BORIS Links as Active Transformations??  To explain that, I must first explain matching and querying</p>
+<p>I’d rather explain values and flow programming first.</p>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Luke's Atomspace Quickstart Guide</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contents/01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contents/02_representing_knowledge.html">Representing Knowledge</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="contents/01_getting_oriented.html" title="next chapter">Getting Oriented &amp; Basic Concepts</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Luke Peterson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
