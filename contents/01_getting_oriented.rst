@@ -125,7 +125,7 @@ We can attach values to atoms.  The below snippet will create a concept node for
 As you can see above, the "weight_in_kg" key is actually a separate :code:`ConceptNode` atom.  Any atom can be used as the key to a value associated with another atom.
 
 However, convention dictates that a :code:`PredicateNode`, which can be abbreviated as just :code:`Predicate`, is the best type of atom to use as a key.
-A :code:`PredicateNode` is a special type of node used to define certain formal relationships.  We'll cover them in the next chapter. :ref:`Representing Knowledge <02_representing_knowledge>`
+A :code:`PredicateNode` is a special type of node used to define certain formal relationships.  We'll cover them in the next chapter. :ref:`Structured Knowledge <02_representing_knowledge>`
 
 So here is the above example, with a :code:`PredicateNode` instead of a :code:`ConceptNode` as the key:
 
@@ -251,7 +251,7 @@ And similarly, you can run :code:`,appropos cog`, or :code:`,a cog` for short, t
 
 Finally, the wiki reference for the OpenCog Scheme interface can be found here: `<https://wiki.opencog.org/w/Scheme>`_  I always have a browser tab open on this page.
 
-Next Chapter: :ref:`Representing Knowledge <02_representing_knowledge>`
+Next Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 
 
 
