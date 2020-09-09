@@ -26,7 +26,7 @@ Links come in both ordered and unordered flavors.
 
 - An unordered link might be used to define a set, like the set of all animals.
 - An ordered link may be used to define a list or sequence, like the colors of the rainbow.
-- An ordered link with only two referants can be used to define a binary relationship, like "A cat is an animal."  In other words, ordered links can express a direction; "A cat is an animal." is not equivalent to "An animal is a cat."
+- An ordered link with only two referants can be used to define a binary relationship, like "A cat is an animal."  In other words, ordered links can express a direction; The statement: "A cat is an animal." is not equivalent to "An animal is a cat.".  Directionality can be important.
 
 A more complete overview of the atoms can be found here: `<https://wiki.opencog.org/w/Atom_types>`_  But I didn't initially have the needed context to understand the information on that page until I'd spent a bit more time with the Atomspace.
 I'd recommend wading into the shallow-end of the pool, especially if you're unfamiliar with *Knowledge Base* concepts.
@@ -61,7 +61,7 @@ The other option is to run :code:`cogserver` on the OpenCog virtual machine, and
 
 Once connected to the cogserver, you can access the Scheme shell by running the :code:`scm` command.
 
-The documentation asserts that the cogserver approach is superior for performance, but at my novice level, I find Option 1 to be more convenient.  Also I enjoy the customizations I made to my `~/.guile` file, that isn't loaded when guile is run by the OpenCog server process.
+The documentation asserts that the cogserver approach is superior for performance, but at my novice level, I find Option 1 to be more convenient.  Also I enjoy the customizations I made to my `~/.guile` file, but that file isn't loaded when guile is run by the OpenCog server process.
 
 Poking around in Scheme
 ------------------------------------------------------------------------
@@ -74,7 +74,7 @@ Scheme is a full-featured programming language.  For example, you can try to exe
 You can read more about Scheme at: `<http://www.shido.info/lisp/idx_scm_e.html>`_ among many other places.  Within the OpenCog Scheme shell you can use *cons*, *car* and *cdr* 'til the cows come home.
 I often find it handy to have the Scheme environment right at my fingertips.
 
-But we're here in a Scheme shell because Scheme is a (the??) first-class interface to the atomspace.  
+But we're here in a Scheme shell because Scheme is a (**the??**) first-class interface to the atomspace.  
 However it's important to point out that the atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn't "Running in Scheme".
 
 Furthermore, irrespective of Scheme, the Atomspace itself can also behave as a Turing-complete program execution environment for Atomese, the language of the Atomspace.
@@ -98,7 +98,19 @@ The :code:`ConceptNode` Scheme function above invokes the :code:`cog-new-node` n
 
 The single quote in :code:`'ConceptNode` above tells the Scheme interpreter that :code:`ConceptNode` should be treated as a literal symbol, and not to attempt to evaluate it further.
 
-If you just ran the code above, the :code:`cog-new-node` function would have retrieved the first node you created, rather than creating a duplicate.  A node is defined as a unique Name & Type combination, so duplicates cannot exist by definition.
+If you just ran the code above, the :code:`cog-new-node` function would have retrieved the first node you created, rather than creating a duplicate.  A node is defined as a unique Name & Type combination, so duplicates cannot exist, by definition.
+
+Sometimes it's handy to use a Scheme symbol to refer to an atom.  This is done with Scheme's :scheme:`define` feature, like this:
+
+.. code-block:: scheme
+
+   (define dog_concept (ConceptNode "Dog"))
+
+Also, you can print an atom using Scheme's :scheme:`display` function.  If the atom is a link, it will recursively display the referenced atoms as well.
+
+.. code-block:: scheme
+
+   (display dog_concept)
 
 Now, you can see all of the atoms in the Atomspace with this function:
 
@@ -106,9 +118,9 @@ Now, you can see all of the atoms in the Atomspace with this function:
 
    (cog-prt-atomspace)
 
-At the moment, there is probably just one atom in your Atomspace, unless you've gone off-script already :-)  Eventually, the output of this function might get a little too verbose to use unfiltered, as we create more and more atoms.
+At the moment, there is probably just one atom in your Atomspace, unless you've gone off-script already :-)  Eventually, the output of the :code:`cog-prt-atomspace` function might get a little too verbose to use unfiltered, as we create more and more atoms.
 
-.. note:: Later on, we'll create multiple Atomspaces.  This will be useful for segmentation of the knowledge base.  Temporary child Atomspaces may be instantiated on a stack, to facilitate things like counterfactual or hypothetical reasoning.  These are more advanced topics, however.
+.. note:: Later on, we'll create multiple Atomspaces.  This will be useful for segmentation of the knowledge base.  Temporary child Atomspaces may be instantiated on a stack, to facilitate things like counterfactual or hypothetical reasoning.  These are more advanced topics, however, and it'll be a while before we get there.
 
 .. note:: QUESTION for someone smarter than me. Does the sub-atomspace management allow for conflicting assertions, so long as the two child atomspaces aren't active simultaneously?  For example, can the Newtonian and the Einsteinian equations of gravity be expressed in the same KB using different child atomspaces?
 
@@ -116,6 +128,8 @@ Values associated with Atoms
 ------------------------------------------------------------------------
 
 We can attach values to atoms.  The below snippet will create a concept node for a particular dog, "Fido the Dog", and another one for the concept of "weight_in_kg".  Then it will assign Fido a weight value.
+
+.. note:: As you can see below, we've abbreviated :code:`ConceptNode` as just :code:`Concept`.  Abbreviations like this are common in the Atomspace.
 
 .. code-block:: scheme
 
@@ -125,7 +139,8 @@ We can attach values to atoms.  The below snippet will create a concept node for
 As you can see above, the "weight_in_kg" key is actually a separate :code:`ConceptNode` atom.  Any atom can be used as the key to a value associated with another atom.
 
 However, convention dictates that a :code:`PredicateNode`, which can be abbreviated as just :code:`Predicate`, is the best type of atom to use as a key.
-A :code:`PredicateNode` is a special type of node used to define certain formal relationships.  We'll cover them in the next chapter. :ref:`Structured Knowledge <02_representing_knowledge>`
+A :code:`PredicateNode` is a special type of node used to define certain formal relationships.  There is a lot to say about :code:`PredicateNode` atoms, and we'll cover them in depth during the next chapters.
+You can skip ahead if you want.  :ref:`Structured Knowledge <02_representing_knowledge>`
 
 So here is the above example, with a :code:`PredicateNode` instead of a :code:`ConceptNode` as the key:
 
@@ -157,7 +172,7 @@ The above snippet will return an Atomspace :code:`FloatValue`, which you can tur
          (Predicate "weight_in_kg")))
 
 And now you can do stuff in Scheme with the result.  You may have noticed that the value was returned as a Scheme list, as opposed to another Scheme primitive data type, such as a Scheme number.
-It appears that all Atomspace values are arrays of elements of the same value type.  So a single value is simply a list of length one.
+All Atomspace values are arrays of elements.  So a single number is represented a list of numerical values with a list-length of one.
 Throughout the other OpenCog documentation, you will often see values being initialized with a list of multiple elements.
 
 Because values are returned to Scheme as a list, I need to use :code:`car` to access the first element.  This example uses Scheme to add 50 to Fido's weight:
@@ -174,7 +189,7 @@ Because values are returned to Scheme as a list, I need to use :code:`car` to ac
 
 But I wasn't supposed to focus on Scheme.  Sorry about that.  The Atomspace has its own way to express arithmetic operations, and we'll get to that soon enough.  I mainly wanted to demonstrate the way the :code:`cog-value->list` function could be used as a bridge to get data from the Atomspace back into Scheme.
 
-If you know the index of the value element you are interested in, you can use the :code:`cog-value-ref` function.  This is cleaner and more efficient than using Scheme's list access semantics, (e.g. :code:`car`, :code:`cdr`, etc.).  It's also very handy if you know you have a 1-element value.
+If you know the index of the value element you are interested in, you can use the :code:`cog-value-ref` function.  This is cleaner and more efficient than using Scheme's list element access semantics, (e.g. :scheme:`car`, :scheme:`cdr`, :scheme:`list-ref`, etc.).  It's also very handy if you know you have a 1-element value, such as in our example.
 
 .. code-block:: scheme
 

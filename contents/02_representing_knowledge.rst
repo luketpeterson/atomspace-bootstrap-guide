@@ -23,6 +23,7 @@ In general, strictly regular KBs have many limitations when representing data fr
 That being said, the Atomspace is better than most other KB formats, because of the tools it provides for expressing nuance, partial truth and uncertainty.  All the same, in my opinion, a symbolic KB alone is not sufficient for many aspects of real-world knowledge representation.  Regardless, I'll attempt to refrain from injecting too much of my own personal opinions and conclusions into this guide dedicated to understanding the Atomspace.
 
 Ultimately, any formal language is only as precise as the axioms and definitions it is built upon, and you will have to define your own grammar.  Personally I view the Atomspace less as a language and instead as the building-blocks out of which a language can be created.
+Some people have used the Atomspace to represent tokens and grammar from a natural language such as English, while others have used it to represent interactions between proteins and genes.  In its purest form, the Atomspace is a system where data and rules about how the data can interact can be described side-by-side, and then queried and simulated.
 
 PredicateNode & Links to make statements
 ------------------------------------------------------------------------
@@ -31,20 +32,22 @@ We touched on :code:`PredicateNode` in the last chapter when we used them as key
 In grammar, a statement is divided into subject(s) and a predicate.  "The dog barks."  'Barks" is the predicate.
 In the statement: "The dog is happy", "is happy" is the predicate.
 
-The important thing about predicates is that they allow assertions to be made.  Concepts by themselves don't say anything, they merely exist, but predicates allow for statements.
+The important thing about predicates is that they allow assertions to be made.  Concepts by themselves don't say anything, they merely exist (or don't exist), but predicates allow for statements.
 
 In the Atomspace, a :code:`PredicateNode` provides a label for these predicate concepts.
-A more formal description of a :code:`PredicateNode` in the Atomspace is here: `<https://wiki.opencog.org/w/PredicateNode>`_
+A more formal description of a :code:`PredicateNode` in the Atomspace is here: `<https://wiki.opencog.org/w/PredicateNode>`_  Formally, a :code:`PredicateNode` is a node that can be evaluated to create a *TruthValue*.  In the next chapter we'll cover exactly how predicates are evaluated, but for now it's ok if this idea is a little vague.
 
-As seen in last chapter, the below Scheme snippet tells the Atomspace that "Fido the Dog's weight is 12.5kg".
+As seen in previous chapter, the below Scheme snippet tells the Atomspace that "Fido the Dog's weight is 12.5kg".
 
 .. code-block:: scheme
 
    (cog-set-value! (Concept "Fido the Dog")
       (Predicate "weight_in_kg") (FloatValue 12.5))
 
-Now, I can retrieve the :code:`weight_in_kg` using the :code:`cog-value` command, as demonstrated previously, but I cannot search for all dogs whose weight is under 15kg.
-Values associated with atoms are not searchable.  If I have the atom, I can get a value attached to it, but if I am looking for atoms with an associated value that meets some criteria, this approach won't work.
+Now, I can retrieve the :code:`weight_in_kg` using the :code:`cog-value` command, as demonstrated previously, but say I want to search for all dogs in the Atomspace whose weight is under 15kg.
+Values associated with atoms are not indexed, so a query like that would be inefficient.  
+
+If I have the atom, I can get a value attached to it in constant time, but if I am looking for atoms with an associated value that meets some criteria, this is generally a bad idea as the time required for the search grows with the number of atoms being examined.
 
 Here is another way to express the statement "Fido the Dog's weight in kg is 12.5".
 
@@ -198,7 +201,7 @@ Because :code:`cog-execute!` returns a :code:`QueueValue` to us, we must get the
 We use the :code:`cog-value->list` OpenCog function to convert the :code:`QueueValue` into a Scheme list, and then use Sheme's :scheme:`car` to extract the first element of that list.
 Finally, we can use the :code:`cog-number` OpenCog function to convert the :code:`NumberNode` into a Scheme number, before performing the arithmetic in Scheme.
 
-.. note:: QUESTION for someone smarter than me. Why does (cog-value-ref) give me "index out of range" errors on QueueValues??  It seems like this should be something that works, conceptually.  If not, what are the preferred semantics for dequeueing an element?
+.. note:: QUESTION for someone smarter than me. Why does (cog-value-ref) give me "index out of range" errors on QueueValues??  It seems like this should be something that works, conceptually.  If not, what are the preferred semantics (most efficient) for dequeueing an element?
 
 That's probably enough on this simple query.  If you want a more complete explanation, the documentation for :code:`VariableNode` is here: `<https://wiki.opencog.org/w/VariableNode>`_ and the documentation for :code:`MeetLink` is here: `<https://wiki.opencog.org/w/MeetLink>`_
 
@@ -251,7 +254,7 @@ Right now, let's give Fido a friend by executing this Scheme snippet:
       (NumberNode 17)
    )
 
-Now, I want to ask the Atomspace to find the dog that has a weight over 15kg.  My query looks like this:
+Now, I want to ask the Atomspace to find the dogs that have a weight over 15kg.  My query looks like this:
 
 .. code-block:: scheme
 
@@ -369,16 +372,86 @@ So this comparison evaluates to *true* if the numeric value of the atom matched 
 
 I'll take this opportunity to introduce other link types along the same lines:
 
-   - `EqualLink <https://wiki.opencog.org/w/EqualLink>`_ Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.
-   - `NotLink <https://wiki.opencog.org/w/NotLink>`_ Is the logical "Not" operator.  Evaluates to *true* if the atom it references evaluates to *false* and vice-versa.  Things get a little more complicated when considering non-binary truth, but that's a topic for later.
-   - `PlusLink <https://wiki.opencog.org/w/PlusLink>`_ Is the arithmetic operator for addition.  It reference two :code:`NumberNode` atoms, and creates a third with the value of the sum of the other two.
-   - `MinusLink <https://wiki.opencog.org/w/MinusLink>`_ Is the arithmetic operator for subtraction.  It reference two :code:`NumberNode` atoms, and creates a third with the value of first minus the second.
-   - `TimesLink <https://wiki.opencog.org/w/TimesLink>`_ Is the arithmetic operator for multiplication.  It reference two :code:`NumberNode` atoms, and creates a third with the value of the product of the other two.
+   - `EqualLink <https://wiki.opencog.org/w/EqualLink>`_ Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.  **Be careful** because :code:`NumberNode` atoms don't get converted to values for comparison by :code:`EqualLink`, in the same way they would be converted by :code:`GreaterThanLink`.  For example, using :code:`EqualLink` to compare :code:`(FloatValue 1.0)` with :code:`(NumberNode 1.0)` will evaluate to *false*!
+   - `NotLink <https://wiki.opencog.org/w/NotLink>`_ Is the logical "Not" operator.  Evaluates to *true* if the atom it references evaluates to *false* and vice-versa.  Things get a little more complicated when considering non-binary TruthValues, but that's a topic we'll cover later.
+   - `PlusLink <https://wiki.opencog.org/w/PlusLink>`_ Is the arithmetic operator for addition.  It references two :code:`NumberNode` atoms, and creates a third with the value of the sum of the other two.
+   - `MinusLink <https://wiki.opencog.org/w/MinusLink>`_ Is the arithmetic operator for subtraction.  It references two :code:`NumberNode` atoms, and creates a third with the value of first minus the second.
+   - `TimesLink <https://wiki.opencog.org/w/TimesLink>`_ Is the arithmetic operator for multiplication.  It references two :code:`NumberNode` atoms, and creates a third with the value of the product of the other two.
    - `DivideLink <https://wiki.opencog.org/w/DivideLink>`_ Is the arithmetic operator for division.  I'm sure you've spotted the pattern by now.
 
-You may have noticed that "LessThanLink" is absent.  The less-than operator itself is just syntactic sugar because the argument order to :code:`GreaterThanLink` can implement a logically identical "LessThanLink".  Personally I've often wondered why more programming languages don't conserve the less-than operator this way, presumably the cost is tiny compared with improved code readability.
+You may have noticed that "LessThanLink" is absent.  The less-than operator itself is just syntactic sugar because the argument order to :code:`GreaterThanLink` can implement a logically identical "LessThanLink".  Personally I've often wondered why more programming languages don't conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.
+
+.. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but comparing IEEE floats are problematic for many applications because values that are no longer representable with the mantissa bits become approximated.
 
 I recommend exploring queries and Active Links further by going through the "assert-retract.scm" OpenCog example here: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm>`_
 In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`(cog-execute! SomeLink)` and drive home the execution model in the Atomspace.
 
-Next Chapter: :ref:`Logical Inferencing <03_logical_inferencing>`
+ValueOfLink and Thinking About Performance
+------------------------------------------------------------------------
+
+Coming full circle, let's revisit values associated with atoms.  Let's associate an age with Fido, using the Scheme snippet below:
+
+.. code-block:: scheme
+
+   (cog-set-value! (Concept "Fido the Dog")
+      (Predicate "age") (FloatValue 3))
+
+It turns out you actually *can* query the Atomspace for atoms with some values that meet your query criteria.  You just need to be careful.
+Consider the query below:
+
+.. code-block:: scheme
+
+   (cog-execute!
+      (Meet
+         (GreaterThan
+            (ValueOf (Variable "dog_node") (Predicate "age"))
+            (NumberNode 2)
+         )
+      )
+   )
+
+It returns Fido, just like you probably expected.  But not so fast!  Literally.
+
+Executing this query involves iterating over every single atom in the Atomspace, and checking to see if it has the :scheme:`(Predicate "age")` key,
+and if it does, then performing the comparison.  It may have appeared to be quick enough, but that's because you probably don't have many atoms in your atomspace.
+Consider what would happen if your atomspace contained millions of atoms!
+
+You can still use :code:`ValueOf` links in queries, but be careful that they are only applied to sets of a tractible size, and not all of the atoms in the Atomspace.
+
+One strategy for accelerating this query is to create a link that tracks whether a given node contains a key.  Here is an example:
+
+.. code-block:: scheme
+
+   (cog-set-value! (Concept "Fido the Dog")
+      (Predicate "age") (FloatValue 3))
+   (Member
+      (Concept "Fido the Dog")
+      (Predicate "age")
+   )
+
+The :code:`MemberLink` atom is a sentinel that says "Fido the Dog has an age."
+Mathmatically, it is saying "Fido the Dog is a member of the age set", where the "age" set is understood (by our convention) to contain all atoms that have an age value.
+
+Now that we have a link we can query, we can compose a query using an :code:`AndLink`, like this:
+
+.. code-block:: scheme
+
+   (cog-execute!
+      (Meet
+         (And
+            (Member
+               (Variable "dog_node")
+               (Predicate "age")
+            )
+            (GreaterThan
+               (ValueOf (Variable "dog_node") (Predicate "age"))
+               (NumberNode 2)
+            )
+         )
+      )
+   )
+
+This query will also find Fido and all other dogs older than 2, just like our first version.  As you can see, the second branch of the query is identical to the one above.
+However, this query will have considerably better performance characteristics as the number of atoms in the Atomspace grows.
+
+Next Chapter: :ref:`TruthValues & Evaluation <03_truth_values_and_evaluation>`

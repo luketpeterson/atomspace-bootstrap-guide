@@ -9,45 +9,19 @@ Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 Logical Inferencing
 ========================================================================
 
+In the previous chapters, we looked at how we could query the Atomspace for knowledge that was represented explicitly.
+Inferencing if the ability to infer implied knowledge, or *inferences*, from explicit facts or *assertions*.
+
+Inferencing is a broad topic and there are many techniques and strategies that can be used.
+In this chapter, we will only touch on a small set of them, but hopefully it's enough to familiarize you with the set of general ideas.
+
 
 Boris Yeltsin
 
-
-TruthValues & EvaluationLinks
-------------------------------------------------------------------------
-
-In the previous section, we showed how :code:`cog-execute!` could execute certain types of links, resulting in an atom being returned.  Now we'll look at the :code:`cog-evaluate!` OpenCog function.
-
-Now that we know how to ask the Atomspace about Fido's weight, the next logical step is to see if we can ask it a yes/no (true/false) question.  "Is Fido the Dog's weight greater than 10kg?"  I phrase that question like this:
-
-.. code-block:: scheme
-
-   (define fidos_weight_query
-      (GetLink
-         (State
-            fidos_weight_link
-            (VariableNode "$v1")
-         )
-      )
-   )
-
-   (cog-evaluate! 
-      (GreaterThanLink
-         fidos_weight_query
-         (NumberNode 10.0)
-      )
-   )
+3 Possibilities for Inferencing to look at.  1.) InheritanceLinks do it automagically.  2.) It's a complex recursive query 3.) Need to use some inference engine module.
 
 
-BORIS.  Some operations result in less truth or less certainty
-
-
-BORIS explain how to interpret the (stv 1 1) that is returned
-BORIS What to say about EvaluationLink??  We've already introduced them above, GreaterThanLink is an EvalLink.
-
-
-Explain the theory behind different kinds of truth value.
-
+BORIS Say something about PLNs??
 
 
 
@@ -111,16 +85,7 @@ A dog has 0 wheels.  Dog implies Animal, Animal has 0 wheels.
 
 
 
-Querying the Atomspace
-------------------------------------------------------------------------
 
-BORIS Answering a simple question
-
-
-EvaluationLink & Truth Values
-------------------------------------------------------------------------
-
-BORIS BORIS, How do I query whether something is part of another set????
 
 
 
