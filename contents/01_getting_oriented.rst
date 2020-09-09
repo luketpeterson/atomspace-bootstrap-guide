@@ -220,7 +220,7 @@ And, should you want to, you can remove a key-value pair from an atom entirely b
    (cog-set-value! (Concept "Fido the Dog")
       (Predicate "nickname") #f)
 
-Other Value Types 
+More about Values 
 ------------------------------------------------------------------------
 
 In addition to Floats and Strings, references to other Atoms can be used as values.  Here is an example.
@@ -254,7 +254,18 @@ Below is an example lifted right out of the documentation for :code:`LinkValue`,
    The Value documentation mentions the :code:`LinkValue` being useful for structured data, e.g. from JSON or YAML, but without a dictionary or map type, it's not complete.
    I understand maps can be created by embedded atoms for each sub-dictionary, and using their key-value spaces, but I thought one of the features of Values was that they have lower overhead than Atoms, so creating embedded atoms seems to defeat that.
 
-Lastly, I gleaned most of the information in this chapter from the built-in reference accessible through the Scheme shell.
+In summary, here are some of the conceptual differences between Atoms and Values.
+
+=========================================   =========================================
+   Atoms                                       Values
+=========================================   =========================================
+   Reside in the Atomspace                     Are effemeral, reside wherever
+   Identical atoms are the **same** atom       Are totally independent of each other
+   Have an associated table of Values          A Value is just a Value
+   A Link Atom may reference other Atoms       A Value can **be** a reference to an Atom
+=========================================   =========================================
+
+Lastly, I want to mention bit about where to start looking if you have additional questions or want to get a deeper understanding of a particular topic.  I gleaned most of the information in this chapter from the built-in reference accessible through the Scheme shell.
 
 You can run :code:`,describe` in the Scheme shell, or :code:`,d` for short, to print usage info for any command.  For example:
 

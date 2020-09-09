@@ -94,6 +94,46 @@ The documentation for :code:`StateLink` is here: `<https://wiki.opencog.org/w/St
 
 In addition, more documentation and examples along these lines can be found in these OpenCog examples: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/state.scm>`_ & `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/property.scm>`_
 
+Executing Atoms
+------------------------------------------------------------------------
+
+Atoms in the Atomspace can represent both data as well as the transformations and operations that can be done to the data.
+The code and the code exist side-by-side.  From the perspective of the Atomspace, it's all the same thing.
+
+We just saw how we can use a link atom to create a compound concept, i.e. "Fido the Dog's weight_in_kg".
+Take a look at another compound concept formed with a link:
+
+.. code-block:: scheme
+
+   (PlusLink
+      (NumberNode 2)
+      (NumberNode 3)
+   )
+
+In English, those 3 atoms would be interpreted as the sentence fragment "The sum of 2 and 3".
+If you run the above Scheme snippet, it just adds those 3 atoms to the Atomspace.  Boring!
+
+But :code:`PlusLink` has a special property; it is an *Active* or "executable" atom type.
+
+So far, the atoms we've seen, like the :code:`ListLink` and :code:`StateLink` we used above, have just been declarative, but *Active* atoms can be executed.
+Executing an atom means some operation is performed, the behavior varies from one atom type to another, and the effects can range from synthesizes a new Value, creating new atoms in the Atomspace or even delete existing atoms.
+
+Some Link types may be Active as well as declarative, and which operation occurs depends on the context in which the link is accessed.
+
+We execute an atom with the :code:`cog-execute!` OpenCog function call.
+
+.. code-block:: scheme
+
+   (cog-execute!
+      (PlusLink
+         (NumberNode 2)
+         (NumberNode 3)
+      )
+   )
+
+If you just ran the Scheme snippet above, you probably noticed that it returned :scheme:`(NumberNode 5)`, but you also may have noticed that (NumberNode 5) was created and added to the Atomspace.
+When the output of :code:`cog-execute!` is an atom, it will be added to the Atomspace.  Sometimes this is desireable.  Sometimes this is annoying.  For now, it's just something to be aware of.
+
 A Basic Query with MeetLink & VariableNode
 ------------------------------------------------------------------------
 
@@ -142,15 +182,8 @@ Now our query looks like this:
 Just like we abbreviated :code:`ConceptNode` and :code:`PredicateNode` earlier, we can abbreviate :code:`ListLink` as just :code:`List` and :code:`StateLink` as :code:`State`.
 Now that I've introduced them, I'll also start abbreviating :code:`MeetLink` as :code:`Meet`, :code:`VariableNode` as :code:`Variable`, etc.  You get the idea, so I won't explicitly explain abbreviations from here onward.
 
-Anyway, let's get to the meat of what we just did.  First, notice the :code:`cog-execute!` function call.
-This is invoking an OpenCog function which tells the Atomspace to execute a link.  What does it mean to execute a link?  
-
-So far, the links we've seen, like the :code:`ListLink` and :code:`StateLink` we used above, have just been declarative.
-But some types of links are *Active*, in other words they are "executable", meaning they can perform some operation, which varies from one link type to another.
-Often executing a like synthesizes a new Value, but also it can create new atoms in the Atomspace or even delete existing atoms.
-Some Link types may be Active as well as declarative, and which operation occurs depends on the context in which the link is accessed.
-
-:code:`MeetLink` is one of the Active, aka executable, link types.  Executing a :code:`MeetLink` performs a query in the Atomspace, and returns the atoms found by the query.
+Anyway, let's get to the meat of what we just did.  :code:`MeetLink` is one of the Active, aka executable, link types.
+Executing a :code:`MeetLink` performs a query in the Atomspace, and returns the atoms found by the query.
 
 Let's look at the atom that our :code:`MeetLink` is referencing.  This atom is our query:
 
