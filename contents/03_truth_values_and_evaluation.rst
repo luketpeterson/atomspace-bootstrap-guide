@@ -9,11 +9,16 @@ Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 TruthValues & Predicate Evaluation
 ========================================================================
 
-In the previous chapter, we used a :code:`MeetLink` to query the "weight_in_kg" of "Fido the Dog",
-and used a different query to find all dogs (all atoms actually) heavier than 15kg.
-But how can we ask "Is Fido heavier than 15kg?".
+In the previous chapter, we used a :code:`MeetLink` and :code:`QueryLink` to query the "weight_in_kg" of "Fido the Dog",
+and used a different query to find all dogs (all atoms actually) heavier than 10kg.
+But how can we ask "Is Fido heavier than 10kg?".
+
+Conditional Expressions
+------------------------------------------------------------------------
 
 More generally, how do we compose a conditional expression in Atomese?
+
+In a simple form, like this:
 
 .. code-block:: scheme
 
@@ -24,8 +29,17 @@ More generally, how do we compose a conditional expression in Atomese?
         )
     )
 
+Notice that we've traded :code:`cog-execute!` for :code:`cog-evaluate!`.
+These OpenCog functions are similar, but where :code:`cog-execute!` may return anything at all, :code:`cog-evaluate!` will always return a *TruthValue*.
+
+
+
+
+
+
 BORIS
-2 ideas to make this work: 1.) Do an execute on a Get, in order to boil it down to a single token
+2 ideas to make this work: 1.) Do an execute on a Get, in order to boil it down to a single token.  This is dumb!
+
 2.) Figure out how to do a general-purpose variable grounding.  Should figure out 2, because it'll have potential implications elsewhere.
 
 .. code-block:: scheme
@@ -61,15 +75,52 @@ BORIS
         )
     )
 
+    (cog-evaluate!
+        (AndLink
+            (SatisfactionLink
+                (StateLink
+                    (ListLink
+                        (Concept "Fido the Dog")
+                        (Predicate "weight_in_kg")
+                    )
+                    (VariableNode "$v1")
+                )
+            )
+            (GreaterThan
+                (VariableNode "$v1")
+                (Number 10)
+            )
+        )
+    )
 
+    (cog-evaluate!
+        (SatisfactionLink
+            (StateLink
+                (ListLink
+                    (Concept "Fido the Dog")
+                    (Predicate "weight_in_kg")
+                )
+                (VariableNode "$v1")
+            )
+        )
+    )
+
+
+
+
+
+Some Philosophy about Truth
+------------------------------------------------------------------------
+
+Boris Yeltsin was the President
+
+
+Declaring EvaluationLinks
+------------------------------------------------------------------------
 
 BORIS, talk about grounding and checking if an assertion is true or not
 
-
-
-
-TruthValues & EvaluationLinks
-------------------------------------------------------------------------
+Assert, (Come up with an example that isn't an "isa" relationship.  Dogs chew bones, goats chew leaves)
 
 BORIS Below is WRONG!
 In the previous chapter, we showed how :code:`cog-execute!` could execute certain *Active* links, resulting in an atom or value being created and returned.
@@ -108,11 +159,12 @@ BORIS EvaluationLink
 
 BORIS two views, as an assertion with a truth value, or as a way to evaluate the truth of a proposition
 
-Assert, (Come up with an example that isn't an "isa" relationship.  Dogs chew bones, goats chew leaves)
 
-BORIS BORIS, How do I query whether something is part of another set????
+BORIS BORIS, How do I query whether something is part of another set
 
-
-BORIS introduce cog-eval!
 
 BORIS PredicateFOrmula
+
+
+
+BORIS Cover using PutLink to find a location and update it.  For example, search the Atomspace, and put all dogs heavier than 10kg is the "Big Dogs" set.

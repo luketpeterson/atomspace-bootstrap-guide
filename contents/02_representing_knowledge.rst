@@ -436,7 +436,7 @@ Now, if we change the query to compare against :code:`(Number 8)` instead of :co
 
 Moving on, notice that the :code:`(Variable "dogs_weight_node")` atom appears on both sides of the :code:`And` expression.  This is important.  
 
-Echoing what I said above, Speaking as somebody with a strong background in procedural programming, the way I think about this is that the :code:`Variable` node is "defined" or temporarily given a value by the first side of the :code:`And` expression, and then that value is used when evaluating the second side.
+Echoing what I said above, Speaking as somebody with a strong background in procedural programming, the way I think about this is that the :code:`Variable` node is "defined" or temporarily given a concrete meaning by the first side of the :code:`And` expression, and then that concrete atom is used when evaluating the second side.
 However, if your intuition comes from databases, you may want to think of the operation as an "INNER JOIN" from SQL.  These mental models are functionally equivalent.
 
 If you're curious, the Atomspace has an :code:`OrLink` along with some other logical link types.  However, if your intention is to perform an "OUTER JOIN", you probably want to use :code:`ChoiceLink` instead of :code:`OrLink`.
@@ -448,8 +448,8 @@ GreaterThanLink
 
 As the name suggests, :code:`GreaterThanLink` compares two :code:`NumberNode` atoms using the "**>**" operator.
 
-In the section above covering :code:`AndLink`, we already explaind how the :code:`(Variable "dogs_weight_node")` atom gets its value from the other side of the :code:`AndLink` expression.
-So this comparison evaluates to *true* if the numeric value of the atom matched by the Variable node is greater than :code:`(Number 15)`.  All pretty self-explanatory so far.
+In the section above covering :code:`AndLink`, we already explaind how the :code:`(Variable "dogs_weight_node")` atom gets its meaning from the other side of the :code:`AndLink` expression.
+So this comparison evaluates to *true* if the numeric value of the atom matched by the Variable node is greater than :code:`(Number 10)`.  All pretty self-explanatory so far.
 
 I'll take this opportunity to introduce other link types along the same lines:
 
@@ -462,7 +462,7 @@ I'll take this opportunity to introduce other link types along the same lines:
 
 You may have noticed that "LessThanLink" is absent.  The less-than operator itself is just syntactic sugar because the argument order to :code:`GreaterThanLink` can implement a logically identical "LessThanLink".  Personally I've often wondered why more programming languages don't conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.
 
-.. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but comparing IEEE floats are problematic for many applications because values that are no longer representable with the mantissa bits become approximated.
+.. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but equality for IEEE floats is problematic for many applications because values that are no longer representable with the mantissa bits become approximated leading to all kinds of unintended behavior.
 
 I recommend exploring queries and Active Links further by going through the "assert-retract.scm" OpenCog example here: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm>`_
 In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`cog-execute!` and drive home the execution model in the Atomspace.
