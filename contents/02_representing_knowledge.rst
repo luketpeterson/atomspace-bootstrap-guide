@@ -37,7 +37,7 @@ The important thing about predicates is that they allow assertions to be made.  
 In the Atomspace, a :code:`PredicateNode` provides a label for these predicate concepts.
 A more formal description of a :code:`PredicateNode` in the Atomspace is here: `<https://wiki.opencog.org/w/PredicateNode>`_  Formally, a :code:`PredicateNode` is a node that can be evaluated to create a *TruthValue*.  In the next chapter we'll cover exactly how predicates are evaluated, but for now it's ok if this idea is a little vague.
 
-As seen in previous chapter, the below Scheme snippet tells the Atomspace that "Fido the Dog's weight is 12.5kg".
+As seen in previous chapter, the below Scheme snippet is one possible way to tell the Atomspace that "Fido the Dog's weight is 12.5kg".
 
 .. code-block:: scheme
 
@@ -88,7 +88,7 @@ A :code:`StateLink` is like a :code:`ListLink` insofar as it also references oth
 
 The main feature of a :code:`StateLink` is that there can be only one :code:`StateLink` for each referant in position 0 (Zero) of the :code:`StateLink`'s outbound set.
 So, referring back to our example, "Fido the Dog's weight in kg" can only have one :code:`StateLink` that points to it as the link's first referenced atom.
-In plain English, "Fido the Dog's weight in kg" can only be one thing at a time.  His weight can't simultaneously be 12.5kg and 15kg.  Setting it to 15kg will update the :code:`StateLink` atom that's already there, rather than creating a new atom.
+In plain English, "Fido the Dog's weight in kg" can only be one thing at a time.  His weight can't simultaneously be 12.5kg and 15kg.  Setting it to 15kg will update the :code:`StateLink` atom that's already there, rather than creating a new :code:`StateLink` atom.
 
 The documentation for :code:`StateLink` is here: `<https://wiki.opencog.org/w/StateLink>`_.
 
@@ -98,7 +98,7 @@ Executing Atoms
 ------------------------------------------------------------------------
 
 Atoms in the Atomspace can represent both data as well as the transformations and operations that can be done to the data.
-The code and the code exist side-by-side.  From the perspective of the Atomspace, it's all the same thing.
+The code and the data exist side-by-side.  From the perspective of the Atomspace, they're all just atoms.
 
 We just saw how we can use a link atom to create a compound concept, i.e. "Fido the Dog's weight_in_kg".
 Take a look at another compound concept formed with a link:
@@ -111,12 +111,12 @@ Take a look at another compound concept formed with a link:
    )
 
 In English, those 3 atoms would be interpreted as the sentence fragment "The sum of 2 and 3".
-If you run the above Scheme snippet, it just adds those 3 atoms to the Atomspace.  Boring!
+If you paste the above Scheme snippet into the Guile interpreter, it just puts those 3 atoms into the Atomspace.  Boring!
 
 But :code:`PlusLink` has a special property; it is an *Active* or "executable" atom type.
 
-So far, the atoms we've seen, like the :code:`ListLink` and :code:`StateLink` we used above, have just been declarative, but *Active* atoms can be executed.
-Executing an atom means some operation is performed, the behavior varies from one atom type to another, and the effects can range from synthesizes a new Value, creating new atoms in the Atomspace or even delete existing atoms.
+So far, the atoms we've seen, like the :code:`ListLink` we used above, have been declarative, but *Active* atoms can be executed.
+Executing an atom means some computational operation is performed.  The behavior varies from one atom type to another, and the effects can range from synthesizing a new Value, creating new atoms in the Atomspace or even deleting existing atoms.
 
 Some Link types may be Active as well as declarative, and which operation occurs depends on the context in which the link is accessed.
 
@@ -131,13 +131,15 @@ We execute an atom with the :code:`cog-execute!` OpenCog function call.
       )
    )
 
-If you just ran the Scheme snippet above, you probably noticed that it returned :scheme:`(NumberNode 5)`, but you also may have noticed that (NumberNode 5) was created and added to the Atomspace.
-When the output of :code:`cog-execute!` is an atom, it will be added to the Atomspace.  Sometimes this is desireable.  Sometimes this is annoying.  For now, it's just something to be aware of.
+If you just ran the Scheme snippet above, you probably noticed that it returned :scheme:`(NumberNode 5)`.  And if you were being very thorough, you also may have also noticed that the (NumberNode 5) atom was created and added to the Atomspace.
+When the output of :code:`cog-execute!` is an atom, it will be added to the Atomspace.  
+
+Remember, Atoms can't exist outside the Atomspace, so even atoms that are created for a temporary operation are added to the Atomspace and remain there until something explicitly removes them.  Sometimes this is desireable.  Sometimes this is annoying.  For now, it's just something to be aware of.
 
 A Basic Query with MeetLink & VariableNode
 ------------------------------------------------------------------------
 
-Now that we've told the Atomspace that "Fido the Dog's weight in kg is 12.5", how can we retrieve that information?  How do we ask "What is Fido the Dog's weight in kg?"
+Back to Fido the Dog.  Now that we've told the Atomspace that "Fido the Dog's weight in kg is 12.5", how can we retrieve that information?  How do we ask "What is Fido the Dog's weight in kg?"
 
 Like this:
 
@@ -178,11 +180,10 @@ Now our query looks like this:
       )
    )
 
-
 Just like we abbreviated :code:`ConceptNode` and :code:`PredicateNode` earlier, we can abbreviate :code:`ListLink` as just :code:`List` and :code:`StateLink` as :code:`State`.
 Now that I've introduced them, I'll also start abbreviating :code:`MeetLink` as :code:`Meet`, :code:`VariableNode` as :code:`Variable`, etc.  You get the idea, so I won't explicitly explain abbreviations from here onward.
 
-Anyway, let's get to the meat of what we just did.  :code:`MeetLink` is one of the Active, aka executable, link types.
+Anyway, let's get to the meat of what we just did. (No pun! I swear it.)  :code:`MeetLink` is one of the Active, aka executable, link types.
 Executing a :code:`MeetLink` performs a query in the Atomspace, and returns the atoms found by the query.
 
 Let's look at the atom that our :code:`MeetLink` is referencing.  This atom is our query:
@@ -198,7 +199,7 @@ This can be thought of as a "Match Expression", because executing the :code:`Mee
 The :code:`VariableNode` can then be thought of as the wildcard.  The wildcard can match any other atom.
 If you are familiar with `Regular Expressions <https://www.regular-expressions.info/quickstart.html>`_, this is the same principle.
 
-So, you might interpret this query expression as saying "Find all the :code:`StateLink` atoms that connect :code:`fidos_weight` to *something*.
+So, you might interpret this query expression as saying "Find all the :code:`StateLink` atoms that connect :code:`fidos_weight_link` to *something*.
 What are all the *somethings* that you found?"
 
 When we execute our query, it should return:
@@ -212,21 +213,76 @@ You probably spotted our :code:`(NumberNode "12.5")` atom.  It's here because it
 A :code:`QueueValue` is a list of atoms or other values.
 :code:`cog-execute!` returns a :code:`QueueValue` instead of a "naked" node atom because a query may match more than one atom and there is no way to know the number of results that will be found, in the general case.
 
-Lastly, let's get our query result back into Scheme.  The Scheme snippet below adds 50 to Fido's weight, just like the example from the previous chapter.
+QueryLink to Utilize Query Results
+------------------------------------------------------------------------
+
+:code:`QueryLink` is another way to execute a query.  It is just like the :code:`MeetLink` atom that we used in the previous examples, except that :code:`QueryLink` allows us to declare the format for the query results.
+
+Last chapter, we used Scheme to add 50 to Fido's weight.  Now let's do it with Atoms alone.
 
 .. code-block:: scheme
 
-   (+
+   (cog-execute!
+      (QueryLink
+         (StateLink
+            fidos_weight_link
+            (VariableNode "fidos_weight_number_node")
+         )
+         (PlusLink
+            (VariableNode "fidos_weight_number_node")
+            (Number 50)
+         )
+      )
+   )
+
+:code:`QueryLink` takes two arguments; the first is the query atom, in exactly the same format as :code:`MeetLink`, and the second atom is the operation to perform on each query result.
+So, in our example, the first atom supplied to the :code:`QueryLink` matches the :code:`MeetLink` example above, and the second atom is a variant of the :code:`PlusLink` example.
+
+.. note::
+
+   The query atom in the :code:`MeetLink` example named the :code:`VariableNode` as :scheme:`(Variable "$v1")` while the :code:`QueryLink` example uses :scheme:`(VariableNode "fidos_weight_number_node")`.
+   These are just different labels for the :code:`VariableNode` atom.  There is a convention in some documentation to prepend variable names with the '$' sigil, but I find the sigil unnecessary, and I prefer a descriptive name to the obtuse "v1".
+
+You can think of :code:`QueryLink` as performing two operations in sequence.  First, it performs a query to search for matching atoms, and then it performs a subsequent atom execution to format each result.
+
+You've probably noticed the :code:`VariableNode` appears in both the query atom and the result output format atom.
+Personally, I think of this as the variable acquiring its *meaning*?? in the query **(better word?? binding?? / grounding?? / I won't say Value because that word is taken, but if this were another programming language then I'd say value.)**
+And thus the :code:`VariableNode` refers to a concrete atom when it is used in the output format atom.
+
+.. note:: Much of the documentation and examples are written to feature :code:`GetLink` instead of :code:`MeetLink`, and :code:`BindLink` instead of :code:`QueryLink`.  The only semantic difference between these is that :code:`MeetLink` and :code:`QueryLink` return results as a :code:`QueueValue` which is transient, while :code:`GetLink` and :code:`BindLink` return a :code:`SetLink` which will become part of the Atomspace until it is deleted.  To avoid cluttering up the Atomspace and the performance costs associated with that, the :code:`QueueValue` functions are better.
+
+The "get-put.scm" OpenCog example demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
+The examples apply equally well to :code:`QueryLink` and :code:`MeetLink`.
+I recommend going through that example as well as the "bindlink.scm" example, which can be found here:
+`<https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_ &
+`<https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm>`_
+
+Lastly, let's get our query result back into Scheme.  Let's use the Scheme snippet below to multiply the new value by 10.
+
+.. code-block:: scheme
+
+   (define fidos_weight_plus_50_query
+      (QueryLink
+         (StateLink
+            fidos_weight_link
+            (VariableNode "Fidos_weight_number_node")
+         )
+         (PlusLink
+            (VariableNode "Fidos_weight_number_node")
+            (Number 50)
+         )
+      )
+   )
+
+   (*
       (cog-number
          (car
             (cog-value->list
-               (cog-execute!
-                  (Meet
-                     (State
-                        fidos_weight_link
-                        (VariableNode "$v1")
-      )  )  )  )  )  )
-      50
+               (cog-execute! fidos_weight_plus_50_query)
+            )
+         )
+      )
+      10
    )
 
 Because :code:`cog-execute!` returns a :code:`QueueValue` to us, we must get the first element of the :code:`QueueValue`, which will be a :code:`NumberNode`.  We can then extract the numerical value from that :code:`NumberNode`.
@@ -234,9 +290,9 @@ Because :code:`cog-execute!` returns a :code:`QueueValue` to us, we must get the
 We use the :code:`cog-value->list` OpenCog function to convert the :code:`QueueValue` into a Scheme list, and then use Sheme's :scheme:`car` to extract the first element of that list.
 Finally, we can use the :code:`cog-number` OpenCog function to convert the :code:`NumberNode` into a Scheme number, before performing the arithmetic in Scheme.
 
-.. note:: QUESTION for someone smarter than me. Why does (cog-value-ref) give me "index out of range" errors on QueueValues??  It seems like this should be something that works, conceptually.  If not, what are the preferred semantics (most efficient) for dequeueing an element?
+.. note:: QUESTION for someone smarter than me. Why does (cog-value-ref) give me "index out of range" errors on QueueValues??  Conceptually, it seems like this should be something that should work.  If not, what are the preferred semantics (most efficient) for dequeueing an element from a QueueValue?
 
-That's probably enough on this simple query.  If you want a more complete explanation, the documentation for :code:`VariableNode` is here: `<https://wiki.opencog.org/w/VariableNode>`_ and the documentation for :code:`MeetLink` is here: `<https://wiki.opencog.org/w/MeetLink>`_
+That's probably enough on this simple query.  If you want a more complete explanation, the documentation for :code:`VariableNode` is here: `<https://wiki.opencog.org/w/VariableNode>`_ and the documentation for :code:`MeetLink` is here: `<https://wiki.opencog.org/w/MeetLink>`_ and :code:`QueryLink` is here: `<https://wiki.opencog.org/w/QueryLink>`_
 
 More Elaborate Queries with other Link Types
 ------------------------------------------------------------------------
@@ -251,7 +307,7 @@ Statement: "The man is running."  Question: "Who is running?" Answer: "The man".
 The question-word "Who" in this example is like a :code:`VariableNode`.
 When the question is matched against the statement, the relative gramatical position of the word "Who" indicates which part of the statement will appropriately answer the question.
 
-So, another intuition for :code:`MeetLink` is that it takes an ungrounded expression and returns a grounded expression.
+So, another intuition for :code:`MeetLink` and :code:`QueryLink` is that they take an ungrounded expression and produce a grounded expression.
 Or said another way, it takes a question and returns an answer.
 
 So let's flip our previous question inside out.  Consider this query:
@@ -267,27 +323,15 @@ So let's flip our previous question inside out.  Consider this query:
       )
    )
 
-Our previous question was: "What is Fido the Dog's weight in kg?".  Now our question is: "What value is 12.5?".
+Our previous question was: "What is Fido the Dog's weight in kg?".  Now our question is Jeopardy style: "*Blank* has a value is 12.5."
 Executing that snippet should return our :code:`ListLink` that represents Fido's weight.
 
-You've probably noticed the :code:`VariableNode` atom's label, :code:`"$v1"`.  This is just an arbitrary label, no different than the other labels we've used such as "Fido the Dog".
-The Atomspace allows you to use multiple :code:`VariableNode` atoms to compose compound questions.
-For example the English question: "What cities in Germany are on the river Danube?" is a compound question because it has two parts, "In Germany" and "On the river Danube".
+.. note::
+   Often we'll want to compose compound questions.
+   For example the English question: "What cities in Germany are on the river Danube?" is a compound question because it has two parts, "In Germany" and "On the river Danube".
+   It is also possible to use multiple :code:`VariableNode` atoms within the query, and we'll get to those situations soon.
 
-Soon we'll get to the uses for multiple :code:`Variable` nodes within a query.
-Right now, let's give Fido a friend by executing this Scheme snippet:
-
-.. code-block:: scheme
-
-   (StateLink
-      (ListLink
-         (Concept "Fluffy the Dog")
-         (Predicate "weight_in_kg")
-      )
-      (NumberNode 17)
-   )
-
-Now, I want to ask the Atomspace to find the dogs that have a weight over 15kg.  My query looks like this:
+Now, I want to ask the Atomspace to find the dogs that have a weight over 10kg.  My query looks like this:
 
 .. code-block:: scheme
 
@@ -303,22 +347,22 @@ Now, I want to ask the Atomspace to find the dogs that have a weight over 15kg. 
             )
             (GreaterThan
                (Variable "dogs_weight_node")
-               (Number 15)
+               (Number 10)
             )
          )
          (Variable "dog_node")
       )
    )
 
-We found Fluffy!
+We found Fido!
 
-Now, let's go over the new Link types I just introduced, and I'll explain the query along the way.
+Now, let's go over the Links we just used, and I'll explain the query along the way.
 
-QueryLink
+QueryLink to Discard Intermediate Variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:code:`QueryLink` is another way to execute a query.  It is just like the :code:`MeetLink` atom, that we used in the previous examples, except that :code:`QueryLink` allows us to declare the format for the query results.
-
+Last time we encountered :code:`QueryLink` we used it as a way to execute additional operations on our query result.
+Here we are using it to specify which portion of the query results we are interested in. 
 To understand this better, try this nearly identical version of the query using :code:`MeetLink` instead of :code:`QueryLink`.
 
 .. code-block:: scheme
@@ -329,34 +373,26 @@ To understand this better, try this nearly identical version of the query using 
             (State
                (List (Variable "dog_node") (Predicate "weight_in_kg"))
                (Variable "dogs_weight_node"))
-            (GreaterThan (Variable "dogs_weight_node") (Number 15))
+            (GreaterThan (Variable "dogs_weight_node") (Number 10))
    )  )  )
 
-As you can see, it also returns the "Fluffy the Dog".  But unlike the :code:`QueryLink` version, the result is a bit more cluttered.
+As you can see, it also returns :scheme:`(ConceptNode "Fido the Dog")`.  But unlike the :code:`QueryLink` version, the result is a bit more cluttered.
 
 The :code:`MeetLink` version returns:
 
 .. code-block:: scheme
 
    (QueueValue  (ListLink
-      (ConceptNode "Fluffy the Dog")
-      (NumberNode "17")))
+      (ConceptNode "Fido the Dog")
+      (NumberNode "12.5")))
 
-While the :code:`QueryLink` version returns:
+While the :code:`QueryLink` version returns just:
 
 .. code-block:: scheme
 
-   (QueueValue  (ConceptNode "Fluffy the Dog"))
+   (QueueValue  (ConceptNode "Fido the Dog"))
 
 That is because we explicitly told the :code:`QueryLink` atom that we were interested in :code:`(Variable "dog_node")` as our result.  On the other hand, the :code:`MeetLink` atom created a :code:`ListLink` referencing all of the :code:`VariableNode` atoms in our query.
-
-You can think of :code:`QueryLink` as performing two operations in sequence.  First, it performs a query to search for matching atoms, and then it performs a subsequent step to format the results as new atoms.
-
-.. note:: Much of the documentation and examples are written to feature :code:`GetLink` instead of :code:`MeetLink`, and :code:`BindLink` instead of :code:`QueryLink`.  The only semantic difference between these is that :code:`MeetLink` and :code:`QueryLink` return results as a :code:`QueueValue` which is transient, while :code:`GetLink` and :code:`BindLink` return a :code:`SetLink` which will become part of the Atomspace until it is deleted.  To avoid cluttering up the Atomspace and the performance costs associated with that, the :code:`QueueValue` functions are better.
-
-The "get-put.scm" OpenCog example demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
-The examples apply equally well to :code:`QueryLink` and :code:`MeetLink`.
-I recommend going through that example as well as the "bindlink.scm" example, which can be found here: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_ & `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm>`_
 
 AndLink
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -378,22 +414,34 @@ Back to our example:
       )
       (GreaterThan
          (Variable "dogs_weight_node")
-         (Number 15)
+         (Number 10)
       )
    )
 
-This query's use of :code:`And` is essentially saying "Find an atom connected to the *weight_in_kg* atom with a :code:`ListLink` that itself is connected to another atom by a :code:`StateLink` **AND** the numerical value of that other atom is greater than 15."
+This query's use of :code:`And` is essentially saying "Find an atom connected to the *weight_in_kg* atom with a :code:`ListLink` that itself is connected to another atom by a :code:`StateLink` **AND** the numerical value of that other atom is greater than 10."
 
-Try experimenting a bit with this query.  For example, if you change the query to compare against :code:`(Number 10)` instead of :code:`(Number 15)`, you will find the query returns both Fido and Fluffy.
+Let's try experimenting a bit with this query.  For example, we'll give Fido a friend by executing the Scheme snippet here:
+
+.. code-block:: scheme
+
+   (StateLink
+      (ListLink
+         (Concept "Fluffy the Dog")
+         (Predicate "weight_in_kg")
+      )
+      (NumberNode 9)
+   )
+
+Now, if we change the query to compare against :code:`(Number 8)` instead of :code:`(Number 10)`, we'll will find the query returns both Fido and Fluffy.
 
 Moving on, notice that the :code:`(Variable "dogs_weight_node")` atom appears on both sides of the :code:`And` expression.  This is important.  
 
-As somebody with a strong background in procedural programming, the way I think about this is that the :code:`Variable` node is "defined" or temporarily given a value by the first side of the :code:`And` expression, and then that value is used when evaluating the second side.
+Echoing what I said above, Speaking as somebody with a strong background in procedural programming, the way I think about this is that the :code:`Variable` node is "defined" or temporarily given a value by the first side of the :code:`And` expression, and then that value is used when evaluating the second side.
 However, if your intuition comes from databases, you may want to think of the operation as an "INNER JOIN" from SQL.  These mental models are functionally equivalent.
 
 If you're curious, the Atomspace has an :code:`OrLink` along with some other logical link types.  However, if your intention is to perform an "OUTER JOIN", you probably want to use :code:`ChoiceLink` instead of :code:`OrLink`.
 "And" expressions narrow the *Satisfying Set* while "Or" expressions expand it.  Therefore you may need to be careful using :code:`Variable` nodes on both sides of an "Or" expression and expecting them to be consistent.  The behavior may not be what you intend.
-There is certinly more that could be said here, but it feels like a rat hole at this point in the guide.
+There is certinly more that could be said on this topic, but it feels like a rat hole at this point in the guide.
 
 GreaterThanLink
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -417,7 +465,7 @@ You may have noticed that "LessThanLink" is absent.  The less-than operator itse
 .. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but comparing IEEE floats are problematic for many applications because values that are no longer representable with the mantissa bits become approximated.
 
 I recommend exploring queries and Active Links further by going through the "assert-retract.scm" OpenCog example here: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm>`_
-In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`(cog-execute! SomeLink)` and drive home the execution model in the Atomspace.
+In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`cog-execute!` and drive home the execution model in the Atomspace.
 
 ValueOfLink and Thinking About Performance
 ------------------------------------------------------------------------
@@ -449,7 +497,7 @@ Executing this query involves iterating over every single atom in the Atomspace,
 and if it does, then performing the comparison.  It may have appeared to be quick enough, but that's because you probably don't have many atoms in your atomspace.
 Consider what would happen if your atomspace contained millions of atoms!
 
-You can still use :code:`ValueOf` links in queries, but be careful that they are only applied to sets of a tractible size, and not all of the atoms in the Atomspace.
+You can still use :code:`ValueOf` links in queries, but be careful that they are only applied to sets of a tractable size, and not all of the atoms in the Atomspace.
 
 One strategy for accelerating this query is to create a link that tracks whether a given node contains a key.  Here is an example:
 
@@ -462,7 +510,7 @@ One strategy for accelerating this query is to create a link that tracks whether
       (Predicate "age")
    )
 
-The :code:`MemberLink` atom is a sentinel that says "Fido the Dog has an age."
+The :code:`MemberLink` atom, in this case, is acting as a sentinel that says "Fido the Dog has an age key-value pair."
 Mathmatically, it is saying "Fido the Dog is a member of the age set", where the "age" set is understood (by our convention) to contain all atoms that have an age value.
 
 Now that we have a link we can query, we can compose a query using an :code:`AndLink`, like this:

@@ -24,6 +24,11 @@ More generally, how do we compose a conditional expression in Atomese?
         )
     )
 
+BORIS
+2 ideas to make this work: 1.) Do an execute on a Get, in order to boil it down to a single token
+2.) Figure out how to do a general-purpose variable grounding.  Should figure out 2, because it'll have potential implications elsewhere.
+
+.. code-block:: scheme
 
     (Evaluation
         (GreaterThan
@@ -40,6 +45,7 @@ More generally, how do we compose a conditional expression in Atomese?
     )
 
 
+.. code-block:: scheme
 
     (cog-evaluate!
         (StateLink

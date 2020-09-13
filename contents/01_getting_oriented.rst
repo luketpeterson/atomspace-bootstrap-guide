@@ -256,14 +256,17 @@ Below is an example lifted right out of the documentation for :code:`LinkValue`,
 
 In summary, here are some of the conceptual differences between Atoms and Values.
 
-=========================================   =========================================
-   Atoms                                       Values
-=========================================   =========================================
-   Reside in the Atomspace                     Are effemeral, reside wherever
-   Identical atoms are the **same** atom       Are totally independent of each other
-   Have an associated table of Values          A Value is just a Value
-   A Link Atom may reference other Atoms       A Value can **be** a reference to an Atom
-=========================================   =========================================
+============================================   ============================================
+   Atoms                                          Values
+============================================   ============================================
+   All Atoms reside in the Atomspace              Values can live anywhere
+   Atoms persist until they are deleted           Values go away when no longer accessed
+   Identical atoms are the **same** atom          Are totally independent of each other
+   Are expensive to create and destroy            Are cheap to create and destroy
+   Are indexed for fast searching                 Can't be searched except in a few cases
+   An Atom has an associated table of Values      Values can only hold type-specific data
+   A Link Atom may reference other Atoms          A Value can **be** a **reference** to an Atom
+============================================   ============================================
 
 Lastly, I want to mention bit about where to start looking if you have additional questions or want to get a deeper understanding of a particular topic.  I gleaned most of the information in this chapter from the built-in reference accessible through the Scheme shell.
 
