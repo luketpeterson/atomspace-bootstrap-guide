@@ -18,6 +18,8 @@ In this chapter, we will only touch on a small set of them, but hopefully it's e
 
 Boris Yeltsin
 
+Look at "Unified Rule Engine"
+
 3 Possibilities for Inferencing to look at.  1.) InheritanceLinks do it automagically.  2.) It's a complex recursive query 3.) Need to use some inference engine module.
 
 

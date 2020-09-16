@@ -10,13 +10,15 @@ TruthValues & Predicate Evaluation
 ========================================================================
 
 In the previous chapter, we used a :code:`MeetLink` and :code:`QueryLink` to query the "weight_in_kg" of "Fido the Dog",
-and used a different query to find all dogs (all atoms actually) heavier than 10kg.
+and used a different query to find all dogs (actually all atoms) heavier than 10kg.
 But how can we ask "Is Fido heavier than 10kg?".
 
-Conditional Expressions
+The Philosophy of Truth
 ------------------------------------------------------------------------
 
-More generally, how do we compose a conditional expression in Atomese?
+BORIS.  not sure whether it makes sense to first explain complex truth, or the Atomese equivalent of branching.
+
+More generally, how do we compose a conditional (Boolean) expression in Atomese?
 
 In a simple form, like this:
 
@@ -32,75 +34,51 @@ In a simple form, like this:
 Notice that we've traded :code:`cog-execute!` for :code:`cog-evaluate!`.
 These OpenCog functions are similar, but where :code:`cog-execute!` may return anything at all, :code:`cog-evaluate!` will always return a *TruthValue*.
 
-
-
-
-
-
-BORIS
-2 ideas to make this work: 1.) Do an execute on a Get, in order to boil it down to a single token.  This is dumb!
-
-2.) Figure out how to do a general-purpose variable grounding.  Should figure out 2, because it'll have potential implications elsewhere.
+Anyway, when you ran that :code:`cog-evaluate!` snippet above, you should have gotten this:
 
 .. code-block:: scheme
 
-    (Evaluation
-        (GreaterThan
-            (VariableNode "$v1")
-            (Number 10)
-        )
-        (StateLink
-            (ListLink
-                (Concept "Fido the Dog")
-                (Predicate "weight_in_kg")
-            )
-            (VariableNode "$v1")
-        )
-    )
+    (stv 1 1)
+
+"stv" in this case stands for *Simple Truth Value*, and an STV is composed of two floating point numbers: *Strength* and *Confidence*.
+In our case, they are both exactly 1.  The expression was 100% true, and we are 100% sure of that.
+
+So, as you can see, this is a step beyond simple bivalent (crisp true or false) logic in both reasoning ability and complexity.
+
+But what precisely does it mean for something to be half-true?  Well... It's complicated.
+
+Consider the statement "Charlie is tall."  If Charlie were 210cm tall, most people today would judge that true.
+If he were 120cm, most would judge it false.  But what if Charlie were 175cm?  In this case, the statement might be "half-true".
+
+This line of reasoning was formalized as `Fuzzy Logic <https://en.wikipedia.org/wiki/Fuzzy_logic>`_, by Lotfi Zadeh, whom I was lucky enough to chat with for half an hour, mostly about self-driving cars, back in the year 2000 when I was 19 years old, but I digress...
+Using fuzzy logic, we could create a set for all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
+
+This is conceptually different from the statement "The train from Manchester arrives every day at 10:42am."  Given the legendary unreliability of the London Midlands train service, you'd also assign that statement a low truth value.
+But it is a probabalistic truth rather than a partial or fuzzy truth.  Some days, the train will indeed arrive on time, but on the majority of days it will not.  This kind of truth value is meant to express a probability that the statement is true.
+
+BORIS.  A lot MORE to say,  PDFs, and also beysian models. but don't get too deep into theory.
+
+Conditional Expressions
+------------------------------------------------------------------------
+
 
 
 .. code-block:: scheme
 
     (cog-evaluate!
-        (StateLink
-            (ListLink
-                (Concept "Fido the Dog")
-                (Predicate "weight_in_kg")
-            )
-            (VariableNode "$v1")
-        )
-        (GreaterThan
-            (VariableNode "$v1")
-            (Number 10)
-        )
-    )
-
-    (cog-evaluate!
-        (AndLink
-            (SatisfactionLink
+        (SatisfactionLink
+            (AndLink
                 (StateLink
                     (ListLink
                         (Concept "Fido the Dog")
                         (Predicate "weight_in_kg")
                     )
-                    (VariableNode "$v1")
+                    (VariableNode "dogs_weight_node")
                 )
-            )
-            (GreaterThan
-                (VariableNode "$v1")
-                (Number 10)
-            )
-        )
-    )
-
-    (cog-evaluate!
-        (SatisfactionLink
-            (StateLink
-                (ListLink
-                    (Concept "Fido the Dog")
-                    (Predicate "weight_in_kg")
+                (GreaterThan
+                    (VariableNode "dogs_weight_node")
+                    (Number 10)
                 )
-                (VariableNode "$v1")
             )
         )
     )
@@ -109,10 +87,7 @@ BORIS
 
 
 
-Some Philosophy about Truth
-------------------------------------------------------------------------
 
-Boris Yeltsin was the President
 
 
 Declaring EvaluationLinks
@@ -144,13 +119,10 @@ BORIS What to say about EvaluationLink??  We've already introduced them above, G
 Explain the theory behind different kinds of truth value.
 
 
+BORIS.  Explain AnchorNodes and VariableLists
 
 
-TruthValue
 
-BORIS General overview of truth values, different types of Truth Values.
-
-BORIS STV
 
 BORIS Revisit PredicateNode
 BORIS introduce StrengthOf & CondfidenceOf

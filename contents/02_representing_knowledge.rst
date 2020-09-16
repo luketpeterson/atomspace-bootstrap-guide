@@ -216,7 +216,7 @@ A :code:`QueueValue` is a list of atoms or other values.
 QueryLink to Utilize Query Results
 ------------------------------------------------------------------------
 
-:code:`QueryLink` is another way to execute a query.  It is just like the :code:`MeetLink` atom that we used in the previous examples, except that :code:`QueryLink` allows us to declare the format for the query results.
+:code:`QueryLink` is another way to execute a query.  It is just like the :code:`MeetLink` atom that we used in the previous examples, except that :code:`QueryLink` allows us to specify what we want to do with the query results.
 
 Last chapter, we used Scheme to add 50 to Fido's weight.  Now let's do it with Atoms alone.
 
@@ -253,6 +253,7 @@ And thus the :code:`VariableNode` refers to a concrete atom when it is used in t
 
 The "get-put.scm" OpenCog example demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
 The examples apply equally well to :code:`QueryLink` and :code:`MeetLink`.
+We haven't covered :code:`PutLink` yet, but we'll get to it in the next few chapters.
 I recommend going through that example as well as the "bindlink.scm" example, which can be found here:
 `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_ &
 `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm>`_
@@ -297,7 +298,7 @@ That's probably enough on this simple query.  If you want a more complete explan
 More Elaborate Queries with other Link Types
 ------------------------------------------------------------------------
 
-This is a good place to introduce the concepts of *Grounded* vs *Ungrounded* expressions.
+This is a good place to introduce the concepts of *Grounded* vs *Ungrounded* expressions.  These terms come from formal logic, which you can read about on Wikipedia here: `<https://en.wikipedia.org/wiki/Ground_expression>`_
 The formal definition is that ungrounded expressions contain 1 or more *Free* :code:`VariableNode` atoms, while grounded expressions don't contain any.
 Personally, the way I think about it is that grounded expressions are statements and ungrounded expressions are questions.
 
@@ -327,9 +328,9 @@ Our previous question was: "What is Fido the Dog's weight in kg?".  Now our ques
 Executing that snippet should return our :code:`ListLink` that represents Fido's weight.
 
 .. note::
-   Often we'll want to compose compound questions.
-   For example the English question: "What cities in Germany are on the river Danube?" is a compound question because it has two parts, "In Germany" and "On the river Danube".
-   It is also possible to use multiple :code:`VariableNode` atoms within the query, and we'll get to those situations soon.
+   Often we'll want to compose compound questions.  Sometimes a compound question has one unknown and more than one criteria, for example,
+   the English question: "What cities in Germany are on the river Danube?" is a compound question because it has two parts, "In Germany" and "On the river Danube".
+   However, it is also possible to use multiple :code:`VariableNode` atoms within the query, and that's the situation we're about to cover.
 
 Now, I want to ask the Atomspace to find the dogs that have a weight over 10kg.  My query looks like this:
 
@@ -371,10 +372,19 @@ To understand this better, try this nearly identical version of the query using 
       (Meet
          (And
             (State
-               (List (Variable "dog_node") (Predicate "weight_in_kg"))
-               (Variable "dogs_weight_node"))
-            (GreaterThan (Variable "dogs_weight_node") (Number 10))
-   )  )  )
+               (List
+                  (Variable "dog_node")
+                  (Predicate "weight_in_kg")
+               )
+               (Variable "dogs_weight_node")
+            )
+            (GreaterThan
+               (Variable "dogs_weight_node")
+               (Number 10)
+            )
+         )
+      )
+   )
 
 As you can see, it also returns :scheme:`(ConceptNode "Fido the Dog")`.  But unlike the :code:`QueryLink` version, the result is a bit more cluttered.
 
