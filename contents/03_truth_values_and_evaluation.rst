@@ -51,12 +51,36 @@ Consider the statement "Charlie is tall."  If Charlie were 210cm tall, most peop
 If he were 120cm, most would judge it false.  But what if Charlie were 175cm?  In this case, the statement might be "half-true".
 
 This line of reasoning was formalized as `Fuzzy Logic <https://en.wikipedia.org/wiki/Fuzzy_logic>`_, by Lotfi Zadeh, whom I was lucky enough to chat with for half an hour, mostly about self-driving cars, back in the year 2000 when I was 19 years old, but I digress...
-Using fuzzy logic, we could create a set for all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
 
-This is conceptually different from the statement "The train from Manchester arrives every day at 10:42am."  Given the legendary unreliability of the London Midlands train service, you'd also assign that statement a low truth value.
-But it is a probabalistic truth rather than a partial or fuzzy truth.  Some days, the train will indeed arrive on time, but on the majority of days it will not.  This kind of truth value is meant to express a probability that the statement is true.
+Using fuzzy logic, we can create a set for all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
+In traditional set theory, a data point either belongs or doesn't belong in a set, based on the set membership function.  The set always has a crisp boundary.  In fuzzy logic, the membership function returns a value between 0 and 1, so there can be a continuous transition from outside the set to inside the set.
 
-BORIS.  A lot MORE to say,  PDFs, and also beysian models. but don't get too deep into theory.
+But consider the conceptual difference between our statement about Charlie and the statement "The train from Manchester arrives every day at 10:42am."  Given the legendary unreliability of the London Midland train service, you'd also assign that statement a low truth value.
+But this is a probabilistic truth rather than a fuzzy truth.  Some days, the train will indeed arrive on time, but on the majority of days it will not.  This kind of truth value is meant to express a probability that the statement is true.
+
+So in summary, a fuzzy truth value represents the **degree** to which a statement is true, while a probabilistic truth value represents the **chance** that it is true.
+Fuzzy truth values are useful for tracking, well fuzzy, statements of known facts, while probabilistic truth values are useful for tracking predictions and known uncertainties.
+They are related concepts, but they aren't mathmatically interchangeable.
+
+Those are two interpretations of the *strength* component; what about the the *confidence* component?
+Strength represents the known aspect of the truth value and confidence is the unknown aspect.
+Consider a truth value of :scheme:`(stv 0.5 1.0)` for the statement "A coin-flip will land on heads."  If somebody offered you a bet with better-than-even odds on that coin, you could be confident that your expected return would be positive.
+But consider the same statement about an unknown coin :scheme:`(stv 0.5 0.0)`.  It might be a weighted coin that lands on tails 99% of the time.  From that TruthValue you just don't know.
+
+OpenCog and the Atomspace support additional types of more complicated TruthValues to cover different situations.
+For example there is the `FormulaTruthValue <https://wiki.opencog.org/w/FormulaTruthValue>`_ for situations where the truth of an assertion depends on additional factors.  These are good for representing probability distribution functions.
+Also there is the `CountTruthValue <https://wiki.opencog.org/w/TruthValue#CountTruthValue>`_ for situations where the system continues to collect new observations and refine its assesment of the probability.
+
+Partial truth is a very big topic, and we're not going to be able to do it justice in this guide.  This section is just a superficial introduction to make you aware of the problem-space.
+
+In general, you can read the official OpenCog reference for TruthValue here: `<https://wiki.opencog.org/w/TruthValue>`_
+
+And now we'll introduce *Probabilistic Logic Networks*, or *PLNs* for short.  PLNs are a way to reason with partial truth values.
+OpenCog and PLNs have a shared heritage, and many ideas from PLNs deeply inform the architecture of OpenCog.  We'll talk a lot more about PLNs in the coming chapters.
+
+For now, you can read an introductory paper on PLNs here: `<https://aiatadams.files.wordpress.com/2016/02/invited_paper_3.pdf>`_
+
+And the complete PLN book can be downloaded (for now) here: `<https://aiatadams.files.wordpress.com/2016/02/pln_book_6_27_08.pdf>`_
 
 Conditional Expressions
 ------------------------------------------------------------------------
@@ -87,6 +111,7 @@ Conditional Expressions
 
 
 
+BORIS introduce StrengthOf & CondfidenceOf
 
 
 
@@ -125,7 +150,6 @@ BORIS.  Explain AnchorNodes and VariableLists
 
 
 BORIS Revisit PredicateNode
-BORIS introduce StrengthOf & CondfidenceOf
 
 BORIS EvaluationLink
 
