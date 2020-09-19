@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Getting Oriented &amp; Basic Concepts &#8212; Luke&#39;s Atomspace Quickstart Guide 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Structured Knowledge &amp; Simple Queries" href="02_representing_knowledge.html" />
+    <link rel="prev" title="Luke’s Atomspace Bootstrap Guide" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-oriented-basic-concepts">
+<span id="getting-oriented"></span><h1>Getting Oriented &amp; Basic Concepts<a class="headerlink" href="#getting-oriented-basic-concepts" title="Permalink to this headline">¶</a></h1>
+<p>For me, the easiest way to begin to conceptualize the atomspace is as a database of <em>Atoms</em>.  So each Atom is a unique record.  And each atom can store a table of <em>Values</em>, where a key can access the value associated with the atom.
+Unlike some database systems, e.g. SQL, Atomspace doesn’t require a rigidly defined table.  Each atom may have its own individual keys and values.  In that sense, the Atomspace is more like some of the newer NoSQL databases.</p>
+<p>More info about atoms is here: <a class="reference external" href="https://wiki.opencog.org/w/Atom">https://wiki.opencog.org/w/Atom</a></p>
+<p>More info about values is here: <a class="reference external" href="https://wiki.opencog.org/w/Value">https://wiki.opencog.org/w/Value</a></p>
+<p>I’ll start out talking about the two most fundamental flavors of atoms: <em>Nodes</em> and <em>Links</em>.</p>
+<p>A node is uniquely identified by a combination of its <em>Name</em> &amp; <em>Type</em>.  I like to think of nodes as nouns.  This isn’t a perfect metaphor, but it’ll do for now.</p>
+<p>Links exist to reference other atoms. A link is uniquely identified by
+its type &amp; <em>Outbound Set</em>, which is the set of all other atoms the link references.  The atomspace is a <em>hypergraph</em>,
+meaning that links may also reference other links, in addition to referencing nodes.</p>
+<p>Links come in both ordered and unordered flavors.</p>
+<ul class="simple">
+<li><p>An unordered link might be used to define a set, like the set of all animals.</p></li>
+<li><p>An ordered link may be used to define a list or sequence, like the colors of the rainbow.</p></li>
+<li><p>An ordered link with only two referants can be used to define a binary relationship, like “A cat is an animal.”  In other words, ordered links can express a direction; The statement: “A cat is an animal.” is not equivalent to “An animal is a cat.”.  Directionality can be important.</p></li>
+</ul>
+<p>A more complete overview of the atoms can be found here: <a class="reference external" href="https://wiki.opencog.org/w/Atom_types">https://wiki.opencog.org/w/Atom_types</a>  But I didn’t initially have the needed context to understand the information on that page until I’d spent a bit more time with the Atomspace.
+I’d recommend wading into the shallow-end of the pool, especially if you’re unfamiliar with <em>Knowledge Base</em> concepts.</p>
+<p>So, Let’s get started.</p>
+<div class="section" id="installation-getting-to-the-scheme-shell">
+<h2>Installation &amp; Getting to the Scheme Shell<a class="headerlink" href="#installation-getting-to-the-scheme-shell" title="Permalink to this headline">¶</a></h2>
+<p>You have many options getting OpenCog set up, and they are well documented at: <a class="reference external" href="https://wiki.opencog.org/w/Building_OpenCog">https://wiki.opencog.org/w/Building_OpenCog</a></p>
+<p>Personally, I found the fastest route was to use the Docker containers.  The procedure is documented here: <a class="reference external" href="https://github.com/opencog/docker/blob/master/opencog/README.md">https://github.com/opencog/docker/blob/master/opencog/README.md</a></p>
+<p>If Docker is unfamiliar, this blog helped me through my Docker-specific conceptual issues.  <a class="reference external" href="https://blog.hipolabs.com/understanding-docker-without-losing-your-shit-cf2b30307c63">https://blog.hipolabs.com/understanding-docker-without-losing-your-shit-cf2b30307c63</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you’re installing OpenCog in Docker on a recent Mac, you’ll need to fix the reference to <code class="code docutils literal notranslate"><span class="pre">/etc/localtime/</span></code>.  See this issue on Github for the work-around I used.  <a class="reference external" href="https://github.com/opencog/docker/issues/151">https://github.com/opencog/docker/issues/151</a></p>
+</div>
+<p>Once you have the OpenCog container running, you can now get to the interactive Scheme shell.  You have multiple options that both get you to basically the same place.</p>
+<div class="section" id="option-1-run-guile-in-the-docker-terminal">
+<h3>Option 1, Run Guile in the Docker terminal<a class="headerlink" href="#option-1-run-guile-in-the-docker-terminal" title="Permalink to this headline">¶</a></h3>
+<p>If you started the OpenCog container using <code class="code docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span></code> or a similar command, such as <code class="code docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">run</span> <span class="pre">--service-ports</span> <span class="pre">dev</span></code>, your terminal should already be running in a shell within the container.
+You can verify this by executing <code class="code docutils literal notranslate"><span class="pre">whoami</span></code>, and verifying that your user is now <code class="code docutils literal notranslate"><span class="pre">opencog</span></code>.</p>
+<p>If you aren’t already in the container’s shell, you can launch a new shell using the <em>CLI</em> button in the Docker Dashboard GUI, or by running <code class="code docutils literal notranslate"><span class="pre">docker</span> <span class="pre">attach</span></code> from another terminal.</p>
+<p>Now, you can run <code class="code docutils literal notranslate"><span class="pre">guile</span></code>, and be at an interactive Scheme interpreter prompt.  However, I’d recommend configuring your <code class="code docutils literal notranslate"><span class="pre">~/.guile</span></code> file first to automatically load the OpenCog modules and make the shell more ergonomic to use.  Instructions are here: <a class="reference external" href="https://wiki.opencog.org/w/Scheme#The_guile_REPL_shell">https://wiki.opencog.org/w/Scheme#The_guile_REPL_shell</a></p>
+</div>
+<div class="section" id="option-2-telnet-into-the-opencog-server">
+<h3>Option 2, Telnet into the OpenCog Server<a class="headerlink" href="#option-2-telnet-into-the-opencog-server" title="Permalink to this headline">¶</a></h3>
+<p>The other option is to run <code class="code docutils literal notranslate"><span class="pre">cogserver</span></code> on the OpenCog virtual machine, and then connect using <code class="code docutils literal notranslate"><span class="pre">telnet</span> <span class="pre">localhost</span> <span class="pre">17001</span></code></p>
+<p>Once connected to the cogserver, you can access the Scheme shell by running the <code class="code docutils literal notranslate"><span class="pre">scm</span></code> command.</p>
+<p>The documentation asserts that the cogserver approach is superior for performance, but at my novice level, I find Option 1 to be more convenient.  Also I enjoy the customizations I made to my <cite>~/.guile</cite> file, but that file isn’t loaded when guile is run by the OpenCog server process.</p>
+</div>
+</div>
+<div class="section" id="poking-around-in-scheme">
+<h2>Poking around in Scheme<a class="headerlink" href="#poking-around-in-scheme" title="Permalink to this headline">¶</a></h2>
+<p>Scheme is a full-featured programming language.  For example, you can try to execute the following:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">display </span><span class="s">&quot;Hello, World!\n&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can read more about Scheme at: <a class="reference external" href="http://www.shido.info/lisp/idx_scm_e.html">http://www.shido.info/lisp/idx_scm_e.html</a> among many other places.  Within the OpenCog Scheme shell you can use <em>cons</em>, <em>car</em> and <em>cdr</em> ‘til the cows come home.
+I often find it handy to have the Scheme environment right at my fingertips.</p>
+<p>But we’re here in a Scheme shell because Scheme is a (<strong>the??</strong>) first-class interface to the atomspace.
+However it’s important to point out that the atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn’t “Running in Scheme”.</p>
+<p>Furthermore, irrespective of Scheme, the Atomspace itself can also behave as a Turing-complete program execution environment for Atomese, the language of the Atomspace.
+I found this a bit confusing because it means there are at least two ways to do most things within an OpenCog Scheme shell.
+However, the point of this guide is to focus on the atomspace, so I’ll do my best to keep the Scheme stuff to a minimum from here onwards.</p>
+</div>
+<div class="section" id="creating-some-node-atoms">
+<h2>Creating some Node Atoms<a class="headerlink" href="#creating-some-node-atoms" title="Permalink to this headline">¶</a></h2>
+<p>Executing this statement will create a new atom.  A new node of type: ConceptNode that has the Name “Dog”</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Dog&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> Scheme function above invokes the <code class="code docutils literal notranslate"><span class="pre">cog-new-node</span></code> native Atomspace function.  So the above code is equivalent to:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-new-node</span> <span class="ss">&#39;ConceptNode</span> <span class="s">&quot;Dog&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The single quote in <code class="code docutils literal notranslate"><span class="pre">'ConceptNode</span></code> above tells the Scheme interpreter that <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> should be treated as a literal symbol, and not to attempt to evaluate it further.</p>
+<p>If you just ran the code above, the <code class="code docutils literal notranslate"><span class="pre">cog-new-node</span></code> function would have retrieved the first node you created, rather than creating a duplicate.  A node is defined as a unique Name &amp; Type combination, so duplicates cannot exist, by definition.</p>
+<p>Sometimes it’s handy to use a Scheme symbol to refer to an atom.  This is done with Scheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">define</span></span></code> feature, like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">dog_concept</span> <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Dog&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Also, you can print an atom using Scheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">display</span></span></code> function.  If the atom is a link, it will recursively display the referenced atoms as well.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">display </span><span class="nv">dog_concept</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, you can see all of the atoms in the Atomspace with this function:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-prt-atomspace</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At the moment, there is probably just one atom in your Atomspace, unless you’ve gone off-script already :-)  Eventually, the output of the <code class="code docutils literal notranslate"><span class="pre">cog-prt-atomspace</span></code> function might get a little too verbose to use unfiltered, as we create more and more atoms.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Later on, we’ll create multiple Atomspaces.  This will be useful for segmentation of the knowledge base.  Temporary child Atomspaces may be instantiated on a stack, to facilitate things like counterfactual or hypothetical reasoning.  These are more advanced topics, however, and it’ll be a while before we get there.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION for someone smarter than me. Does the sub-atomspace management allow for conflicting assertions, so long as the two child atomspaces aren’t active simultaneously?  For example, can the Newtonian and the Einsteinian equations of gravity be expressed in the same KB using different child atomspaces?</p>
+</div>
+</div>
+<div class="section" id="values-associated-with-atoms">
+<h2>Values associated with Atoms<a class="headerlink" href="#values-associated-with-atoms" title="Permalink to this headline">¶</a></h2>
+<p>We can attach values to atoms.  The below snippet will create a concept node for a particular dog, “Fido the Dog”, and another one for the concept of “weight_in_kg”.  Then it will assign Fido a weight value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As you can see below, we’ve abbreviated <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> as just <code class="code docutils literal notranslate"><span class="pre">Concept</span></code>.  Abbreviations like this are common in the Atomspace.</p>
+</div>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mf">12.5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>As you can see above, the “weight_in_kg” key is actually a separate <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> atom.  Any atom can be used as the key to a value associated with another atom.</p>
+<p>However, convention dictates that a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code>, which can be abbreviated as just <code class="code docutils literal notranslate"><span class="pre">Predicate</span></code>, is the best type of atom to use as a key.
+A <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> is a special type of node used to define certain formal relationships.  There is a lot to say about <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> atoms, and we’ll cover them in depth during the next chapters.
+You can skip ahead if you want.  <a class="reference internal" href="02_representing_knowledge.html#representing-knowledge"><span class="std std-ref">Structured Knowledge</span></a></p>
+<p>So here is the above example, with a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> instead of a <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> as the key:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mf">12.5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Values can also be non-numerical.  Here’s an example string value for Fido.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;nickname&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">StringValue</span> <span class="s">&quot;Good Boy&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>You can access values on an atom using the <code class="code docutils literal notranslate"><span class="pre">cog-value</span></code> function, like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The above snippet will return an Atomspace <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code>, which you can turn into a scheme list using <code class="code docutils literal notranslate"><span class="pre">cog-value-&gt;list</span></code> like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-value-&gt;list</span>
+   <span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>And now you can do stuff in Scheme with the result.  You may have noticed that the value was returned as a Scheme list, as opposed to another Scheme primitive data type, such as a Scheme number.
+All Atomspace values are arrays of elements.  So a single number is represented a list of numerical values with a list-length of one.
+Throughout the other OpenCog documentation, you will often see values being initialized with a list of multiple elements.</p>
+<p>Because values are returned to Scheme as a list, I need to use <code class="code docutils literal notranslate"><span class="pre">car</span></code> to access the first element.  This example uses Scheme to add 50 to Fido’s weight:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">+</span>
+   <span class="p">(</span><span class="nf">car</span>
+      <span class="p">(</span><span class="nf">cog-value-&gt;list</span>
+         <span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">))))</span>
+   <span class="mi">50</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>But I wasn’t supposed to focus on Scheme.  Sorry about that.  The Atomspace has its own way to express arithmetic operations, and we’ll get to that soon enough.  I mainly wanted to demonstrate the way the <code class="code docutils literal notranslate"><span class="pre">cog-value-&gt;list</span></code> function could be used as a bridge to get data from the Atomspace back into Scheme.</p>
+<p>If you know the index of the value element you are interested in, you can use the <code class="code docutils literal notranslate"><span class="pre">cog-value-ref</span></code> function.  This is cleaner and more efficient than using Scheme’s list element access semantics, (e.g. <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">car</span></span></code>, <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">cdr</span></span></code>, <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">list-ref</span></span></code>, etc.).  It’s also very handy if you know you have a 1-element value, such as in our example.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">+</span>
+   <span class="p">(</span><span class="nf">cog-value-ref</span>
+      <span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">))</span>
+      <span class="mi">0</span><span class="p">)</span>
+   <span class="mi">50</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Additionally, you can retrieve the complete set of keys associated with an atom using the <code class="code docutils literal notranslate"><span class="pre">cog-keys</span></code> function.  Here is an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-keys</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>And if you want to list both the keys and values, you can do it with <code class="code docutils literal notranslate"><span class="pre">cog-keys-&gt;alist</span></code> like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-keys-&gt;alist</span> <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>And, should you want to, you can remove a key-value pair from an atom entirely by setting they key to either <code class="code docutils literal notranslate"><span class="pre">#f</span></code> (The symbol for ‘false’) or <code class="code docutils literal notranslate"><span class="pre">'()</span></code> (The empty list) using the <code class="code docutils literal notranslate"><span class="pre">cog-set-value!</span></code> function.  For example, you could use the snippet below to delete the “nickname” we assigned earlier.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;nickname&quot;</span><span class="p">)</span> <span class="no">#f</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-about-values">
+<h2>More about Values<a class="headerlink" href="#more-about-values" title="Permalink to this headline">¶</a></h2>
+<p>In addition to Floats and Strings, references to other Atoms can be used as values.  Here is an example.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;favorite_toy&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Squeaky Ball&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In the Atomspace, every atom can be used as a value, but not every value can be used as an atom.</p>
+<p>Other value types are described on the OpenCog wiki <a class="reference external" href="https://wiki.opencog.org/w/Value">here</a>.  We’ll get to <em>TruthValue</em> in the near future but it deserves a whole section.</p>
+<p>Right now, let’s talk about <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code>.</p>
+<p>In my mind, it is unfortunate that <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> and Link have a name collision, as I believe they have some major conceptual differences.  But c’est la vie.
+A <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> is essentially a list.  But aren’t all values lists?  Well yes, but <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> can be used to compose a heterogeneous list of different value types.
+So, while a <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code> is a list of floats and a <code class="code docutils literal notranslate"><span class="pre">StringValue</span></code> is a list of Strings, a <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> is a list of abstract values.</p>
+<p>Below is an example lifted right out of the documentation for <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code>, which is here: <a class="reference external" href="https://wiki.opencog.org/w/LinkValue">https://wiki.opencog.org/w/LinkValue</a></p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;abc&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;key&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">LinkValue</span>
+   <span class="p">(</span><span class="nf">StringValue</span> <span class="s">&quot;foo&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">FloatValue</span> <span class="mi">41</span> <span class="mi">43</span> <span class="mi">43</span> <span class="mi">44</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;foobar&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION for someone smarter than me. If <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> is an array, Why isn’t there a fundamental “MapValue” type with its own internal keys?
+The Value documentation mentions the <code class="code docutils literal notranslate"><span class="pre">LinkValue</span></code> being useful for structured data, e.g. from JSON or YAML, but without a dictionary or map type, it’s not complete.
+I understand maps can be created by embedded atoms for each sub-dictionary, and using their key-value spaces, but I thought one of the features of Values was that they have lower overhead than Atoms, so creating embedded atoms seems to defeat that.</p>
+</div>
+<p>In summary, here are some of the conceptual differences between Atoms and Values.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Atoms</p></th>
+<th class="head"><p>Values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>All Atoms reside in the Atomspace</p></td>
+<td><p>Values can live anywhere</p></td>
+</tr>
+<tr class="row-odd"><td><p>Atoms persist until they are deleted</p></td>
+<td><p>Values go away when no longer accessed</p></td>
+</tr>
+<tr class="row-even"><td><p>Identical atoms are the <strong>same</strong> atom</p></td>
+<td><p>Are totally independent of each other</p></td>
+</tr>
+<tr class="row-odd"><td><p>Are expensive to create and destroy</p></td>
+<td><p>Are cheap to create and destroy</p></td>
+</tr>
+<tr class="row-even"><td><p>Are indexed for fast searching</p></td>
+<td><p>Can’t be searched except in a few cases</p></td>
+</tr>
+<tr class="row-odd"><td><p>An Atom has an associated table of Values</p></td>
+<td><p>Values can only hold type-specific data</p></td>
+</tr>
+<tr class="row-even"><td><p>A Link Atom may reference other Atoms</p></td>
+<td><p>A Value can <strong>be</strong> a <strong>reference</strong> to an Atom</p></td>
+</tr>
+</tbody>
+</table>
+<p>Lastly, I want to mention bit about where to start looking if you have additional questions or want to get a deeper understanding of a particular topic.  I gleaned most of the information in this chapter from the built-in reference accessible through the Scheme shell.</p>
+<p>You can run <code class="code docutils literal notranslate"><span class="pre">,describe</span></code> in the Scheme shell, or <code class="code docutils literal notranslate"><span class="pre">,d</span></code> for short, to print usage info for any command.  For example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="o">,</span><span class="nv">d</span> <span class="nv">cog-set-values!</span>
+</pre></div>
+</div>
+<p>And similarly, you can run <code class="code docutils literal notranslate"><span class="pre">,appropos</span> <span class="pre">cog</span></code>, or <code class="code docutils literal notranslate"><span class="pre">,a</span> <span class="pre">cog</span></code> for short, to get a listing of all available OpenCog functions.</p>
+<p>Finally, the wiki reference for the OpenCog Scheme interface can be found here: <a class="reference external" href="https://wiki.opencog.org/w/Scheme">https://wiki.opencog.org/w/Scheme</a>  I always have a browser tab open on this page.</p>
+<p>Next Chapter: <a class="reference internal" href="02_representing_knowledge.html#representing-knowledge"><span class="std std-ref">Structured Knowledge</span></a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Luke's Atomspace Quickstart Guide</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Oriented &amp; Basic Concepts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#poking-around-in-scheme">Poking around in Scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-some-node-atoms">Creating some Node Atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#values-associated-with-atoms">Values associated with Atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-about-values">More about Values</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="02_representing_knowledge.html">Structured Knowledge &amp; Simple Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_truth_values_and_evaluation.html">TruthValues &amp; Predicate Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_logical_inferencing.html">Logical Inferencing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Luke’s Atomspace Bootstrap Guide</a></li>
+      <li>Next: <a href="02_representing_knowledge.html" title="next chapter">Structured Knowledge &amp; Simple Queries</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Luke Peterson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/contents/01_getting_oriented.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
