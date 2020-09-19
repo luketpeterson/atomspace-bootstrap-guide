@@ -112,18 +112,57 @@ Finally, let's use our new :scheme:`fido_is_big?` predicate in a :code:`CondLink
 
 Executing that should get you a resounding :scheme:`(ConceptNode "Yes")`!
 
-Controlling Reduction with QuoteLink 
+Using PutLink to Update the AtomSpace 
 ------------------------------------------------------------------------
 
 Now, let's use the result of our conditional to update some state in the Atomspace.
+Recall how, a few chapters ago, we used a :code:`StateLink` to create an exclusive link that can only have one result for a given atom.
+Here, we will assign a :code:`StateLink` result depending on a :code:`CondLink`.
+
+To do this, we will use :code:`PutLink`.  You can think of :code:`PutLink` as the assignment operator of Atomese.
+Here in our example, we set the association of :scheme:`(Predicate "conditional_result")` with one of two possible :code:`ConceptNode` atoms, using a :code:`StateLink`.
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (PutLink
+            (CondLink
+                (GreaterThan
+                    (Number 2)
+                    (Number 1)
+                )
+                (StateLink
+                    (Variable "result_placeholder")
+                    (Concept "Yes")
+                )
+                (StateLink
+                    (Variable "result_placeholder")
+                    (Concept "No")
+                )
+            )
+            (Predicate "conditional_result")
+        )
+    )
+
+As you probably expected, running the Scheme snippet above produces this:
+
+.. code-block:: scheme
+
+    (StateLink
+        (PredicateNode "conditional_result")
+        (ConceptNode "Yes")
+    )
+
+So now the :code:`StateLink` belonging to :scheme:`(PredicateNode "conditional_result")` points to :scheme:`(ConceptNode "Yes")`.
+But there is a lot going on here, and some of it is subtle and non-obvious.
+That said, understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. the way to think about atoms that represent data and atoms that represent transformations and operations that can affect that data.
+Remember both kinds of atoms live in the Atomspace, and there isn't a simple rule about whether an atom is "data" or it's "code".  Often it can feel like everything is all mixed together.
+This is a source of tremendous flexibility, but remember, with great power comes great responsibility ;-)
 
 
-PutLink is the answer here.
 
-BORIS, if I explain PutLink here, go on and move some of the earlier dicsussion about PutLink to here.
+BORIS, go through why the trivial approach doesn't work.
 
-
-BORIS
 
 .. code-block:: scheme
 
@@ -147,6 +186,12 @@ BORIS
             )
         )
     )
+
+
+BORIS, if I explain PutLink here, go on and move some of the earlier dicsussion about PutLink to here.
+
+
+
 
 
 
