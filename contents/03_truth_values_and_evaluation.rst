@@ -127,10 +127,7 @@ Here in our example, we set the association of :scheme:`(Predicate "conditional_
     (cog-execute!
         (PutLink
             (CondLink
-                (GreaterThan
-                    (Number 2)
-                    (Number 1)
-                )
+                (TrueLink)
                 (StateLink
                     (Variable "result_placeholder")
                     (Concept "Yes")
@@ -154,14 +151,37 @@ As you probably expected, running the Scheme snippet above produces this:
     )
 
 So now the :code:`StateLink` belonging to :scheme:`(PredicateNode "conditional_result")` points to :scheme:`(ConceptNode "Yes")`.
-But there is a lot going on here, and some of it is subtle and non-obvious.
-That said, understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. the way to think about atoms that represent data and atoms that represent transformations and operations that can affect that data.
+
+.. note:: :code:`TrueLink` and its mirror-twin :code:`FalseLink` are atoms that always evaluate to true (or false).  As used above, it's equivalent to saying "if (true)", and thus it gives me a concise way to demonstrate the behavior of the :code:`CondLink` atom.
+
+This appears fairly simple but there is a lot going on here, and some of it is subtle and non-obvious.
+Understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data vs. atoms that represent transformations and operations that can affect data.
 Remember both kinds of atoms live in the Atomspace, and there isn't a simple rule about whether an atom is "data" or it's "code".  Often it can feel like everything is all mixed together.
 This is a source of tremendous flexibility, but remember, with great power comes great responsibility ;-)
 
 
 
-BORIS, go through why the trivial approach doesn't work.
+BORIS, go through why the trivial approach doesn't work.  i.e. why adding atoms as part of the conditional clobbers the moon
+
+To illustrate this point, what if we were to try this:
+
+
+    (cog-execute!
+        (PutLink
+            (CondLink
+                (FalseLink)
+                (StateLink
+                    (Variable "result_placeholder")
+                    (Concept "Yes")
+                )
+                (StateLink
+                    (Variable "result_placeholder")
+                    (Concept "No")
+                )
+            )
+            (Predicate "conditional_result")
+        )
+    )
 
 
 .. code-block:: scheme
