@@ -545,4 +545,4 @@ Now that we have a link we can query, we can compose a query using an :code:`And
 This query will also find Fido and all other dogs older than 2, just like our first version.  As you can see, the second branch of the query is identical to the one above.
 However, this query will have considerably better performance characteristics as the number of atoms in the Atomspace grows.
 
-Next Chapter: :ref:`TruthValues & Evaluation <03_truth_values_and_evaluation>`
+Next Chapter: :ref:`Programming with Atomese <03_atomese_programming>`

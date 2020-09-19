@@ -30,7 +30,7 @@ Let's begin.
 
    contents/01_getting_oriented
    contents/02_representing_knowledge
-   contents/03_truth_values_and_evaluation
+   contents/03_atomese_programming
    contents/04_logical_inferencing
 
 

@@ -1,7 +1,7 @@
 .. role:: scheme(code)
    :language: scheme
 
-.. _03_truth_values_and_evaluation:
+.. _03_atomese_programming:
 
 Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 
@@ -152,10 +152,11 @@ As you probably expected, running the Scheme snippet above produces this:
 
 So now the :code:`StateLink` belonging to :scheme:`(PredicateNode "conditional_result")` points to :scheme:`(ConceptNode "Yes")`.
 
-.. note:: :code:`TrueLink` and its mirror-twin :code:`FalseLink` are atoms that always evaluate to true (or false).  As used above, it's equivalent to saying "if (true)", and thus it gives me a concise way to demonstrate the behavior of the :code:`CondLink` atom.
+.. note:: :code:`TrueLink` and its mirror-twin :code:`FalseLink` are atoms that always evaluate to true (or false).  As used above, it's equivalent to saying "if (true)" in another language, and thus it gives me a concise way to demonstrate the behavior of the :code:`CondLink` atom.
 
-This appears fairly simple but there is a lot going on here, and some of it is subtle and non-obvious.
-Understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data vs. atoms that represent transformations and operations that can affect data.
+This :code:`PutLink` expression appears fairly simple but there is a lot going on here, and some of it is subtle and non-obvious.
+Understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data vs. atoms that represent transformations and operations that can affect the data.
+
 Remember both kinds of atoms live in the Atomspace, and there isn't a simple rule about whether an atom is "data" or it's "code".  Often it can feel like everything is all mixed together.
 This is a source of tremendous flexibility, but remember, with great power comes great responsibility ;-)
 
@@ -165,6 +166,7 @@ BORIS, go through why the trivial approach doesn't work.  i.e. why adding atoms 
 
 To illustrate this point, what if we were to try this:
 
+.. code-block:: scheme
 
     (cog-execute!
         (PutLink
