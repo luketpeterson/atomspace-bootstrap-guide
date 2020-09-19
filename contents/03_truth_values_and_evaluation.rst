@@ -6,14 +6,161 @@
 Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 
 ========================================================================
-TruthValues & Predicate Evaluation
+Programming with Atomese
 ========================================================================
+
+In the previous chapter, we introduced Atomspace queries and a little bit about the execution model with :code:`cog-execute!`.
+Now we'll go deeper into some more of the program-flow constructs that allow Atomese to behave like a complete programming language.
+
+In this upcoming chapter, we'll deal with Atomese approaches to conditionals, code factoring (i.e. functions), and looping.
+We will also cover the difference between the execution and the evaluation context.
+
+If you are steeped in procedural programming, like I am, there are things about the Atomspace execution model that will require you to turn your brain inside-out.
+On the other hand, if you come from a `Lambda Calculus <https://en.wikipedia.org/wiki/Lambda_calculus>`_ or `Functional Programming <https://en.wikipedia.org/wiki/Functional_programming>`_ background then, lucky you!
+This next parts will be a lot easier to wrap your head around.
+
+The Atomspace is different from procedural programming languages insofar as there isn't a program counter as I typically understand it.
+You can't "follow" the execution in a sequential fashion the way you might be able to in other languages.
+Under the hood, obviously, it's software running on a microprocessor so there has to be sequential instruction-flow at some level, but it's abstracted away from you and trying to follow it is counter-productive to understanding how to effectively use the Atomspace.
+
+Conditional Expressions
+------------------------------------------------------------------------
 
 In the previous chapter, we used a :code:`MeetLink` and :code:`QueryLink` to query the "weight_in_kg" of "Fido the Dog",
 and used a different query to find all dogs (actually all atoms) heavier than 10kg.
-But how can we ask "Is Fido heavier than 10kg?".
+But how can we cause a different action to be taken, depending on whether or not Fido is heavier than 10kg?
 
-More generally, how do we compose a Boolean expression in Atomese?
+More generally, how do we compose a conditional expression in Atomese?
+
+Let's start with a simpler conditional.  We'll use a :code:`CondLink` like this:
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (CondLink
+            (GreaterThan
+                (Number 2)
+                (Number 1)
+            )
+            (Concept "Yes")
+            (Concept "No")
+        )
+    )
+
+When you execute the Scheme snippet above, you will see :scheme:`(ConceptNode "Yes")` because 2 is indeed greater than 1.
+Simple enough.  :code:`CondLink` takes either 2 or 3 atoms as arguments.
+
+The first is the *conditional* predicate atom.  Something that will evaluate to true or false.  There is a lot more to say about this later.
+For now, just remember that :code:`CondLink` predicates must be 100% true or they will be considered false.
+
+Argument 2 is the *consequent* atom, or as I like to think of it, the expression after the **then** keyword in other languages.  Optionally, for argument 3, you can supply a *default* atom, which is basically the **else** expression, to be executed if the conditional evaluates to false. 
+
+Building on that, let's compare Fido's weight rather than just comparing some constants.  First we need to bring Fido back into the Atomspace (assuming you've cleared things out since last chapter's exercises).
+
+.. code-block:: scheme
+
+    (define fidos_weight_link
+        (ListLink
+            (Concept "Fido the Dog")
+            (Predicate "weight_in_kg")
+        )
+    )
+
+    (StateLink
+        fidos_weight_link
+        (NumberNode 12.5)
+    )
+
+Now we need a predicate that will query for Fido's weight, and evaluate to true if he's heavier than 10kg.
+
+.. code-block:: scheme
+
+    (define fido_is_big?
+        (SatisfactionLink
+            (AndLink
+                (StateLink
+                    fidos_weight_link
+                    (VariableNode "dogs_weight_node")
+                )
+                (GreaterThan
+                    (VariableNode "dogs_weight_node")
+                    (Number 10)
+                )
+            )
+        )
+    )
+
+Earlier I promised I wouldn't drop a new atom or other construct on you without at least attempting to demystify it.  :code:`SatisfactionLink` is yet another query link type.
+Fundamentally it's just like :code:`MeetLink`, :code:`GetLink`, :code:`QueryLink`, and :code:`BindLink`.
+
+The main feature that sets :code:`SatisfactionLink` apart is that it evaluates to a TruthValue.  True, aka :scheme:`stv(1, 1)`, if the expression could be matched in the Atomspace, and false, aka :scheme:`stv(0, 1)`, if not.
+There is a lot to say about TruthValues, and we'll get there soon.  For now you can think of them as Booleans True/False or Yes/No values, just know that there is a lot more to them.
+
+.. note:: :code:`SatisfactionLink` is actually the basic building-block from which all of the other query links are constructed.
+
+Finally, let's use our new :scheme:`fido_is_big?` predicate in a :code:`CondLink` atom.
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (CondLink
+            fido_is_big?
+            (Concept "Yes")
+            (Concept "No")
+        )
+    )
+
+Executing that should get you a resounding :scheme:`(ConceptNode "Yes")`!
+
+Controlling Reduction with QuoteLink 
+------------------------------------------------------------------------
+
+Now, let's use the result of our conditional to update some state in the Atomspace.
+
+
+PutLink is the answer here.
+
+BORIS, if I explain PutLink here, go on and move some of the earlier dicsussion about PutLink to here.
+
+
+BORIS
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (CondLink
+            (GreaterThan
+                (Number 2)
+                (Number 1)
+            )
+            (QuoteLink
+                (StateLink
+                    (Predicate "conditional_result")
+                    (Concept "Yes")
+                )
+            )
+            (QuoteLink
+                (StateLink
+                    (Predicate "conditional_result")
+                    (Concept "No")
+                )
+            )
+        )
+    )
+
+
+
+
+
+So we saw above how we could use :code:`cog-evaluate!` to evaluate a atom to generate a TruthValue.
+But how do we utilize that result to control what our program does next?
+In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?
+
+
+
+
+LP: See if I can get the AndLink stuff to work for partial conditionals, testing it with the side-effect-full eval path from the recursive-loop.scm example
+
 
 In a simple form, like this:
 
@@ -50,10 +197,10 @@ If he were 120cm, most would judge it false.  But what if Charlie were 175cm?  I
 
 This line of reasoning was formalized as `Fuzzy Logic <https://en.wikipedia.org/wiki/Fuzzy_logic>`_, by Lotfi Zadeh, whom I was lucky enough to chat with for half an hour, mostly about self-driving cars, back in the year 2000 when I was 19 years old, but I digress...
 
-Using fuzzy logic, we can create a set for all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
-In traditional set theory, a data point either belongs or doesn't belong in a set, based on the set membership function.  The set always has a crisp boundary.  In fuzzy logic, the membership function returns a value between 0 and 1, so there can be a continuous transition from outside the set to inside the set.
+Using fuzzy logic, we can define a set of all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
+In traditional set theory, an object or data point either belongs or doesn't belong in a set, based on the set membership function.  In other words, traditional sets always have a crisp boundary.  In fuzzy logic, the membership function returns a value between 0 and 1, so there can be a continuous transition from outside the set to inside the set.
 
-But consider the conceptual difference between our statement about Charlie and the statement "The train from Birmingham arrives every day at 10:42am."  Given the legendary unreliability of the London Midland train service, you'd also assign that statement a low truth value.
+But consider the conceptual difference between our statement about Charlie and the statement "The train from Birmingham arrives every day at 10:42am."  Given the legendary unreliability of the London Midland train service, you'd certainly assign that statement a low truth value.
 But this is a probabilistic truth rather than a fuzzy truth.  Some days, the train will indeed arrive on time, but on the majority of days it will not.  This kind of truth value is meant to express a probability that the statement is true.
 
 So in summary, a fuzzy truth value represents the **degree** to which a statement is true, while a probabilistic truth value represents the **chance** that it is true.
@@ -80,52 +227,18 @@ For now, you can read an introductory paper on PLNs here: `<https://aiatadams.fi
 
 And the complete PLN book can be downloaded (for now) here: `<https://aiatadams.files.wordpress.com/2016/02/pln_book_6_27_08.pdf>`_
 
-Conditional Expressions
-------------------------------------------------------------------------
 
-So we saw above how we could use :code:`cog-evaluate!` to evaluate a atom to generate a TruthValue.
-But how do we utilize that result to control what our program does next?
-In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?
+BORIS HERE
 
-If you are as steeped in procedural programming as I am, this next bit will require you to turn your brain inside-out.
-If you come from a `Lambda Calculus <https://en.wikipedia.org/wiki/Lambda_calculus>`_ or `Functional Programming <https://en.wikipedia.org/wiki/Functional_programming>`_ background then, lucky you!
-This next part will be a lot easier to wrap your head around.
-
-Let's bring back Fido.
-
-.. code-block:: scheme
-
-    (define fidos_weight_link
-        (ListLink
-            (Concept "Fido the Dog")
-            (Predicate "weight_in_kg")
-        )
-    )
-
-    (StateLink
-        fidos_weight_link
-        (NumberNode 12.5)
-    )
 
 Now, we want to put him into a "Big Dog" or a "Small Dog" set, depending on his weight.
 But first, we need to define a predicate that will evaluate to true if his weight is above a threshold.
 
-.. code-block:: scheme
 
-    (define fido_is_big?
-        (SatisfactionLink
-            (AndLink
-                (StateLink
-                    fidos_weight_link
-                    (VariableNode "dogs_weight_node")
-                )
-                (GreaterThan
-                    (VariableNode "dogs_weight_node")
-                    (Number 15)
-                )
-            )
-        )
-    )
+BORIS Unnatural Break
+
+So unlike the other query link types, :code:`SatisfactionLink` is appropriate to use in an evaluation context rather than in an execution context.  In fact, 
+
 
 Let's stop here, and just evaluate our new predicate.
 
@@ -135,11 +248,7 @@ Let's stop here, and just evaluate our new predicate.
 
 You should get back :scheme:`(stv 0 1)`, aka false.  Fido is not heavier than 15kg.  If you're not convinced, try tweaking Fido's weight or the predicate to get the answer you want.
 
-Earlier I promised I wouldn't drop a new atom or other construct on you without at least attempting to demystify it, so :code:`SatisfactionLink` is yet another query link type.
-Fundamentally it's just like :code:`MeetLink`, :code:`GetLink`, :code:`QueryLink`, and :code:`BindLink`.
-The main feature that sets :code:`SatisfactionLink` apart is that it evaluates to a TruthValue.  True, aka :scheme:`stv(1, 1)`, if the expression could be matched in the Atomspace, and false, aka :scheme:`stv(0, 1)`, if not.
-
-So unlike the other query link types, :code:`SatisfactionLink` is appropriate to use in an evaluation context rather than in an execution context.  In fact, :code:`SatisfactionLink` is actually the basic building-block from which all of those other query links are constructed.
+BORIS Unnatural Break
 
 Continuing on, we can now create the appropriate :code:`MemberLink`, depending on how our predicate evaluates.
 
