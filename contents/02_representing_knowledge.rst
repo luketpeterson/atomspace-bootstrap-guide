@@ -251,14 +251,14 @@ You've probably noticed the :code:`VariableNode` appears in both the query atom 
 Personally, I think of this as the variable acquiring its *meaning*?? in the query **(better word?? binding?? / grounding?? / I won't say Value because that word is taken, but if this were another programming language then I'd say value.)**
 And thus the :code:`VariableNode` refers to a concrete atom when it is used in the output format atom.
 
-.. note:: Much of the documentation and examples are written to feature :code:`GetLink` instead of :code:`MeetLink`, and :code:`BindLink` instead of :code:`QueryLink`.  The only semantic difference between these is that :code:`MeetLink` and :code:`QueryLink` return results as a :code:`QueueValue` which is transient, while :code:`GetLink` and :code:`BindLink` return a :code:`SetLink` which will become part of the Atomspace until it is deleted.  To avoid cluttering up the Atomspace and the performance costs associated with that, the :code:`QueueValue` functions are better.
+.. note::
+   
+   Much of the documentation and examples are written to feature :code:`GetLink` instead of :code:`MeetLink`, and :code:`BindLink` instead of :code:`QueryLink`.
+   The only semantic difference between these is that :code:`MeetLink` and :code:`QueryLink` return results as a :code:`QueueValue` which is transient,
+   while :code:`GetLink` and :code:`BindLink` return a :code:`SetLink` which will become part of the Atomspace until it is deleted.
+   To avoid cluttering up the Atomspace and the performance costs associated with that, the :code:`QueueValue` functions are better.
 
-The "get-put.scm" OpenCog example demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
-The examples apply equally well to :code:`QueryLink` and :code:`MeetLink`.
-We haven't covered :code:`PutLink` yet, but we'll get to it in the next few chapters.
-I recommend going through that example as well as the "bindlink.scm" example, which can be found here:
-`<https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_ &
-`<https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm>`_
+   The OpenCog examples covering :code:`BindLink` and :code:`GetLink` apply equally well to :code:`QueryLink` and :code:`MeetLink`.
 
 Lastly, let's get our query result back into Scheme.  Let's use the Scheme snippet below to multiply the new value by 10.
 
@@ -475,9 +475,6 @@ I'll take this opportunity to introduce other link types along the same lines:
 You may have noticed that "LessThanLink" is absent.  The less-than operator itself is just syntactic sugar because the argument order to :code:`GreaterThanLink` can implement a logically identical "LessThanLink".  Personally I've often wondered why more programming languages don't conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.
 
 .. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but equality for IEEE floats is problematic for many applications because values that are no longer representable with the mantissa bits become approximated leading to all kinds of unintended behavior.
-
-I recommend exploring queries and Active Links further by going through the "assert-retract.scm" OpenCog example here: `<https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm>`_
-In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`cog-execute!` and drive home the execution model in the Atomspace.
 
 ValueOfLink and Thinking About Performance
 ------------------------------------------------------------------------

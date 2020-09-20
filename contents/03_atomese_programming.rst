@@ -1,5 +1,7 @@
 .. role:: scheme(code)
    :language: scheme
+.. role:: c(code)
+   :language: c
 
 .. _03_atomese_programming:
 
@@ -94,9 +96,9 @@ Earlier I promised I wouldn't drop a new atom or other construct on you without 
 Fundamentally it's just like :code:`MeetLink`, :code:`GetLink`, :code:`QueryLink`, and :code:`BindLink`.
 
 The main feature that sets :code:`SatisfactionLink` apart is that it evaluates to a TruthValue.  True, aka :scheme:`stv(1, 1)`, if the expression could be matched in the Atomspace, and false, aka :scheme:`stv(0, 1)`, if not.
-There is a lot to say about TruthValues, and we'll get there soon.  For now you can think of them as Booleans True/False or Yes/No values, just know that there is a lot more to them.
+There is a lot to say about TruthValues, and we'll get there soon.  For now you can think of them as Boolean True/False or Yes/No values, just know that there is a lot more to them.
 
-.. note:: :code:`SatisfactionLink` is actually the basic building-block from which all of the other query links are constructed.
+.. note:: :code:`SatisfactionLink` is actually the basic building-block from which all of the other query link types are constructed.
 
 Finally, let's use our new :scheme:`fido_is_big?` predicate in a :code:`CondLink` atom.
 
@@ -158,9 +160,9 @@ So now the one and only :code:`StateLink` associated with :scheme:`(PredicateNod
 
 .. note:: :code:`TrueLink` and its mirror-twin :code:`FalseLink` are atoms that always evaluate to true (or false).  As used above, it's equivalent to saying "if (true)" in another language, and thus it gives me a concise way to demonstrate the behavior of the :code:`CondLink` atom.
 
-This :code:`PutLink` expression appears fairly simple but there is a lot going on here, and some of it is subtle and non-obvious.
-Understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data vs. atoms that represent transformations and operations that can affect the data.
-In another programming language, we would call that "code".
+This :code:`PutLink` expression appears fairly simple but some of the behavior is a bit subtle and non-obvious, and it tripped me up badly at first.
+Understanding :code:`PutLink` is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data aka program state vs. atoms that represent operations that can affect the data.
+In another programming language we would call these "data" and "code".
 
 Remember both kinds of atoms live in the Atomspace, and there isn't a simple rule about whether an atom is "data" or it's "code".  Often it can feel like everything is all mixed together.
 This is a source of tremendous flexibility, but remember, with great power comes great responsibility ;-)
@@ -181,10 +183,10 @@ But hold on...  What's the point?  Isn't that identical to just: :scheme:`(Conce
 
 Yes.  Yes it is.  :code:`PutLink` is not the only way to put atoms into the Atomspace.
 We've been putting atoms in the Atomspace since the very first example in this guide.
-Why do we need :code:`PutLink` then?
+So why do we need :code:`PutLink` then?
 
-Ungrounded Expressions to Defer Execution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Ungrounded Expressions can Represent "Latent Code"
+------------------------------------------------------------------------
 
 Let's look at what's wrong with this naïve attempt to set our result :code:`StateLink` from the first example.
 
@@ -206,11 +208,12 @@ Let's look at what's wrong with this naïve attempt to set our result :code:`Sta
 
 Try it!  Did it do what you expected?  I know I was puzzled when I encountered this behavior.  Actually "annoyed" and "frustrated" are more accurate words.
 
-A clue to what is happening can be found by dropping the :code:`cog-execute!`, and just observing what happens when those atoms are added to the Atomspace.
+A clue to what is happening can be found by dropping the :code:`cog-execute!`, and just observing what happens when the :code:`CondLink` and all its referenced atoms are added to the Atomspace.
 Notice that the :code:`StateLink` connecting :scheme:`(Predicate "conditional_result")` to :scheme:`(Concept "Yes")` is gone altogether.
 Remember that the act of creating a :code:`StateLink` removes a prior extant :code:`StateLink` with the same target.
 
-I was stuck in the mindset that I was just inputting code, and the :code:`StateLink` behavior would only be triggered when the code actually executed.  Wrong!
+This left me scratching my head for a minute.  I was stuck in the mindset that I was just inputting code, and the :code:`StateLink` behavior would only be triggered when the code actually executed.  Wrong!
+
 As I inputted the first arm of the :code:`CondLink`, I actually assigned the result to "Yes" by creating the :code:`StateLink`.
 Then, when I inputted the second arm, I re-assigned the result to "No", by creating the new :code:`StateLink`, thus triggering the old one to be destroyed.
 
@@ -234,94 +237,161 @@ So what's the solution?
 We introduced ungrounded vs. grounded expressions last chapter when discussing queries.
 I remember saying (typing) "Think of a grounded expression as a statement and an ungrounded expression as a question."
 
-Now I'll add a bit more nuance.  You can also think of an ungrounded expression as a **Hypothetical**.
-As long as an expression is ungrounded, it is abstract.
+Now I'll add a bit more nuance.  You can also think of an ungrounded expression as a **Hypothetical** or **Abstract** statement.
+As long as an expression is ungrounded, it doesn't really say anything specific or concrete.
 
 So in terms of the example, the :code:`StateLink` atoms we want to input say "Connect *something* with 'Yes'" and "Connect *something* with 'No'".
-But without that *something* being a specific concrete atom, the :code:`StateLink` can't do its behavior to ensure uniqueness and both :code:`StateLink` atoms are allowed to exist at the same time.
+But without that *something* being a specific concrete atom, the :code:`StateLink` can't do its behavior to ensure uniqueness and thus both :code:`StateLink` atoms are allowed to exist at the same time.
 
 That's where :code:`PutLink` comes in.  When :code:`PutLink` is executed, the ungrounded expression is grounded using the atom(s) supplied to :code:`PutLink`.
-:scheme:`(Predicate "conditional_result")` in the case of the example.  And the atoms of the newly grounded expression are added to the Atomspace.
+In the case of the example, that is :scheme:`(Predicate "conditional_result")` .  And the atoms of the newly grounded expression are put into the Atomspace.
 
+Grounding a DeleteLink Removes an Atom
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+We just saw how grounding a :code:`StateLink` can cause another conflicting :code:`StateLink` atom to be deleted if they share the same target atom.
+This is a special case of a general behavior.  To illustrate that, I'll introduce the :code:`DeleteLink` atom.
 
+As long as the :code:`DeleteLink` remains ungrounded, it doesn't to anything.
+But the instant it is grounded, it ceases to exist, and takes whatever atoms it references out along with it.
 
-BORIS, below is probably bunk and should be deleted.
-
-So, looking at our example above, we supplied two atoms to :code:`PutLink`.  First we gave it our :code:`CondLink` and second we supplied :scheme:`(Predicate "conditional_result")`.
-In this case, we can think of the first argument as being like the "R-Value" and the second argument as being the "L-Value".
-That'll mean something if you've ever spent significant time working through gcc errors.
-
-If not, think of the first argument atom as being the "what" you want to assign, and the second argument atom as being the "where" you want to assign it.
-
-Consider this :code:`PutLink` example:
+Consider this Scheme snippet:
 
 .. code-block:: scheme
+
+    (define hello (Concept "Here I am!"))
+
+    (define delete_me
+        (PutLink
+            (DeleteLink
+                (Variable "the_concept")
+            )
+            hello
+        )
+    )
+
+We just defined two scheme symbols: :code:`hello` and :code:`delete_me`.  Let's prove :code:`hello` exists by having a look.
+
+.. code-block:: scheme
+
+    (display hello)
+
+Yup.  Just where we left it.
+We can also look at :code:`delete_me`, and we will see it contains an ungrounded :code:`DeleteLink` expression.
+
+But what happens when we execute :code:`delete_me`?
+
+.. code-block:: scheme
+
+    (cog-execute! delete_me)
+
+Well... We just annihilated the atom referenced by :code:`hello`.  To prove it, we'll try to display it again.
+
+.. code-block:: scheme
+
+    (display hello)
+
+So sad. :-(  We now get :code:`#<Invalid handle>`.
+
+Of course, deleting a pre-specified atom using a :code:`DeleteLink` inside a :code:`PutLink` isn't really any more useful than just declaring the :code:`DeleteLink` directly, and skipping all the :code:`PutLink` machinations.
+We could have just done this:
+
+.. code-block:: scheme
+
+    (cog-execute! (DeleteLink hello))
+
+However, next, we'll cover how to query for atoms inside a :code:`PutLink`, so we'll be able to do things like deleting all atoms returned by a query, for example.
+
+At some point, I recommend exploring the Atomspace execution model further by going through the `"assert-retract.scm" OpenCog example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm>`_.
+In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`cog-execute!`.
+
+Finding Atoms with a Query Inside a PutLink
+------------------------------------------------------------------------
+
+To implement any complex behavior beyond the trivial toy examples we've seen so far,
+like our conditional above that branched based on a constant, we need to operate on data from the Atomspace.
+
+Consider a simple counter that might be written in C like this:
+
+.. code-block:: c
+
+    int counter = 0;
+
+    counter = counter + 1;
+
+How would that look in Atomese?
+
+.. code-block:: scheme
+
+    (State (Concept "counter") (Number 0))
 
     (cog-execute!
         (PutLink
-            (PlusLink
-                (Variable "our_num")
-                (Number 1)
+            (State
+                (Concept "counter")
+                (PlusLink
+                    (Variable "our_num")
+                    (Number 1)
+                )
             )
-            (Number 1)
+            (MeetLink
+                (State
+                    (Concept "counter")
+                    (Variable "our_num")
+                )
+            )
         )
     )
 
+As you can see in both C and Atomese, we begin by declaring :code:`counter` and initially setting it to 0 (Zero).
+In a way, a declaration with an initial value is like an assignment, but you couldn't write much of a program using only declarations in C, and that's also true in Atomese.
 
+So, looking at the interesting part of the example, we supplied two atoms to :code:`PutLink`.
+We can think of the first argument as being like the "R-Value" and the second argument as being like the "L-Value".
+That'll mean something if you've spent significant time working through gcc errors.
+If not, consider yourself fortunate for avoiding that particular drain of life energy.
 
+Basically, the first argument is the expression to the right of the equal-sign in the assignment.
+From our C example, that would be :c:`counter + 1`.  Think of the R-Value as "what" is being assigned.
 
+The second argument to :code:`PutLink` is the part of the assignment to the left of the equal side.
+From our C example, that would be :c:`counter`.  Think of the L-Value as "where" you are assigning to.
 
+Again, this is a flawed comparison with the assignment operation in C, so don't try and stretch the analogy too far.
+For example, you could change the ConceptNode in the first expression, so a totally different atom would be created by executing the :code:`PutLink`
 
-BORIS, Explain how PutLink args are the right and left side of the assignment expression.
-So, 
-
-But haven't I been doing asignments already?  What about Fido's weight?
-The best analogy in other languages is the way some languages let you declare a variable with an initial value.
-In a way, it is an assignment, but you often can't use the exact same syntax to change the value during runtime.
-
-Talk about all the assignments we thought we were doing and how they were just declarations.
-
-
-BORIS, go through why the trivial approach doesn't work.  i.e. why adding atoms as part of the conditional clobbers the moon
-
-To illustrate this point, what if we were to try this:
+Coming full circle, :code:`QueryLink` and :code:`BindLink` are actually implemented using PutLink.
+The increment example above is functionally equivalent to:
 
 .. code-block:: scheme
 
     (cog-execute!
-        (CondLink
-            (GreaterThan
-                (Number 2)
-                (Number 1)
+        (QueryLink
+            (State
+                (Concept "counter")
+                (Variable "our_num")
             )
-            (QuoteLink
-                (StateLink
-                    (Predicate "conditional_result")
-                    (Concept "Yes")
-                )
-            )
-            (QuoteLink
-                (StateLink
-                    (Predicate "conditional_result")
-                    (Concept "No")
+            (State
+                (Concept "counter")
+                (PlusLink
+                    (Variable "our_num")
+                    (Number 1)
                 )
             )
         )
     )
 
+The `"get-put.scm" OpenCog example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm>`_
+Further explores :code:`PutLink` and demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
+I recommend going through that example as well as the `"bindlink.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_.
 
-
-BORIS Finally, grab the example assert-retract, get-put, whatever
-
-
-
-BORIS, cover DeleteLink
-
-BORIS, go on and move some of the earlier dicsussion about PutLink to here.
+Using DefinedSchemaNode to Implement Procedures
+------------------------------------------------------------------------
 
 
 
+
+Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode
 
 
 
@@ -525,7 +595,6 @@ BORIS.  Explain AnchorNodes and VariableLists
 BORIS Revisit PredicateNode
 
 BORIS EvaluationLink
-
 BORIS two views, as an assertion with a truth value, or as a way to evaluate the truth of a proposition
 
 

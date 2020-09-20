@@ -104,10 +104,10 @@ For now, just remember that <code class="code docutils literal notranslate"><spa
 <p>Earlier I promised I wouldn’t drop a new atom or other construct on you without at least attempting to demystify it.  <code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code> is yet another query link type.
 Fundamentally it’s just like <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code>, <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code>, <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code>, and <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code>.</p>
 <p>The main feature that sets <code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code> apart is that it evaluates to a TruthValue.  True, aka <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">stv</span></span><span class="p"><span class="pre">(</span></span><span class="mi"><span class="pre">1</span></span><span class="o"><span class="pre">,</span></span> <span class="mi"><span class="pre">1</span></span><span class="p"><span class="pre">)</span></span></code>, if the expression could be matched in the Atomspace, and false, aka <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">stv</span></span><span class="p"><span class="pre">(</span></span><span class="mi"><span class="pre">0</span></span><span class="o"><span class="pre">,</span></span> <span class="mi"><span class="pre">1</span></span><span class="p"><span class="pre">)</span></span></code>, if not.
-There is a lot to say about TruthValues, and we’ll get there soon.  For now you can think of them as Booleans True/False or Yes/No values, just know that there is a lot more to them.</p>
+There is a lot to say about TruthValues, and we’ll get there soon.  For now you can think of them as Boolean True/False or Yes/No values, just know that there is a lot more to them.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code> is actually the basic building-block from which all of the other query links are constructed.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code> is actually the basic building-block from which all of the other query link types are constructed.</p>
 </div>
 <p>Finally, let’s use our new <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">fido_is_big?</span></span></code> predicate in a <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> atom.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
@@ -121,13 +121,16 @@ There is a lot to say about TruthValues, and we’ll get there soon.  For now yo
 </div>
 <p>Executing that should get you a resounding <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">ConceptNode</span></span> <span class="s"><span class="pre">“Yes”</span></span><span class="p"><span class="pre">)</span></span></code>!</p>
 </div>
-<div class="section" id="using-putlink-to-update-the-atomspace">
-<h2>Using PutLink to Update the AtomSpace<a class="headerlink" href="#using-putlink-to-update-the-atomspace" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-putlink-to-modify-the-atomspace">
+<h2>Using PutLink to Modify the AtomSpace<a class="headerlink" href="#using-putlink-to-modify-the-atomspace" title="Permalink to this headline">¶</a></h2>
 <p>Now, let’s use the result of our conditional to update some state in the Atomspace.
 Recall how, a few chapters ago, we used a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> to create an exclusive link that can only have one result for a given atom.
-Here, we will assign a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> result depending on a <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code>.</p>
-<p>To do this, we will use <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.  You can think of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> as the assignment operator of Atomese.
-Here in our example, we set the association of <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> with one of two possible <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> atoms, using a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>.</p>
+Here, we will assign a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> result depending on a <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> conditional execution.</p>
+<p>To do this, we will use <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.  You can think of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> as the assignment operator of Atomese, akin to “<strong>=</strong>” or “<strong>:=</strong>” in other languages.
+Here in our example, we set the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> association of <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> with one of two possible <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> atoms.</p>
+<p>In reality, the comparison of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> to the assignment operator is flawed because of enormous fundamental differences between the Atomspace and the traditional precedural programming language execution model.
+The <a class="reference external" href="https://wiki.opencog.org/w/PutLink">OpenCog PutLink documentation</a> more accurately describes <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> as a <em>Beta Redex</em>, but without a Lambda Calculus background that didn’t connect for me.
+So, I found the analogy to assignment to be a useful way of bootstrapping my understanding, not only of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> itself, but the process of learning about <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> gave me a deeper understanding of the Atomspace as a whole.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">PutLink</span>
         <span class="p">(</span><span class="nf">CondLink</span>
@@ -153,58 +156,191 @@ Here in our example, we set the association of <code class="code scheme docutils
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>So now the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> belonging to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">PredicateNode</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> points to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">ConceptNode</span></span> <span class="s"><span class="pre">“Yes”</span></span><span class="p"><span class="pre">)</span></span></code>.</p>
+<p>So now the one and only <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> associated with <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">PredicateNode</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> points to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">ConceptNode</span></span> <span class="s"><span class="pre">“Yes”</span></span><span class="p"><span class="pre">)</span></span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="code docutils literal notranslate"><span class="pre">TrueLink</span></code> and its mirror-twin <code class="code docutils literal notranslate"><span class="pre">FalseLink</span></code> are atoms that always evaluate to true (or false).  As used above, it’s equivalent to saying “if (true)” in another language, and thus it gives me a concise way to demonstrate the behavior of the <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> atom.</p>
 </div>
-<p>This <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> expression appears fairly simple but there is a lot going on here, and some of it is subtle and non-obvious.
-Understanding <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data vs. atoms that represent transformations and operations that can affect the data.</p>
+<p>This <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> expression appears fairly simple but some of the behavior is a bit subtle and non-obvious, and it tripped me up badly at first.
+Understanding <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is critical to internalizing a key Atomspace concept, i.e. learning how to think about atoms that represent data aka program state vs. atoms that represent operations that can affect the data.
+In another programming language we would call these “data” and “code”.</p>
 <p>Remember both kinds of atoms live in the Atomspace, and there isn’t a simple rule about whether an atom is “data” or it’s “code”.  Often it can feel like everything is all mixed together.
 This is a source of tremendous flexibility, but remember, with great power comes great responsibility ;-)</p>
-<p>BORIS, go through why the trivial approach doesn’t work.  i.e. why adding atoms as part of the conditional clobbers the moon</p>
-<p>To illustrate this point, what if we were to try this:</p>
+<p>So back to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.  Like the name suggests, it “Puts” atoms into the Atomspace.
+The simplest valid <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> I could compose looks like this:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">PutLink</span>
-        <span class="p">(</span><span class="nf">CondLink</span>
-            <span class="p">(</span><span class="nf">FalseLink</span><span class="p">)</span>
-            <span class="p">(</span><span class="nf">StateLink</span>
-                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;result_placeholder&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Yes&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="p">(</span><span class="nf">StateLink</span>
-                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;result_placeholder&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;No&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;atom_placeholder&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;The Atom We Are Putting In&quot;</span><span class="p">)</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
+<p>But hold on…  What’s the point?  Isn’t that identical to just: <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“The</span> <span class="pre">Atom</span> <span class="pre">We</span> <span class="pre">Are</span> <span class="pre">Putting</span> <span class="pre">In”</span></span><span class="p"><span class="pre">)</span></span></code>?</p>
+<p>Yes.  Yes it is.  <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is not the only way to put atoms into the Atomspace.
+We’ve been putting atoms in the Atomspace since the very first example in this guide.
+So why do we need <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> then?</p>
+</div>
+<div class="section" id="ungrounded-expressions-can-represent-latent-code">
+<h2>Ungrounded Expressions can Represent “Latent Code”<a class="headerlink" href="#ungrounded-expressions-can-represent-latent-code" title="Permalink to this headline">¶</a></h2>
+<p>Let’s look at what’s wrong with this naïve attempt to set our result <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> from the first example.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">CondLink</span>
-        <span class="p">(</span><span class="nf">GreaterThan</span>
-            <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">TrueLink</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">StateLink</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Yes&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="p">(</span><span class="nf">QuoteLink</span>
-            <span class="p">(</span><span class="nf">StateLink</span>
-                <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Yes&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">StateLink</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;No&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Try it!  Did it do what you expected?  I know I was puzzled when I encountered this behavior.  Actually “annoyed” and “frustrated” are more accurate words.</p>
+<p>A clue to what is happening can be found by dropping the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, and just observing what happens when the <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> and all its referenced atoms are added to the Atomspace.
+Notice that the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> connecting <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“Yes”</span></span><span class="p"><span class="pre">)</span></span></code> is gone altogether.
+Remember that the act of creating a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> removes a prior extant <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> with the same target.</p>
+<p>This left me scratching my head for a minute.  I was stuck in the mindset that I was just inputting code, and the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> behavior would only be triggered when the code actually executed.  Wrong!</p>
+<p>As I inputted the first arm of the <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code>, I actually assigned the result to “Yes” by creating the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>.
+Then, when I inputted the second arm, I re-assigned the result to “No”, by creating the new <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>, thus triggering the old one to be destroyed.</p>
+<p>Finally, when I executed the <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code>, there was no “else” clause atom, because the “then” clause atom had disappeared and so the former “else” clause atom became argument 2, and was interpreted as the “then” clause atom.
+So the atom I actually executed looked like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">CondLink</span>
+    <span class="p">(</span><span class="nf">TrueLink</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">StateLink</span>
+        <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;No&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Basically <code class="code docutils literal notranslate"><span class="pre">if</span> <span class="pre">(true)</span> <span class="pre">{</span> <span class="pre">result</span> <span class="pre">=</span> <span class="pre">No;</span> <span class="pre">}</span></code>.  Oops.</p>
+<p>So what’s the solution?</p>
+<p>We introduced ungrounded vs. grounded expressions last chapter when discussing queries.
+I remember saying (typing) “Think of a grounded expression as a statement and an ungrounded expression as a question.”</p>
+<p>Now I’ll add a bit more nuance.  You can also think of an ungrounded expression as a <strong>Hypothetical</strong> or <strong>Abstract</strong> statement.
+As long as an expression is ungrounded, it doesn’t really say anything specific or concrete.</p>
+<p>So in terms of the example, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atoms we want to input say “Connect <em>something</em> with ‘Yes’” and “Connect <em>something</em> with ‘No’”.
+But without that <em>something</em> being a specific concrete atom, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> can’t do its behavior to ensure uniqueness and thus both <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atoms are allowed to exist at the same time.</p>
+<p>That’s where <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> comes in.  When <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is executed, the ungrounded expression is grounded using the atom(s) supplied to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
+In the case of the example, that is <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> .  And the atoms of the newly grounded expression are put into the Atomspace.</p>
+<div class="section" id="grounding-a-deletelink-removes-an-atom">
+<h3>Grounding a DeleteLink Removes an Atom<a class="headerlink" href="#grounding-a-deletelink-removes-an-atom" title="Permalink to this headline">¶</a></h3>
+<p>We just saw how grounding a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> can cause another conflicting <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom to be deleted if they share the same target atom.
+This is a special case of a general behavior.  To illustrate that, I’ll introduce the <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> atom.</p>
+<p>As long as the <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> remains ungrounded, it doesn’t to anything.
+But the instant it is grounded, it ceases to exist, and takes whatever atoms it references out along with it.</p>
+<p>Consider this Scheme snippet:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">hello</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Here I am!&quot;</span><span class="p">))</span>
+
+<span class="p">(</span><span class="k">define </span><span class="nv">delete_me</span>
+    <span class="p">(</span><span class="nf">PutLink</span>
+        <span class="p">(</span><span class="nf">DeleteLink</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;the_concept&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="nv">hello</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We just defined two scheme symbols: <code class="code docutils literal notranslate"><span class="pre">hello</span></code> and <code class="code docutils literal notranslate"><span class="pre">delete_me</span></code>.  Let’s prove <code class="code docutils literal notranslate"><span class="pre">hello</span></code> exists by having a look.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">display </span><span class="nv">hello</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Yup.  Just where we left it.
+We can also look at <code class="code docutils literal notranslate"><span class="pre">delete_me</span></code>, and we will see it contains an ungrounded <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> expression.</p>
+<p>But what happens when we execute <code class="code docutils literal notranslate"><span class="pre">delete_me</span></code>?</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="nv">delete_me</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Well… We just annihilated the atom referenced by <code class="code docutils literal notranslate"><span class="pre">hello</span></code>.  To prove it, we’ll try to display it again.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">display </span><span class="nv">hello</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So sad. :-(  We now get <code class="code docutils literal notranslate"><span class="pre">#&lt;Invalid</span> <span class="pre">handle&gt;</span></code>.</p>
+<p>Of course, deleting a pre-specified atom using a <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> inside a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> isn’t really any more useful than just declaring the <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> directly, and skipping all the <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> machinations.
+We could have just done this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">DeleteLink</span> <span class="nv">hello</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>However, next, we’ll cover how to query for atoms inside a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>, so we’ll be able to do things like deleting all atoms returned by a query, for example.</p>
+<p>At some point, I recommend exploring the Atomspace execution model further by going through the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm">“assert-retract.scm” OpenCog example</a>.
+In particular, understanding the mechanics of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> will help you understand what really happens when you invoke <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>.</p>
+</div>
+</div>
+<div class="section" id="finding-atoms-with-a-query-inside-a-putlink">
+<h2>Finding Atoms with a Query Inside a PutLink<a class="headerlink" href="#finding-atoms-with-a-query-inside-a-putlink" title="Permalink to this headline">¶</a></h2>
+<p>To implement any complex behavior beyond the trivial toy examples we’ve seen so far,
+like our conditional above that branched based on a constant, we need to operate on data from the Atomspace.</p>
+<p>Consider a simple counter that might be written in C like this:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>How would that look in Atomese?</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">State</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">PutLink</span>
+        <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">PlusLink</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="p">(</span><span class="nf">QuoteLink</span>
-            <span class="p">(</span><span class="nf">StateLink</span>
-                <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;conditional_result&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;No&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">MeetLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>BORIS, if I explain PutLink here, go on and move some of the earlier dicsussion about PutLink to here.</p>
+<p>As you can see in both C and Atomese, we begin by declaring <code class="code docutils literal notranslate"><span class="pre">counter</span></code> and initially setting it to 0 (Zero).
+In a way, a declaration with an initial value is like an assignment, but you couldn’t write much of a program using only declarations in C, and that’s also true in Atomese.</p>
+<p>So, looking at the interesting part of the example, we supplied two atoms to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
+We can think of the first argument as being like the “R-Value” and the second argument as being like the “L-Value”.
+That’ll mean something if you’ve spent significant time working through gcc errors.
+If not, consider yourself fortunate for avoiding that particular drain of life energy.</p>
+<p>Basically, the first argument is the expression to the right of the equal-sign in the assignment.
+From our C example, that would be <code class="code c docutils literal notranslate"><span class="n"><span class="pre">counter</span></span> <span class="o"><span class="pre">+</span></span> <span class="mi"><span class="pre">1</span></span></code>.  Think of the R-Value as “what” is being assigned.</p>
+<p>The second argument to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is the part of the assignment to the left of the equal side.
+From our C example, that would be <code class="code c docutils literal notranslate"><span class="n"><span class="pre">counter</span></span></code>.  Think of the L-Value as “where” you are assigning to.</p>
+<p>Again, this is a flawed comparison with the assignment operation in C, so don’t try and stretch the analogy too far.
+For example, you could change the ConceptNode in the first expression, so a totally different atom would be created by executing the <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code></p>
+<p>Coming full circle, <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> are actually implemented using PutLink.
+The increment example above is functionally equivalent to:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">QueryLink</span>
+        <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">PlusLink</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm">“get-put.scm” OpenCog example</a>
+Further explores <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and demonstrates exactly how a <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> can be composed from a <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> and a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
+I recommend going through that example as well as the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">“bindlink.scm” example</a>.</p>
+</div>
+<div class="section" id="using-definedschemanode-to-implement-procedures">
+<h2>Using DefinedSchemaNode to Implement Procedures<a class="headerlink" href="#using-definedschemanode-to-implement-procedures" title="Permalink to this headline">¶</a></h2>
+<p>Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode</p>
 <p>So we saw above how we could use <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> to evaluate a atom to generate a TruthValue.
 But how do we utilize that result to control what our program does next?
 In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?</p>
@@ -328,8 +464,8 @@ Unlike Active Links, Declarative links always evaluate to a <em>TruthValue</em>.
 <p>BORIS What to say about EvaluationLink??  We’ve already introduced them above, GreaterThanLink is an EvalLink.</p>
 <p>BORIS.  Explain AnchorNodes and VariableLists</p>
 <p>BORIS Revisit PredicateNode</p>
-<p>BORIS EvaluationLink</p>
-<p>BORIS two views, as an assertion with a truth value, or as a way to evaluate the truth of a proposition</p>
+<p>BORIS EvaluationLink
+BORIS two views, as an assertion with a truth value, or as a way to evaluate the truth of a proposition</p>
 <p>BORIS BORIS, How do I query whether something is part of another set</p>
 <p>BORIS PredicateFOrmula</p>
 <p>BORIS Cover using PutLink to find a location and update it.  For example, search the Atomspace, and put all dogs heavier than 10kg is the “Big Dogs” set.</p>
@@ -362,7 +498,10 @@ We’ll also talk about the FFI, like using ExecutionOutput and GroundedSchema, 
 <li class="toctree-l1"><a class="reference internal" href="02_representing_knowledge.html">Structured Knowledge &amp; Simple Queries</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Programming with Atomese</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#conditional-expressions">Conditional Expressions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-putlink-to-update-the-atomspace">Using PutLink to Update the AtomSpace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ungrounded-expressions-can-represent-latent-code">Ungrounded Expressions can Represent “Latent Code”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-definedschemanode-to-implement-procedures">Using DefinedSchemaNode to Implement Procedures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-philosophy-of-truth">The Philosophy of Truth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#declaring-evaluationlinks">Declaring EvaluationLinks</a></li>
 </ul>
