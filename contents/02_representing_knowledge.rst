@@ -22,7 +22,7 @@ However, I believe a large amount of the value of KBs and ontologies come from t
 In general, strictly regular KBs have many limitations when representing data from real world.  For example, the `InheritanceLink <https://wiki.opencog.org/w/InheritanceLink>`_ documentation points out the difference between Extensional vs. Intentional Inheritance.  I'd argue this is just the tip of the iceberg when trying to formalize knowledge about the fuzzy real world into a crisp ontology.
 That being said, the Atomspace is better than most other KB formats, because of the tools it provides for expressing nuance, partial truth and uncertainty.  All the same, in my opinion, a symbolic KB alone is not sufficient for many aspects of real-world knowledge representation.  Regardless, I'll attempt to refrain from injecting too much of my own personal opinions and conclusions into this guide dedicated to understanding the Atomspace.
 
-Ultimately, any formal language is only as precise as the axioms and definitions it is built upon, and you will have to define your own grammar.  Personally I view the Atomspace less as a language and instead as the building-blocks out of which a language can be created.
+Ultimately, any formal language is only as precise as the axioms and definitions it is built upon, and you will have to define your own meanings and maybe even your own grammar.  Personally I view the Atomspace less as a language and instead as the building-blocks out of which a language can be created.
 Some people have used the Atomspace to represent tokens and grammar from a natural language such as English, while others have used it to represent interactions between proteins and genes.  In its purest form, the Atomspace is a system where data and rules about how the data can interact can be described side-by-side, and then queried and simulated.
 
 PredicateNode & Links to make statements
@@ -31,6 +31,8 @@ PredicateNode & Links to make statements
 We touched on :code:`PredicateNode` in the last chapter when we used them as keys for values we associated with other atoms.
 In grammar, a statement is divided into subject(s) and a predicate.  "The dog barks."  'Barks" is the predicate.
 In the statement: "The dog is happy", "is happy" is the predicate.
+
+It's just like that `SchoolHouse Rock video <https://www.youtube.com/watch?v=CLV3eMvW73g>` would sing.  The video is unlikely to further elucidate anything at all, but if you're a child of the 80s like me, it's a fun diversion down memory lane.
 
 The important thing about predicates is that they allow assertions to be made.  Concepts by themselves don't say anything, they merely exist (or don't exist), but predicates allow for statements.
 
