@@ -15,7 +15,6 @@ In the previous chapter, we introduced Atomspace queries and a little bit about 
 Now we'll go deeper into some more of the program-flow constructs that allow Atomese to behave like a complete programming language.
 
 In this upcoming chapter, we'll deal with Atomese approaches to conditionals, code factoring (i.e. functions), and looping.
-We will also cover the difference between the execution and the evaluation context.
 
 If you are steeped in procedural programming, like I am, there are things about the Atomspace execution model that will require you to turn your brain inside-out.
 On the other hand, if you come from a `Lambda Calculus <https://en.wikipedia.org/wiki/Lambda_calculus>`_ or `Functional Programming <https://en.wikipedia.org/wiki/Functional_programming>`_ background then, lucky you!
@@ -186,7 +185,7 @@ We've been putting atoms in the Atomspace since the very first example in this g
 So why do we need :code:`PutLink` then?
 
 Ungrounded Expressions can Represent "Latent Code"
-------------------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let's look at what's wrong with this naïve attempt to set our result :code:`StateLink` from the first example.
 
@@ -385,16 +384,182 @@ The `"get-put.scm" OpenCog example <https://github.com/opencog/atomspace/blob/ma
 Further explores :code:`PutLink` and demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
 I recommend going through that example as well as the `"bindlink.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_.
 
-Using DefinedSchemaNode to Implement Procedures
+Factoring and Functions in Atomese
+------------------------------------------------------------------------
+
+Up until now, we've been using Scheme's :scheme:`(define)` mechanism to as a way to get a symbolic reference to an atom we intend to use later.
+But this mechanism has some limitations that we're about to cover, not to mention its reliance on Scheme.
+Remember the Atomspace can theoretically be accessed from other non-Scheme environments.
+
+In this section we're going to introduce some code segmentation and organization primitives that are native to Atomese.
+
+Let's being with Atomese's own version of :code:`define`, the :code:`DefineLink`.  Here's an example:
+
+.. code-block:: scheme
+
+    (Define (DefinedSchemaNode "five") (NumberNode 5))
+
+We just introduced two new atoms.  :code:`DefineLink` gives a name to something else.  That's it.
+
+The first argument to a :code:`DefineLink` needs to be a "naming" node.
+There are 3 special "naming" node types: :code:`DefinedSchemaNode`, :code:`DefinedPredicateNode`, and :code:`DefinedTypeNode`.
+We'll cover the latter two in due course, but here we'll focus on :code:`DefinedSchemaNode`.
+The second atom provided to :code:`DefineLink` is the definition body.  In our case, it is just a simple :code:`NumberNode`.
+
+:code:`DefinedSchemaNode` is the most general of the "naming" node types.  A :code:`DefinedSchemaNode` can give a name to any other atom.
+
+We can now use our :code:`DefinedSchemaNode` as we would use the atom it represents...  Almost.
+This example below does exactly what you think it should do.
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (State
+            (Concept "counter")
+            (DefinedSchemaNode "five")
+        )
+    )
+
+But without the :code:`cog-execute!`, the :code:`StateLink` connects :scheme:`(Concept "counter")` to :scheme:`(DefinedSchemaNode "five")`, and not to :scheme:`(NumberNode 5)`.
+The :code:`DefinedSchemaNode` will be replaced by the node it represents, but only in an execution context.
+
+Basic Subroutines
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:code:`DefinedSchemaNode` can also be used to define subroutines.  By subroutine I mean that there are no function arguments and no return values.
+The expectation is that all communication to and from the subroutine happens by way of global program state.
+Subroutines are just a way to dispatch one chunk of code from a different place in the program.
+Most modern programming languages don't even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the degenerate case.
+If you've written assembly code by hand or worked with a very old language like `Integer BASIC <https://en.wikipedia.org/wiki/Integer_BASIC>`_, you'll certainly appreciate why subroutines are insufficient to architect a complex piece of software. 
+
+All that said, subroutines are simpler than functions so let's start there.
+Here is an example:
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchemaNode "turn_on_switch")
+        (PutLink
+            (State
+                (Variable "switch_placeholder")
+                (Concept "On")
+            )
+            (Concept "Global Switch")
+        )
+    )
+
+We can call it like this:
+
+.. code-block:: scheme
+
+    (cog-execute! (DefinedSchemaNode "turn_on_switch"))
+
+You may have already stumbled into this, but you can use a :code:`ListLink` to execute multiple operations.
+Here's an example: 
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchemaNode "make_nighttime")
+        (ListLink
+            (PutLink
+                (State
+                    (Variable "switch_placeholder")
+                    (Concept "On")
+                )
+                (Concept "Moonlight")
+            )
+            (PutLink
+                (State
+                    (Variable "switch_placeholder")
+                    (Concept "Off")
+                )
+                (Concept "Sunlight")
+            )
+        )
+    )
+
+LambdaLink Lets you Pass Function Arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The difference between subroutines vs. procedures and functions are the arguments that can be passed in and out.
+:code:`LambdaLink` is the mechanism for defining functions in Atomese, and specifying the arguments that can be passed in.
+
+Here is an example function that squares the incoming :code:`NumberNode` argument:
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchemaNode "square")
+        (LambdaLink
+            (VariableNode "x")
+            (TimesLink
+                (VariableNode "x")
+                (VariableNode "x")
+            )
+        )
+    )
+
+So there's our function.  It takes a :code:`NumberNode` and squares it.  Now, how do we call it?
+
+Well, unfortunately we can't just :code:`cog-execute!` it like the simple subroutine.  That will cause an error.
+The reason is a little bit convoluted, but in essence, we need a seperate operation to pack up the arguments and bind them to the :code:`VariableNode` atoms used inside the fucntion, and then dispatch the function execution.
+That "dispatch" process is handled by the :code:`ExecutionOutputLink` atom.
+Atomese is very "assembly-language-like", so very little is magically done for you, as might happen in higher-level languages.
+
+We call it like this:
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (ExecutionOutputLink
+            (DefinedSchemaNode "square")
+            (NumberNode 2)
+        )
+    )
+
+VariableList and Typed Variables
 ------------------------------------------------------------------------
 
 
 
 
+BORIS VariableList
+BORIS TypedVariables
+
+
+BORIS
 Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode
 
 
+BORIS. Check out the https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm example.  
+BORIS SignatureLink and DefinedTypeNode
+Let's start with data structures.  In C, for example, there is the :c:`struct` keyword, to declares a collection of variables that are packaged up together as a unified code object.
 
+
+
+
+
+
+
+
+Looping with Tail Recursion
+------------------------------------------------------------------------
+
+BORIS
+
+
+
+
+
+
+NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN
+
+
+
+
+Intro.
+We will also cover the difference between the execution and the evaluation context.
 
 
 So we saw above how we could use :code:`cog-evaluate!` to evaluate a atom to generate a TruthValue.

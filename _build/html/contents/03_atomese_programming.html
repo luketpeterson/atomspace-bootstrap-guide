@@ -38,8 +38,7 @@
 <h1>Programming with Atomese<a class="headerlink" href="#programming-with-atomese" title="Permalink to this headline">¶</a></h1>
 <p>In the previous chapter, we introduced Atomspace queries and a little bit about the execution model with <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>.
 Now we’ll go deeper into some more of the program-flow constructs that allow Atomese to behave like a complete programming language.</p>
-<p>In this upcoming chapter, we’ll deal with Atomese approaches to conditionals, code factoring (i.e. functions), and looping.
-We will also cover the difference between the execution and the evaluation context.</p>
+<p>In this upcoming chapter, we’ll deal with Atomese approaches to conditionals, code factoring (i.e. functions), and looping.</p>
 <p>If you are steeped in procedural programming, like I am, there are things about the Atomspace execution model that will require you to turn your brain inside-out.
 On the other hand, if you come from a <a class="reference external" href="https://en.wikipedia.org/wiki/Lambda_calculus">Lambda Calculus</a> or <a class="reference external" href="https://en.wikipedia.org/wiki/Functional_programming">Functional Programming</a> background then, lucky you!
 This next parts will be a lot easier to wrap your head around.</p>
@@ -180,9 +179,8 @@ The simplest valid <code class="code docutils literal notranslate"><span class="
 <p>Yes.  Yes it is.  <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is not the only way to put atoms into the Atomspace.
 We’ve been putting atoms in the Atomspace since the very first example in this guide.
 So why do we need <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> then?</p>
-</div>
 <div class="section" id="ungrounded-expressions-can-represent-latent-code">
-<h2>Ungrounded Expressions can Represent “Latent Code”<a class="headerlink" href="#ungrounded-expressions-can-represent-latent-code" title="Permalink to this headline">¶</a></h2>
+<h3>Ungrounded Expressions can Represent “Latent Code”<a class="headerlink" href="#ungrounded-expressions-can-represent-latent-code" title="Permalink to this headline">¶</a></h3>
 <p>Let’s look at what’s wrong with this naïve attempt to set our result <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> from the first example.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">CondLink</span>
@@ -227,6 +225,7 @@ As long as an expression is ungrounded, it doesn’t really say anything specifi
 But without that <em>something</em> being a specific concrete atom, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> can’t do its behavior to ensure uniqueness and thus both <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atoms are allowed to exist at the same time.</p>
 <p>That’s where <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> comes in.  When <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is executed, the ungrounded expression is grounded using the atom(s) supplied to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
 In the case of the example, that is <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“conditional_result”</span></span><span class="p"><span class="pre">)</span></span></code> .  And the atoms of the newly grounded expression are put into the Atomspace.</p>
+</div>
 <div class="section" id="grounding-a-deletelink-removes-an-atom">
 <h3>Grounding a DeleteLink Removes an Atom<a class="headerlink" href="#grounding-a-deletelink-removes-an-atom" title="Permalink to this headline">¶</a></h3>
 <p>We just saw how grounding a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> can cause another conflicting <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom to be deleted if they share the same target atom.
@@ -338,9 +337,132 @@ The increment example above is functionally equivalent to:</p>
 Further explores <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and demonstrates exactly how a <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> can be composed from a <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> and a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
 I recommend going through that example as well as the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">“bindlink.scm” example</a>.</p>
 </div>
-<div class="section" id="using-definedschemanode-to-implement-procedures">
-<h2>Using DefinedSchemaNode to Implement Procedures<a class="headerlink" href="#using-definedschemanode-to-implement-procedures" title="Permalink to this headline">¶</a></h2>
-<p>Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode</p>
+<div class="section" id="factoring-and-functions-in-atomese">
+<h2>Factoring and Functions in Atomese<a class="headerlink" href="#factoring-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
+<p>Up until now, we’ve been using Scheme’s <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">define</span></span><span class="p"><span class="pre">)</span></span></code> mechanism to as a way to get a symbolic reference to an atom we intend to use later.
+But this mechanism has some limitations that we’re about to cover, not to mention its reliance on Scheme.
+Remember the Atomspace can theoretically be accessed from other non-Scheme environments.</p>
+<p>In this section we’re going to introduce some code segmentation and organization primitives that are native to Atomese.</p>
+<p>Let’s being with Atomese’s own version of <code class="code docutils literal notranslate"><span class="pre">define</span></code>, the <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code>.  Here’s an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span> <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;five&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We just introduced two new atoms.  <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> gives a name to something else.  That’s it.</p>
+<p>The first argument to a <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> needs to be a “naming” node.
+There are 3 special “naming” node types: <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>, <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>, and <code class="code docutils literal notranslate"><span class="pre">DefinedTypeNode</span></code>.
+We’ll cover the latter two in due course, but here we’ll focus on <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>.
+The second atom provided to <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> is the definition body.  In our case, it is just a simple <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code>.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> is the most general of the “naming” node types.  A <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can give a name to any other atom.</p>
+<p>We can now use our <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> as we would use the atom it represents…  Almost.
+This example below does exactly what you think it should do.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">State</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;five&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>But without the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> connects <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“counter”</span></span><span class="p"><span class="pre">)</span></span></code> to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">DefinedSchemaNode</span></span> <span class="s"><span class="pre">“five”</span></span><span class="p"><span class="pre">)</span></span></code>, and not to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">5</span></span><span class="p"><span class="pre">)</span></span></code>.
+The <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> will be replaced by the node it represents, but only in an execution context.</p>
+<div class="section" id="basic-subroutines">
+<h3>Basic Subroutines<a class="headerlink" href="#basic-subroutines" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can also be used to define subroutines.  By subroutine I mean that there are no function arguments and no return values.
+The expectation is that all communication to and from the subroutine happens by way of global program state.
+Subroutines are just a way to dispatch one chunk of code from a different place in the program.
+Most modern programming languages don’t even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the degenerate case.
+If you’ve written assembly code by hand or worked with a very old language like <a class="reference external" href="https://en.wikipedia.org/wiki/Integer_BASIC">Integer BASIC</a>, you’ll certainly appreciate why subroutines are insufficient to architect a complex piece of software.</p>
+<p>All that said, subroutines are simpler than functions so let’s start there.
+Here is an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;turn_on_switch&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">PutLink</span>
+        <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;On&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Global Switch&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We can call it like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;turn_on_switch&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>You may have already stumbled into this, but you can use a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> to execute multiple operations.
+Here’s an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;make_nighttime&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">ListLink</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;On&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Moonlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Off&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Sunlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lambdalink-lets-you-pass-function-arguments">
+<h3>LambdaLink Lets you Pass Function Arguments<a class="headerlink" href="#lambdalink-lets-you-pass-function-arguments" title="Permalink to this headline">¶</a></h3>
+<p>The difference between subroutines vs. procedures and functions are the arguments that can be passed in and out.
+<code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> is the mechanism for defining functions in Atomese, and specifying the arguments that can be passed in.</p>
+<p>Here is an example function that squares the incoming <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> argument:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;square&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">TimesLink</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>So there’s our function.  It takes a <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> and squares it.  Now, how do we call it?</p>
+<p>Well, unfortunately we can’t just <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> it like the simple subroutine.  That will cause an error.
+The reason is a little bit convoluted, but in essence, we need a seperate operation to pack up the arguments and bind them to the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms used inside the fucntion, and then dispatch the function execution.
+That “dispatch” process is handled by the <code class="code docutils literal notranslate"><span class="pre">ExecutionOutputLink</span></code> atom.
+Atomese is very “assembly-language-like”, so very little is magically done for you, as might happen in higher-level languages.</p>
+<p>We call it like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+        <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;square&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="variablelist-and-typed-variables">
+<h2>VariableList and Typed Variables<a class="headerlink" href="#variablelist-and-typed-variables" title="Permalink to this headline">¶</a></h2>
+<p>BORIS VariableList
+BORIS TypedVariables</p>
+<p>BORIS
+Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode</p>
+<p>BORIS. Check out the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm">https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm</a> example.
+BORIS SignatureLink and DefinedTypeNode
+Let’s start with data structures.  In C, for example, there is the <code class="code c docutils literal notranslate"><span class="k"><span class="pre">struct</span></span></code> keyword, to declares a collection of variables that are packaged up together as a unified code object.</p>
+</div>
+<div class="section" id="looping-with-tail-recursion">
+<h2>Looping with Tail Recursion<a class="headerlink" href="#looping-with-tail-recursion" title="Permalink to this headline">¶</a></h2>
+<p>BORIS</p>
+<p>NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN</p>
+<p>Intro.
+We will also cover the difference between the execution and the evaluation context.</p>
 <p>So we saw above how we could use <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> to evaluate a atom to generate a TruthValue.
 But how do we utilize that result to control what our program does next?
 In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?</p>
@@ -499,9 +621,10 @@ We’ll also talk about the FFI, like using ExecutionOutput and GroundedSchema, 
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Programming with Atomese</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#conditional-expressions">Conditional Expressions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ungrounded-expressions-can-represent-latent-code">Ungrounded Expressions can Represent “Latent Code”</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-definedschemanode-to-implement-procedures">Using DefinedSchemaNode to Implement Procedures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#looping-with-tail-recursion">Looping with Tail Recursion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-philosophy-of-truth">The Philosophy of Truth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#declaring-evaluationlinks">Declaring EvaluationLinks</a></li>
 </ul>
