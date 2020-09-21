@@ -269,9 +269,8 @@ We could have just done this:</p>
 <p>At some point, I recommend exploring the Atomspace execution model further by going through the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/assert-retract.scm">“assert-retract.scm” OpenCog example</a>.
 In particular, understanding the mechanics of <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">DeleteLink</span></code> will help you understand what really happens when you invoke <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>.</p>
 </div>
-</div>
 <div class="section" id="finding-atoms-with-a-query-inside-a-putlink">
-<h2>Finding Atoms with a Query Inside a PutLink<a class="headerlink" href="#finding-atoms-with-a-query-inside-a-putlink" title="Permalink to this headline">¶</a></h2>
+<h3>Finding Atoms with a Query Inside a PutLink<a class="headerlink" href="#finding-atoms-with-a-query-inside-a-putlink" title="Permalink to this headline">¶</a></h3>
 <p>To implement any complex behavior beyond the trivial toy examples we’ve seen so far,
 like our conditional above that branched based on a constant, we need to operate on data from the Atomspace.</p>
 <p>Consider a simple counter that might be written in C like this:</p>
@@ -336,6 +335,7 @@ The increment example above is functionally equivalent to:</p>
 <p>The <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/get-put.scm">“get-put.scm” OpenCog example</a>
 Further explores <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and demonstrates exactly how a <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> can be composed from a <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> and a <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>.
 I recommend going through that example as well as the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">“bindlink.scm” example</a>.</p>
+</div>
 </div>
 <div class="section" id="factoring-and-functions-in-atomese">
 <h2>Factoring and Functions in Atomese<a class="headerlink" href="#factoring-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
@@ -446,9 +446,8 @@ Atomese is very “assembly-language-like”, so very little is magically done f
 </pre></div>
 </div>
 </div>
-</div>
 <div class="section" id="variablelist-and-typed-variables">
-<h2>VariableList and Typed Variables<a class="headerlink" href="#variablelist-and-typed-variables" title="Permalink to this headline">¶</a></h2>
+<h3>VariableList and Typed Variables<a class="headerlink" href="#variablelist-and-typed-variables" title="Permalink to this headline">¶</a></h3>
 <p>BORIS VariableList
 BORIS TypedVariables</p>
 <p>BORIS
@@ -457,12 +456,14 @@ Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentat
 BORIS SignatureLink and DefinedTypeNode
 Let’s start with data structures.  In C, for example, there is the <code class="code c docutils literal notranslate"><span class="k"><span class="pre">struct</span></span></code> keyword, to declares a collection of variables that are packaged up together as a unified code object.</p>
 </div>
+</div>
 <div class="section" id="looping-with-tail-recursion">
 <h2>Looping with Tail Recursion<a class="headerlink" href="#looping-with-tail-recursion" title="Permalink to this headline">¶</a></h2>
 <p>BORIS</p>
 <p>NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN</p>
 <p>Intro.
 We will also cover the difference between the execution and the evaluation context.</p>
+<p>We’ve gotten a lot of mileage out of <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, but BORIS YELTSIN</p>
 <p>So we saw above how we could use <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> to evaluate a atom to generate a TruthValue.
 But how do we utilize that result to control what our program does next?
 In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?</p>
@@ -620,10 +621,18 @@ We’ll also talk about the FFI, like using ExecutionOutput and GroundedSchema, 
 <li class="toctree-l1"><a class="reference internal" href="02_representing_knowledge.html">Structured Knowledge &amp; Simple Queries</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Programming with Atomese</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#conditional-expressions">Conditional Expressions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ungrounded-expressions-can-represent-latent-code">Ungrounded Expressions can Represent “Latent Code”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grounding-a-deletelink-removes-an-atom">Grounding a DeleteLink Removes an Atom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-subroutines">Basic Subroutines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lambdalink-lets-you-pass-function-arguments">LambdaLink Lets you Pass Function Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#looping-with-tail-recursion">Looping with Tail Recursion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-philosophy-of-truth">The Philosophy of Truth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#declaring-evaluationlinks">Declaring EvaluationLinks</a></li>

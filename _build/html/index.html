@@ -49,7 +49,11 @@ That said, I tried to focus the guide on the places where I felt the examples mi
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="contents/01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/01_getting_oriented.html#option-1-run-guile-in-the-docker-terminal">Option 1, Run Guile in the Docker terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/01_getting_oriented.html#option-2-telnet-into-the-opencog-server">Option 2, Telnet into the OpenCog Server</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#poking-around-in-scheme">Poking around in Scheme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#creating-some-node-atoms">Creating some Node Atoms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/01_getting_oriented.html#values-associated-with-atoms">Values associated with Atoms</a></li>
@@ -61,16 +65,29 @@ That said, I tried to focus the guide on the places where I felt the examples mi
 <li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#executing-atoms">Executing Atoms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#a-basic-query-with-meetlink-variablenode">A Basic Query with MeetLink &amp; VariableNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#querylink-to-utilize-query-results">QueryLink to Utilize Query Results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#more-elaborate-queries-with-other-link-types">More Elaborate Queries with other Link Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#more-elaborate-queries-with-other-link-types">More Elaborate Queries with other Link Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/02_representing_knowledge.html#querylink-to-discard-intermediate-variables">QueryLink to Discard Intermediate Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/02_representing_knowledge.html#andlink">AndLink</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/02_representing_knowledge.html#greaterthanlink">GreaterThanLink</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="contents/02_representing_knowledge.html#valueoflink-and-thinking-about-performance">ValueOfLink and Thinking About Performance</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="contents/03_atomese_programming.html">Programming with Atomese</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#conditional-expressions">Conditional Expressions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#using-putlink-to-modify-the-atomspace">Using PutLink to Modify the AtomSpace</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#ungrounded-expressions-can-represent-latent-code">Ungrounded Expressions can Represent “Latent Code”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#grounding-a-deletelink-removes-an-atom">Grounding a DeleteLink Removes an Atom</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#basic-subroutines">Basic Subroutines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#lambdalink-lets-you-pass-function-arguments">LambdaLink Lets you Pass Function Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contents/03_atomese_programming.html#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#looping-with-tail-recursion">Looping with Tail Recursion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#the-philosophy-of-truth">The Philosophy of Truth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="contents/03_atomese_programming.html#declaring-evaluationlinks">Declaring EvaluationLinks</a></li>

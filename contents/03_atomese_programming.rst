@@ -305,7 +305,7 @@ At some point, I recommend exploring the Atomspace execution model further by go
 In particular, understanding the mechanics of :code:`PutLink` and :code:`DeleteLink` will help you understand what really happens when you invoke :code:`cog-execute!`.
 
 Finding Atoms with a Query Inside a PutLink
-------------------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To implement any complex behavior beyond the trivial toy examples we've seen so far,
 like our conditional above that branched based on a constant, we need to operate on data from the Atomspace.
@@ -519,7 +519,7 @@ We call it like this:
     )
 
 VariableList and Typed Variables
-------------------------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
@@ -561,6 +561,7 @@ NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN
 Intro.
 We will also cover the difference between the execution and the evaluation context.
 
+We've gotten a lot of mileage out of :code:`cog-execute!`, but BORIS YELTSIN
 
 So we saw above how we could use :code:`cog-evaluate!` to evaluate a atom to generate a TruthValue.
 But how do we utilize that result to control what our program does next?

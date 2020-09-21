@@ -25,7 +25,7 @@ Perhaps you will find this guide to be complimentary to the examples, and progre
 Let's begin.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    contents/01_getting_oriented
