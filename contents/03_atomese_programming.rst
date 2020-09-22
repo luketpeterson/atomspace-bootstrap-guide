@@ -518,14 +518,231 @@ We call it like this:
         )
     )
 
-VariableList and Typed Variables
+Local Variables
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+BORIS, I can't actually figure out how to use local variables in Lambdas, but I'm also not convinced they are needed.
+
+Distilling the benefits of functions down to just argument passing really doesn't do justice to the concept.
+Functions provide a means manage the side-effects that a subroutine can produce.
+In other words, if a function produces 
+
+
+BORIS.  Create a return value from a function.
+Then create an increment function where the value passes through a local variable, think up a way that the function would cross-talk with itself from one calling to the next.
+BORIS BEST IDEA, Make a recursive function that have 2-dimensions so it interferes with itself.
+Consider implementing a "list_of_n_primes" function.  That might be the best way to contrive a variable confict, and if not it'll still be good practice.
+Read the parallelism OpenCog Example.
+
+
+
+
+BORIS CHAPTER FLOW IDEAS.  Finish off LambdaLink,  Then cover Looping with a simple "add 1 n times" loop.
+In the next chapter, introduce EvaluationLink and DefinedPredicate.
+Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs to compose programs.
+
+
+(cog-evaluate!
+   (Evaluation
+      (DefinedPredicate "is_pos_integer?")
+      (Number 2)
+    )
+)
+
+
+    (Define
+        (DefinedPredicateNode "is_pos_integer?")
+        ; Determines whether "x" is a positive integer, i.e. ?(x > 0 && x % 1 == 0)
+        ; The lack of a native % (mod) fn turns a constant-time op into an order n op. :-(
+        ; Also not numerically stable for high values of x, due to floating point rounding
+
+        (Lambda
+            (Variable "x")
+            (SequentialAndLink
+
+                ; As long as x is greater-than-or-equal-to 1, we can continue
+                ; Otherwise we will return false
+                (NotLink (GreaterThanLink (Number 1) (Variable "x") ) )
+
+                (SequentialOrLink
+
+                    ; See if our number is exactly 1, return true if so
+                    (EqualLink (Variable "x") (Number 1))
+
+                    ; Recurse with 1 minus our number
+                    (Evaluation
+                        (DefinedPredicateNode "is_pos_integer?")
+                        (MinusLink
+                            (Variable "x")
+                            (Number 1)
+                        )
+                    )
+                )
+            )
+        )
+    )
+
+
+    BORIS, looks like I will need to explain DefinedPredicate, which means I'll probably need to explain evaluation
+    BORIS, write up SequentialAnd & SequentialOr, and how they fit in, 
+        This will require drawing a diagram of AND, OR, and NOT gates.
+    BORIS, look at PredicateFormula, it Constructs a TruthValue from two number values
+
+    (Define
+        (DefinedPredicateNode "is_prime_helper")
+        ; Determines whether "x" is evenly divisible by "i" or another integer greater than "i"
+        ; In otherwords, returns partial NOT prime.  Intended to be called by "is_prime?"
+        ; If called with i=2, false = x is prime, true = x is not prime
+
+        (Lambda
+            (VariableList
+                (Variable "x")
+                (Variable "i")
+            )
+            (SequentialAndLink
+
+                ; If i is greater-than-or-equal-to x, return false because we've tried all possibilities, so it must be prime
+                ; Ideally we could stop at sqrt(x), but if I cared about efficiency, I'd implement native modulo first
+                (GreaterThan (Variable "x") (Variable "i") ) ; greater-than-or-equal is the same as not-less-than
+
+                (SequentialOrLink
+                    ; Check to see if x is evenly divisible by i, if so, return true
+                    (Evaluation
+                        (DefinedPredicateNode "is_pos_integer?")
+                        (DivideLink (Variable "x") (Variable "i"))
+                    )
+
+                    ; Recurse with i++       
+                    (Evaluation
+                        (DefinedPredicateNode "is_prime_helper")
+                        (Variable "x")
+                        (PlusLink (Variable "i") (Number 1))
+                    )
+                )
+            )
+        )
+    )
+
+(cog-evaluate!
+   (Evaluation
+      (DefinedPredicate "is_prime_helper")
+      (Number 5)
+      (Number 2)
+    )
+)
+
+    (Define
+        (DefinedPredicateNode "is_prime?")
+        ; Determines whether a number supplied is prime or not
+        
+        (Lambda
+            (Variable "x")
+
+            ; Call our recursive helper function
+            (NotLink
+                (Evaluation
+                    (DefinedPredicateNode "is_prime_helper")
+                    (Variable "x")
+                    (Number 2)
+                )
+            )
+        )
+    )
+
+(cog-evaluate!
+   (Evaluation
+      (DefinedPredicate "is_prime?")
+      (Number 37)
+    )
+)
+
+    
+
+    BORIS, Include discussion about FFI, like a printf debug funcrtion
+
+(define (scm-display-wrapper-exec atom)
+	(display atom)
+    (Concept "done")
+)
+
+(cog-execute!
+	(ExecutionOutput
+		(GroundedSchema "scm: scm-display-wrapper-exec")
+		(Concept "Hi")
+	)
+)
+
+(define (scm-display-wrapper-eval atom)
+	(display atom)
+    (stv 1 1)
+)
+
+(cog-evaluate!
+    (Evaluation
+        (GroundedPredicate "scm: scm-display-wrapper-eval")
+        (Concept "Hi")
+    )
+)
+
+(define (scm-display-wrapper-eval-2-arg atom1 atom2)
+	(display atom1)
+    (display atom2)
+    (stv 1 1)
+)
+
+(cog-evaluate!
+    (Evaluation
+        (GroundedPredicate "scm: scm-display-wrapper-eval-2-arg")
+        (List
+            (Concept "One")
+            (Concept "Two")
+        )
+    )
+)
+
+
+
+
+
+
+
+    (Define
+        ; Calculates the next prime number, greater than the number supplied
+        (DefinedSchemaNode "next_prime")
+        (Lambda
+            (Variable "x")
+
+            ; temp = x+1
+            (SetValue (Variable "x") (Predicate ""))
+            
+            ; Check to see if temp is prime
+
+            ; If it is, return it, if not, recurse to find the value after temp
+        )
+    )
+
+BORIS, need to explain the SetValue and ValueOf Links in Chapter 2
+
+    (Define
+        (DefinedSchemaNode "list_of_n_primes")
+        (Lambda
+            (VariableNode "n")
+
+        )
+    )
+
+    
+
+
+
+Typed Variables and VariableLists as Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
 
 BORIS VariableList
-BORIS TypedVariables
+BORIS TypedVariableLink
 
 
 BORIS
@@ -777,3 +994,10 @@ BORIS Cover using PutLink to find a location and update it.  For example, search
 BORIS VariableList, Typed Variables (CAN I DEFINE MY OWN TYPES???)
 BORIS Next Chapter, program segmentation, DefineLinks, Tail Recursion, etc. look at the recursive-loop.scm example.
 We'll also talk about the FFI, like using ExecutionOutput and GroundedSchema, or GroundedPredicate, look at "execute.scm"
+
+
+
+
+
+BORIS.  Understand how Values become Atoms sometimes...  A clue is dropped in the documentation on SleepLink https://wiki.opencog.org/w/SleepLink
+He says "NumberNodes are problematic for the AtomSpace".  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.
