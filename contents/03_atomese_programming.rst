@@ -358,9 +358,11 @@ From our C example, that would be :c:`counter`.  Think of the L-Value as "where"
 
 Again, this is a flawed comparison with the assignment operation in C, so don't try and stretch the analogy too far.
 For example, you could change the ConceptNode in the first expression, so a totally different atom would be created by executing the :code:`PutLink`
+Therefore, it's more accurate to say the second argument matches existing atoms, providing concrete meanings to the :code:`VariableNode` atoms in the first argument,
+While the first argument is a template for the new atoms to insert into the Atomspace, after that template is grounded in terms of the second argument.
 
 Coming full circle, :code:`QueryLink` and :code:`BindLink` are actually implemented using PutLink.
-The increment example above is functionally equivalent to:
+The increment example above is functionally equivalent to this:
 
 .. code-block:: scheme
 
@@ -397,9 +399,9 @@ Let's being with Atomese's own version of :code:`define`, the :code:`DefineLink`
 
 .. code-block:: scheme
 
-    (Define (DefinedSchemaNode "five") (NumberNode 5))
+    (Define (DefinedSchema "five") (NumberNode 5))
 
-We just introduced two new atoms.  :code:`DefineLink` gives a name to something else.  That's it.
+We just introduced two new atom types: :code:`DefineLink` and :code:`DefinedSchemaNode`.  :code:`DefineLink` gives a name to something else.  That's it.
 
 The first argument to a :code:`DefineLink` needs to be a "naming" node.
 There are 3 special "naming" node types: :code:`DefinedSchemaNode`, :code:`DefinedPredicateNode`, and :code:`DefinedTypeNode`.
@@ -416,12 +418,12 @@ This example below does exactly what you think it should do.
     (cog-execute!
         (State
             (Concept "counter")
-            (DefinedSchemaNode "five")
+            (DefinedSchema "five")
         )
     )
 
 But without the :code:`cog-execute!`, the :code:`StateLink` connects :scheme:`(Concept "counter")` to :scheme:`(DefinedSchemaNode "five")`, and not to :scheme:`(NumberNode 5)`.
-The :code:`DefinedSchemaNode` will be replaced by the node it represents, but only in an execution context.
+The :code:`DefinedSchemaNode` will be replaced by the node it represents, but only when it is reduced by executing it.
 
 Basic Subroutines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -453,31 +455,6 @@ We can call it like this:
 .. code-block:: scheme
 
     (cog-execute! (DefinedSchemaNode "turn_on_switch"))
-
-You may have already stumbled into this, but you can use a :code:`ListLink` to execute multiple operations.
-Here's an example: 
-
-.. code-block:: scheme
-
-    (DefineLink
-        (DefinedSchemaNode "make_nighttime")
-        (ListLink
-            (PutLink
-                (State
-                    (Variable "switch_placeholder")
-                    (Concept "On")
-                )
-                (Concept "Moonlight")
-            )
-            (PutLink
-                (State
-                    (Variable "switch_placeholder")
-                    (Concept "Off")
-                )
-                (Concept "Sunlight")
-            )
-        )
-    )
 
 LambdaLink Lets you Pass Function Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -518,6 +495,53 @@ We call it like this:
         )
     )
 
+Typed Variables and VariableLists as Arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+BORIS VariableList
+BORIS TypedVariableLink
+
+
+Looping with Tail Recursion
+------------------------------------------------------------------------
+
+BORIS  Implement a simple counter that increments a number 5 times using a DefinedSchemaLink
+
+
+    
+
+BORISYELTSIN, here's where the new chapter starts...
+
+
+BORIS, Section below should be part of the lead-in to using SequentialAndLink and SequentialOrLink
+
+You may have already stumbled into this, but you can use a :code:`ListLink` to execute multiple operations.
+Here's an example: 
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchemaNode "make_nighttime")
+        (ListLink
+            (PutLink
+                (State
+                    (Variable "switch_placeholder")
+                    (Concept "On")
+                )
+                (Concept "Moonlight")
+            )
+            (PutLink
+                (State
+                    (Variable "switch_placeholder")
+                    (Concept "Off")
+                )
+                (Concept "Sunlight")
+            )
+        )
+    )
+
+
+
 Local Variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -537,17 +561,19 @@ Read the parallelism OpenCog Example.
 
 
 
-BORIS CHAPTER FLOW IDEAS.  Finish off LambdaLink,  Then cover Looping with a simple "add 1 n times" loop.
+BORIS CHAPTER FLOW IDEAS.
 In the next chapter, introduce EvaluationLink and DefinedPredicate.
 Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs to compose programs.
 
 
-(cog-evaluate!
-   (Evaluation
-      (DefinedPredicate "is_pos_integer?")
-      (Number 2)
+.. code-block:: scheme
+
+    (cog-evaluate!
+    (Evaluation
+        (DefinedPredicate "is_pos_integer?")
+        (Number 2)
+        )
     )
-)
 
 
     (Define
@@ -588,6 +614,8 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         This will require drawing a diagram of AND, OR, and NOT gates.
     BORIS, look at PredicateFormula, it Constructs a TruthValue from two number values
 
+.. code-block:: scheme
+
     (Define
         (DefinedPredicateNode "is_prime_helper")
         ; Determines whether "x" is evenly divisible by "i" or another integer greater than "i"
@@ -623,13 +651,13 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
-(cog-evaluate!
-   (Evaluation
-      (DefinedPredicate "is_prime_helper")
-      (Number 5)
-      (Number 2)
+    (cog-evaluate!
+    (Evaluation
+        (DefinedPredicate "is_prime_helper")
+        (Number 5)
+        (Number 2)
+        )
     )
-)
 
     (Define
         (DefinedPredicateNode "is_prime?")
@@ -649,61 +677,63 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
-(cog-evaluate!
-   (Evaluation
-      (DefinedPredicate "is_prime?")
-      (Number 37)
+    (cog-evaluate!
+    (Evaluation
+        (DefinedPredicate "is_prime?")
+        (Number 37)
+        )
     )
-)
 
     
 
     BORIS, Include discussion about FFI, like a printf debug funcrtion
 
-(define (scm-display-wrapper-exec atom)
-	(display atom)
-    (Concept "done")
-)
+.. code-block:: scheme
 
-(cog-execute!
-	(ExecutionOutput
-		(GroundedSchema "scm: scm-display-wrapper-exec")
-		(Concept "Hi")
-	)
-)
-
-(define (scm-display-wrapper-eval atom)
-	(display atom)
-    (stv 1 1)
-)
-
-(cog-evaluate!
-    (Evaluation
-        (GroundedPredicate "scm: scm-display-wrapper-eval")
-        (Concept "Hi")
+    (define (scm-display-wrapper-exec atom)
+        (display atom)
+        (Concept "done")
     )
-)
 
-(define (scm-display-wrapper-eval-2-arg atom1 atom2)
-	(display atom1)
-    (display atom2)
-    (stv 1 1)
-)
-
-(cog-evaluate!
-    (Evaluation
-        (GroundedPredicate "scm: scm-display-wrapper-eval-2-arg")
-        (List
-            (Concept "One")
-            (Concept "Two")
+    (cog-execute!
+        (ExecutionOutput
+            (GroundedSchema "scm: scm-display-wrapper-exec")
+            (Concept "Hi")
         )
     )
-)
+
+    (define (scm-display-wrapper-eval atom)
+        (display atom)
+        (stv 1 1)
+    )
+
+    (cog-evaluate!
+        (Evaluation
+            (GroundedPredicate "scm: scm-display-wrapper-eval")
+            (Concept "Hi")
+        )
+    )
+
+    (define (scm-display-wrapper-eval-2-arg atom1 atom2)
+        (display atom1)
+        (display atom2)
+        (stv 1 1)
+    )
+
+    (cog-evaluate!
+        (Evaluation
+            (GroundedPredicate "scm: scm-display-wrapper-eval-2-arg")
+            (List
+                (Concept "One")
+                (Concept "Two")
+            )
+        )
+    )
 
 
+Boris end of FFI section
 
-
-
+.. code-block:: scheme
 
 
     (Define
@@ -721,7 +751,9 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
-BORIS, need to explain the SetValue and ValueOf Links in Chapter 2
+BORIS, need to explain the SetValue and ValueOf Links in Chapter 2.  It fits with the "optimization" section
+
+.. code-block:: scheme
 
     (Define
         (DefinedSchemaNode "list_of_n_primes")
@@ -735,18 +767,9 @@ BORIS, need to explain the SetValue and ValueOf Links in Chapter 2
 
 
 
-Typed Variables and VariableLists as Arguments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-
-
-BORIS VariableList
-BORIS TypedVariableLink
-
 
 BORIS
-Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode
+Look at explaining DefinedPredicateNode
 
 
 BORIS. Check out the https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm example.  
@@ -760,10 +783,6 @@ Let's start with data structures.  In C, for example, there is the :c:`struct` k
 
 
 
-Looping with Tail Recursion
-------------------------------------------------------------------------
-
-BORIS
 
 
 
@@ -991,8 +1010,8 @@ BORIS PredicateFOrmula
 BORIS Cover using PutLink to find a location and update it.  For example, search the Atomspace, and put all dogs heavier than 10kg is the "Big Dogs" set.
 
 
-BORIS VariableList, Typed Variables (CAN I DEFINE MY OWN TYPES???)
-BORIS Next Chapter, program segmentation, DefineLinks, Tail Recursion, etc. look at the recursive-loop.scm example.
+BORIS (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
+BORIS Next Chapter
 We'll also talk about the FFI, like using ExecutionOutput and GroundedSchema, or GroundedPredicate, look at "execute.scm"
 
 

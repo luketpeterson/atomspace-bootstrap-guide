@@ -312,9 +312,11 @@ From our C example, that would be <code class="code c docutils literal notransla
 <p>The second argument to <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> is the part of the assignment to the left of the equal side.
 From our C example, that would be <code class="code c docutils literal notranslate"><span class="n"><span class="pre">counter</span></span></code>.  Think of the L-Value as “where” you are assigning to.</p>
 <p>Again, this is a flawed comparison with the assignment operation in C, so don’t try and stretch the analogy too far.
-For example, you could change the ConceptNode in the first expression, so a totally different atom would be created by executing the <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code></p>
+For example, you could change the ConceptNode in the first expression, so a totally different atom would be created by executing the <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code>
+Therefore, it’s more accurate to say the second argument matches existing atoms, providing concrete meanings to the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms in the first argument,
+While the first argument is a template for the new atoms to insert into the Atomspace, after that template is grounded in terms of the second argument.</p>
 <p>Coming full circle, <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> are actually implemented using PutLink.
-The increment example above is functionally equivalent to:</p>
+The increment example above is functionally equivalent to this:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">QueryLink</span>
         <span class="p">(</span><span class="nf">State</span>
@@ -344,10 +346,10 @@ But this mechanism has some limitations that we’re about to cover, not to ment
 Remember the Atomspace can theoretically be accessed from other non-Scheme environments.</p>
 <p>In this section we’re going to introduce some code segmentation and organization primitives that are native to Atomese.</p>
 <p>Let’s being with Atomese’s own version of <code class="code docutils literal notranslate"><span class="pre">define</span></code>, the <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code>.  Here’s an example:</p>
-<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span> <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;five&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">5</span><span class="p">))</span>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span> <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;five&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">5</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>We just introduced two new atoms.  <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> gives a name to something else.  That’s it.</p>
+<p>We just introduced two new atom types: <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>.  <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> gives a name to something else.  That’s it.</p>
 <p>The first argument to a <code class="code docutils literal notranslate"><span class="pre">DefineLink</span></code> needs to be a “naming” node.
 There are 3 special “naming” node types: <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>, <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>, and <code class="code docutils literal notranslate"><span class="pre">DefinedTypeNode</span></code>.
 We’ll cover the latter two in due course, but here we’ll focus on <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>.
@@ -358,13 +360,13 @@ This example below does exactly what you think it should do.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
     <span class="p">(</span><span class="nf">State</span>
         <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
-        <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;five&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;five&quot;</span><span class="p">)</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <p>But without the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> connects <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“counter”</span></span><span class="p"><span class="pre">)</span></span></code> to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">DefinedSchemaNode</span></span> <span class="s"><span class="pre">“five”</span></span><span class="p"><span class="pre">)</span></span></code>, and not to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">5</span></span><span class="p"><span class="pre">)</span></span></code>.
-The <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> will be replaced by the node it represents, but only in an execution context.</p>
+The <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> will be replaced by the node it represents, but only when it is reduced by executing it.</p>
 <div class="section" id="basic-subroutines">
 <h3>Basic Subroutines<a class="headerlink" href="#basic-subroutines" title="Permalink to this headline">¶</a></h3>
 <p><code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can also be used to define subroutines.  By subroutine I mean that there are no function arguments and no return values.
@@ -388,29 +390,6 @@ Here is an example:</p>
 </div>
 <p>We can call it like this:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;turn_on_switch&quot;</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>You may have already stumbled into this, but you can use a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> to execute multiple operations.
-Here’s an example:</p>
-<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
-    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;make_nighttime&quot;</span><span class="p">)</span>
-    <span class="p">(</span><span class="nf">ListLink</span>
-        <span class="p">(</span><span class="nf">PutLink</span>
-            <span class="p">(</span><span class="nf">State</span>
-                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;On&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Moonlight&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="p">(</span><span class="nf">PutLink</span>
-            <span class="p">(</span><span class="nf">State</span>
-                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
-                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Off&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Sunlight&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -446,20 +425,247 @@ Atomese is very “assembly-language-like”, so very little is magically done f
 </pre></div>
 </div>
 </div>
-<div class="section" id="variablelist-and-typed-variables">
-<h3>VariableList and Typed Variables<a class="headerlink" href="#variablelist-and-typed-variables" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="typed-variables-and-variablelists-as-arguments">
+<h3>Typed Variables and VariableLists as Arguments<a class="headerlink" href="#typed-variables-and-variablelists-as-arguments" title="Permalink to this headline">¶</a></h3>
 <p>BORIS VariableList
-BORIS TypedVariables</p>
-<p>BORIS
-Look at explaining DefinedSchemaNode (look at the PutLink OpenCog web documentation for ideas) and DefinedPredicateNode</p>
-<p>BORIS. Check out the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm">https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm</a> example.
-BORIS SignatureLink and DefinedTypeNode
-Let’s start with data structures.  In C, for example, there is the <code class="code c docutils literal notranslate"><span class="k"><span class="pre">struct</span></span></code> keyword, to declares a collection of variables that are packaged up together as a unified code object.</p>
+BORIS TypedVariableLink</p>
 </div>
 </div>
 <div class="section" id="looping-with-tail-recursion">
 <h2>Looping with Tail Recursion<a class="headerlink" href="#looping-with-tail-recursion" title="Permalink to this headline">¶</a></h2>
-<p>BORIS</p>
+<p>BORIS  Implement a simple counter that increments a number 5 times using a DefinedSchemaLink</p>
+<p>BORISYELTSIN, here’s where the new chapter starts…</p>
+<p>BORIS, Section below should be part of the lead-in to using SequentialAndLink and SequentialOrLink</p>
+<p>You may have already stumbled into this, but you can use a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> to execute multiple operations.
+Here’s an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;make_nighttime&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">ListLink</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;On&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Moonlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_placeholder&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Off&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Sunlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="local-variables">
+<h3>Local Variables<a class="headerlink" href="#local-variables" title="Permalink to this headline">¶</a></h3>
+<p>BORIS, I can’t actually figure out how to use local variables in Lambdas, but I’m also not convinced they are needed.</p>
+<p>Distilling the benefits of functions down to just argument passing really doesn’t do justice to the concept.
+Functions provide a means manage the side-effects that a subroutine can produce.
+In other words, if a function produces</p>
+<p>BORIS.  Create a return value from a function.
+Then create an increment function where the value passes through a local variable, think up a way that the function would cross-talk with itself from one calling to the next.
+BORIS BEST IDEA, Make a recursive function that have 2-dimensions so it interferes with itself.
+Consider implementing a “list_of_n_primes” function.  That might be the best way to contrive a variable confict, and if not it’ll still be good practice.
+Read the parallelism OpenCog Example.</p>
+<p>BORIS CHAPTER FLOW IDEAS.
+In the next chapter, introduce EvaluationLink and DefinedPredicate.
+Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs to compose programs.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+<span class="p">(</span><span class="nf">Evaluation</span>
+    <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether &quot;x&quot; is a positive integer, i.e. ?(x &gt; 0 &amp;&amp; x % 1 == 0)</span>
+    <span class="c1">; The lack of a native % (mod) fn turns a constant-time op into an order n op. :-(</span>
+    <span class="c1">; Also not numerically stable for high values of x, due to floating point rounding</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">SequentialAndLink</span>
+
+            <span class="c1">; As long as x is greater-than-or-equal-to 1, we can continue</span>
+            <span class="c1">; Otherwise we will return false</span>
+            <span class="p">(</span><span class="nf">NotLink</span> <span class="p">(</span><span class="nf">GreaterThanLink</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+            <span class="p">(</span><span class="nf">SequentialOrLink</span>
+
+                <span class="c1">; See if our number is exactly 1, return true if so</span>
+                <span class="p">(</span><span class="nf">EqualLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1">; Recurse with 1 minus our number</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">MinusLink</span>
+                        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="nv">BORIS,</span> <span class="nv">looks</span> <span class="nv">like</span> <span class="nv">I</span> <span class="nv">will</span> <span class="nv">need</span> <span class="nv">to</span> <span class="nv">explain</span> <span class="nv">DefinedPredicate,</span> <span class="nv">which</span> <span class="nv">means</span> <span class="nv">I</span><span class="ss">&#39;ll</span> <span class="nv">probably</span> <span class="nv">need</span> <span class="nv">to</span> <span class="nv">explain</span> <span class="nv">evaluation</span>
+<span class="nv">BORIS,</span> <span class="nv">write</span> <span class="nv">up</span> <span class="nv">SequentialAnd</span> <span class="nv">&amp;</span> <span class="nv">SequentialOr,</span> <span class="k">and </span><span class="nv">how</span> <span class="nv">they</span> <span class="nv">fit</span> <span class="nv">in,</span>
+    <span class="nv">This</span> <span class="nv">will</span> <span class="nv">require</span> <span class="nv">drawing</span> <span class="nv">a</span> <span class="nv">diagram</span> <span class="nv">of</span> <span class="nv">AND,</span> <span class="nv">OR,</span> <span class="k">and </span><span class="nv">NOT</span> <span class="nv">gates</span><span class="o">.</span>
+<span class="nv">BORIS,</span> <span class="nv">look</span> <span class="nv">at</span> <span class="nv">PredicateFormula,</span> <span class="nv">it</span> <span class="nv">Constructs</span> <span class="nv">a</span> <span class="nv">TruthValue</span> <span class="nv">from</span> <span class="nv">two</span> <span class="nv">number</span> <span class="nv">values</span>
+</pre></div>
+</div>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether &quot;x&quot; is evenly divisible by &quot;i&quot; or another integer greater than &quot;i&quot;</span>
+    <span class="c1">; In otherwords, returns partial NOT prime.  Intended to be called by &quot;is_prime?&quot;</span>
+    <span class="c1">; If called with i=2, false = x is prime, true = x is not prime</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">VariableList</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">SequentialAndLink</span>
+
+            <span class="c1">; If i is greater-than-or-equal-to x, return false because we&#39;ve tried all possibilities, so it must be prime</span>
+            <span class="c1">; Ideally we could stop at sqrt(x), but if I cared about efficiency, I&#39;d implement native modulo first</span>
+            <span class="p">(</span><span class="nf">GreaterThan</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="c1">; greater-than-or-equal is the same as not-less-than</span>
+
+            <span class="p">(</span><span class="nf">SequentialOrLink</span>
+                <span class="c1">; Check to see if x is evenly divisible by i, if so, return true</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">DivideLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">))</span>
+                <span class="p">)</span>
+
+                <span class="c1">; Recurse with i++</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">PlusLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+<span class="p">(</span><span class="nf">Evaluation</span>
+    <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime?&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether a number supplied is prime or not</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+
+        <span class="c1">; Call our recursive helper function</span>
+        <span class="p">(</span><span class="nf">NotLink</span>
+            <span class="p">(</span><span class="nf">Evaluation</span>
+                <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+<span class="p">(</span><span class="nf">Evaluation</span>
+    <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_prime?&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">37</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+
+<span class="nv">BORIS,</span> <span class="nv">Include</span> <span class="nv">discussion</span> <span class="nv">about</span> <span class="nv">FFI,</span> <span class="nv">like</span> <span class="nv">a</span> <span class="nv">printf</span> <span class="nv">debug</span> <span class="nv">funcrtion</span>
+</pre></div>
+</div>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-exec</span> <span class="nv">atom</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;done&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutput</span>
+        <span class="p">(</span><span class="nf">GroundedSchema</span> <span class="s">&quot;scm: scm-display-wrapper-exec&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Hi&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-eval</span> <span class="nv">atom</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">stv</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">GroundedPredicate</span> <span class="s">&quot;scm: scm-display-wrapper-eval&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Hi&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-eval-2-arg</span> <span class="nv">atom1</span> <span class="nv">atom2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom1</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">stv</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">GroundedPredicate</span> <span class="s">&quot;scm: scm-display-wrapper-eval-2-arg&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">List</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;One&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Two&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Boris end of FFI section</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span>
+    <span class="c1">; Calculates the next prime number, greater than the number supplied</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;next_prime&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+
+        <span class="c1">; temp = x+1</span>
+        <span class="p">(</span><span class="nf">SetValue</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;&quot;</span><span class="p">))</span>
+
+        <span class="c1">; Check to see if temp is prime</span>
+
+        <span class="c1">; If it is, return it, if not, recurse to find the value after temp</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>BORIS, need to explain the SetValue and ValueOf Links in Chapter 2.  It fits with the “optimization” section</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;list_of_n_primes&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;n&quot;</span><span class="p">)</span>
+
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>BORIS
+Look at explaining DefinedPredicateNode</p>
+<p>BORIS. Check out the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm">https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm</a> example.
+BORIS SignatureLink and DefinedTypeNode
+Let’s start with data structures.  In C, for example, there is the <code class="code c docutils literal notranslate"><span class="k"><span class="pre">struct</span></span></code> keyword, to declares a collection of variables that are packaged up together as a unified code object.</p>
 <p>NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN</p>
 <p>Intro.
 We will also cover the difference between the execution and the evaluation context.</p>
@@ -479,6 +685,7 @@ In other words, what are the Atomese equivalents for program-flow constructs lik
 </div>
 <p>Notice that we’ve traded <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> for <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code>.
 These OpenCog functions are similar, but where <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> may return anything at all, <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> will always return a <em>TruthValue</em>.</p>
+</div>
 </div>
 <div class="section" id="the-philosophy-of-truth">
 <h2>The Philosophy of Truth<a class="headerlink" href="#the-philosophy-of-truth" title="Permalink to this headline">¶</a></h2>
@@ -592,9 +799,11 @@ BORIS two views, as an assertion with a truth value, or as a way to evaluate the
 <p>BORIS BORIS, How do I query whether something is part of another set</p>
 <p>BORIS PredicateFOrmula</p>
 <p>BORIS Cover using PutLink to find a location and update it.  For example, search the Atomspace, and put all dogs heavier than 10kg is the “Big Dogs” set.</p>
-<p>BORIS VariableList, Typed Variables (CAN I DEFINE MY OWN TYPES???)
-BORIS Next Chapter, program segmentation, DefineLinks, Tail Recursion, etc. look at the recursive-loop.scm example.
+<p>BORIS (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
+BORIS Next Chapter
 We’ll also talk about the FFI, like using ExecutionOutput and GroundedSchema, or GroundedPredicate, look at “execute.scm”</p>
+<p>BORIS.  Understand how Values become Atoms sometimes…  A clue is dropped in the documentation on SleepLink <a class="reference external" href="https://wiki.opencog.org/w/SleepLink">https://wiki.opencog.org/w/SleepLink</a>
+He says “NumberNodes are problematic for the AtomSpace”.  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.</p>
 </div>
 </div>
 
@@ -630,10 +839,13 @@ We’ll also talk about the FFI, like using ExecutionOutput and GroundedSchema, 
 <li class="toctree-l2"><a class="reference internal" href="#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basic-subroutines">Basic Subroutines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdalink-lets-you-pass-function-arguments">LambdaLink Lets you Pass Function Arguments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#variablelist-and-typed-variables">VariableList and Typed Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typed-variables-and-variablelists-as-arguments">Typed Variables and VariableLists as Arguments</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#looping-with-tail-recursion">Looping with Tail Recursion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#looping-with-tail-recursion">Looping with Tail Recursion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-variables">Local Variables</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#the-philosophy-of-truth">The Philosophy of Truth</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#declaring-evaluationlinks">Declaring EvaluationLinks</a></li>
 </ul>
