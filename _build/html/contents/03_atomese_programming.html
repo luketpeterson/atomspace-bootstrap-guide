@@ -339,8 +339,8 @@ Further explores <code class="code docutils literal notranslate"><span class="pr
 I recommend going through that example as well as the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">“bindlink.scm” example</a>.</p>
 </div>
 </div>
-<div class="section" id="factoring-and-functions-in-atomese">
-<h2>Factoring and Functions in Atomese<a class="headerlink" href="#factoring-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="schemas-factoring-and-functions-in-atomese">
+<h2>Schemas, Factoring and Functions in Atomese<a class="headerlink" href="#schemas-factoring-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
 <p>Up until now, we’ve been using Scheme’s <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">define</span></span><span class="p"><span class="pre">)</span></span></code> mechanism to as a way to get a symbolic reference to an atom we intend to use later.
 But this mechanism has some limitations that we’re about to cover, not to mention its reliance on Scheme.
 Remember the Atomspace can theoretically be accessed from other non-Scheme environments.</p>
@@ -366,13 +366,14 @@ This example below does exactly what you think it should do.</p>
 </pre></div>
 </div>
 <p>But without the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> connects <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“counter”</span></span><span class="p"><span class="pre">)</span></span></code> to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">DefinedSchemaNode</span></span> <span class="s"><span class="pre">“five”</span></span><span class="p"><span class="pre">)</span></span></code>, and not to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">5</span></span><span class="p"><span class="pre">)</span></span></code>.
-The <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> will be replaced by the node it represents, but only when it is reduced by executing it.</p>
+The <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> will be replaced by the node it represents, but only when it is reduced by executing it.
+Think of it like a <code class="code c docutils literal notranslate"><span class="k"><span class="pre">const</span></span></code> in C, not like a pre-processor <code class="code c docutils literal notranslate"><span class="cp"><span class="pre">#define</span></span></code>.</p>
 <div class="section" id="basic-subroutines">
 <h3>Basic Subroutines<a class="headerlink" href="#basic-subroutines" title="Permalink to this headline">¶</a></h3>
-<p><code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can also be used to define subroutines.  By subroutine I mean that there are no function arguments and no return values.
-The expectation is that all communication to and from the subroutine happens by way of global program state.
+<p><code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can also be used to define subroutines.  By subroutine I mean a block of code you can call, but where there are no function arguments.
+The expectation is that all communication between the subroutine and the caller happens by way of global program state.
 Subroutines are just a way to dispatch one chunk of code from a different place in the program.
-Most modern programming languages don’t even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the degenerate case.
+Most modern programming languages don’t even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the case where no arguments are needed.
 If you’ve written assembly code by hand or worked with a very old language like <a class="reference external" href="https://en.wikipedia.org/wiki/Integer_BASIC">Integer BASIC</a>, you’ll certainly appreciate why subroutines are insufficient to architect a complex piece of software.</p>
 <p>All that said, subroutines are simpler than functions so let’s start there.
 Here is an example:</p>
@@ -392,10 +393,11 @@ Here is an example:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;turn_on_switch&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
+<p>That’s it.  The <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">DefinedSchemaNode</span></span> <span class="s"><span class="pre">“turn_on_switch”</span></span><span class="p"><span class="pre">)</span></span></code> takes the place of the whole <code class="code docutils literal notranslate"><span class="pre">PutLink</span></code> and all its dependent atoms.</p>
 </div>
 <div class="section" id="lambdalink-lets-you-pass-function-arguments">
 <h3>LambdaLink Lets you Pass Function Arguments<a class="headerlink" href="#lambdalink-lets-you-pass-function-arguments" title="Permalink to this headline">¶</a></h3>
-<p>The difference between subroutines vs. procedures and functions are the arguments that can be passed in and out.
+<p>The difference between subroutines vs. procedures and functions are the arguments that can be passed.
 <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> is the mechanism for defining functions in Atomese, and specifying the arguments that can be passed in.</p>
 <p>Here is an example function that squares the incoming <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> argument:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
@@ -410,7 +412,9 @@ Here is an example:</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>So there’s our function.  It takes a <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> and squares it.  Now, how do we call it?</p>
+<p>So there’s our function.  It takes a <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> and squares it.
+The first argument to <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> is <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">VariableNode</span></span> <span class="s"><span class="pre">“x”</span></span><span class="p"><span class="pre">)</span></span></code>.  This specifies that our function expects one argument, and we’re mapping that argument onto <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">VariableNode</span></span> <span class="s"><span class="pre">“x”</span></span><span class="p"><span class="pre">)</span></span></code>.</p>
+<p>Now, how do we call it?</p>
 <p>Well, unfortunately we can’t just <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> it like the simple subroutine.  That will cause an error.
 The reason is a little bit convoluted, but in essence, we need a seperate operation to pack up the arguments and bind them to the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms used inside the fucntion, and then dispatch the function execution.
 That “dispatch” process is handled by the <code class="code docutils literal notranslate"><span class="pre">ExecutionOutputLink</span></code> atom.
@@ -424,6 +428,7 @@ Atomese is very “assembly-language-like”, so very little is magically done f
 <span class="p">)</span>
 </pre></div>
 </div>
+<p>The first argument is our <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>, and the second atom argument is the parameter we are passing to our function.</p>
 </div>
 <div class="section" id="typed-variables-and-variablelists-as-arguments">
 <h3>Typed Variables and VariableLists as Arguments<a class="headerlink" href="#typed-variables-and-variablelists-as-arguments" title="Permalink to this headline">¶</a></h3>
@@ -836,7 +841,7 @@ He says “NumberNodes are problematic for the AtomSpace”.  It appears that nu
 <li class="toctree-l3"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#factoring-and-functions-in-atomese">Factoring and Functions in Atomese</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#schemas-factoring-and-functions-in-atomese">Schemas, Factoring and Functions in Atomese</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basic-subroutines">Basic Subroutines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdalink-lets-you-pass-function-arguments">LambdaLink Lets you Pass Function Arguments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#typed-variables-and-variablelists-as-arguments">Typed Variables and VariableLists as Arguments</a></li>

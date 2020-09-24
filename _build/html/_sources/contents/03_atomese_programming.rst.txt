@@ -386,7 +386,7 @@ The `"get-put.scm" OpenCog example <https://github.com/opencog/atomspace/blob/ma
 Further explores :code:`PutLink` and demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
 I recommend going through that example as well as the `"bindlink.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_.
 
-Factoring and Functions in Atomese
+Schemas, Factoring and Functions in Atomese
 ------------------------------------------------------------------------
 
 Up until now, we've been using Scheme's :scheme:`(define)` mechanism to as a way to get a symbolic reference to an atom we intend to use later.
@@ -424,14 +424,15 @@ This example below does exactly what you think it should do.
 
 But without the :code:`cog-execute!`, the :code:`StateLink` connects :scheme:`(Concept "counter")` to :scheme:`(DefinedSchemaNode "five")`, and not to :scheme:`(NumberNode 5)`.
 The :code:`DefinedSchemaNode` will be replaced by the node it represents, but only when it is reduced by executing it.
+Think of it like a :c:`const` in C, not like a pre-processor :c:`#define`.
 
 Basic Subroutines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:code:`DefinedSchemaNode` can also be used to define subroutines.  By subroutine I mean that there are no function arguments and no return values.
-The expectation is that all communication to and from the subroutine happens by way of global program state.
+:code:`DefinedSchemaNode` can also be used to define subroutines.  By subroutine I mean a block of code you can call, but where there are no function arguments.
+The expectation is that all communication between the subroutine and the caller happens by way of global program state.
 Subroutines are just a way to dispatch one chunk of code from a different place in the program.
-Most modern programming languages don't even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the degenerate case.
+Most modern programming languages don't even have subroutines because they can lead to hideous spaghetti code and functions with arguments reduce to subroutines in the case where no arguments are needed.
 If you've written assembly code by hand or worked with a very old language like `Integer BASIC <https://en.wikipedia.org/wiki/Integer_BASIC>`_, you'll certainly appreciate why subroutines are insufficient to architect a complex piece of software. 
 
 All that said, subroutines are simpler than functions so let's start there.
@@ -456,10 +457,12 @@ We can call it like this:
 
     (cog-execute! (DefinedSchemaNode "turn_on_switch"))
 
+That's it.  The :scheme:`(DefinedSchemaNode "turn_on_switch")` takes the place of the whole :code:`PutLink` and all its dependent atoms.
+
 LambdaLink Lets you Pass Function Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The difference between subroutines vs. procedures and functions are the arguments that can be passed in and out.
+The difference between subroutines vs. procedures and functions are the arguments that can be passed.
 :code:`LambdaLink` is the mechanism for defining functions in Atomese, and specifying the arguments that can be passed in.
 
 Here is an example function that squares the incoming :code:`NumberNode` argument:
@@ -477,7 +480,10 @@ Here is an example function that squares the incoming :code:`NumberNode` argumen
         )
     )
 
-So there's our function.  It takes a :code:`NumberNode` and squares it.  Now, how do we call it?
+So there's our function.  It takes a :code:`NumberNode` and squares it.
+The first argument to :code:`LambdaLink` is :scheme:`(VariableNode "x")`.  This specifies that our function expects one argument, and we're mapping that argument onto :scheme:`(VariableNode "x")`.
+
+Now, how do we call it?
 
 Well, unfortunately we can't just :code:`cog-execute!` it like the simple subroutine.  That will cause an error.
 The reason is a little bit convoluted, but in essence, we need a seperate operation to pack up the arguments and bind them to the :code:`VariableNode` atoms used inside the fucntion, and then dispatch the function execution.
@@ -494,6 +500,8 @@ We call it like this:
             (NumberNode 2)
         )
     )
+
+The first argument is our :code:`DefinedSchemaNode`, and the second atom argument is the parameter we are passing to our function.
 
 Typed Variables and VariableLists as Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
