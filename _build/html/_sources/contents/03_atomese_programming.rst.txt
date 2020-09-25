@@ -386,7 +386,7 @@ The `"get-put.scm" OpenCog example <https://github.com/opencog/atomspace/blob/ma
 Further explores :code:`PutLink` and demonstrates exactly how a :code:`BindLink` can be composed from a :code:`GetLink` and a :code:`PutLink`.  
 I recommend going through that example as well as the `"bindlink.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm>`_.
 
-Schemas, Factoring and Functions in Atomese
+Defines, Schemas, Lambdas and Functions in Atomese
 ------------------------------------------------------------------------
 
 Up until now, we've been using Scheme's :scheme:`(define)` mechanism to as a way to get a symbolic reference to an atom we intend to use later.
@@ -506,9 +506,87 @@ The first argument is our :code:`DefinedSchemaNode`, and the second atom argumen
 Typed Variables and VariableLists as Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BORIS VariableList
-BORIS TypedVariableLink
+:code:`LambdaLink` takes a single atom to specify its argument, but what if we want to pass multiple arguments to a function?
+Enter the :code:`VariableList` atom.  A :code:`VariableList`, as the name would suggest, is an ordered list to define multiple :code:`VariableNode` atoms.
 
+You can use it with a :code:`LambdaLink`, as in the example below, where I've reimplemented simple multiplication using :code:`TimesLink`.
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchema "multiply")
+        (LambdaLink
+            (VariableList
+                (VariableNode "x")
+                (VariableNode "y")
+            )
+            (TimesLink
+                (VariableNode "x")
+                (VariableNode "y")
+            )
+        )
+    )
+
+And we use a :code:`ListLink` to pass the arguments, when we want to call it.
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (ExecutionOutputLink
+            (DefinedSchema "multiply")
+            (List
+                (Number 2)
+                (Number 3)
+            )
+        )
+    )
+
+If your list doesn't have enough arguments to match the :code:`VariableList` of the :code:`LambdaLink` that you are calling, then it will cause an error.
+On the other hand, if you pass additional extraneous arguments they will be silently ignored.
+
+.. note:: :code:`VariableList` is one type of :code:`Connector`.  :code:`Connector` atoms are used to declare which atoms may be linked with which other atoms.  They are key to specifying custom grammars, which we will cover later on. 
+
+We have been using "naked" :code:`VariableNode` atoms, which can map onto any other atom whatsoever, irrespective of the atom's type.
+In some situations we may want to constrain the types of atoms that our function accept as arguments.
+This is done with a :code:`TypedVariableLink`.
+
+Here is the "multiply" function from above, but using :code:`TypedVariableLink` atoms to declare that the parameters should be :code:`NumberNode` atoms.
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedSchema "multiply")
+        (LambdaLink
+            (VariableList
+                (TypedVariableLink
+                    (VariableNode "x")
+                    (TypeNode "NumberNode")
+                )
+                (TypedVariableLink
+                    (VariableNode "y")
+                    (TypeNode "NumberNode")
+                )
+            )
+            (TimesLink
+                (VariableNode "x")
+                (VariableNode "y")
+            )
+        )
+    )
+
+:code:`TypeNode` is an atom type that represents an atom type.  Whoa... that's meta.
+It can refer to any of the built-in atom types we've used so far; in addition, new types can be defined.
+In a later chapter we'll get deeper into Signatures and creating new atom types.
+
+.. note:: QUESTION FOR SOMEBODY SMARTER THAN ME.  What is :code:`TypedVariableLink` actually useful for when used in a :code:`LambdaLink`?  It seems to be ignored when executing lambdas.  I see how it gives extra criteria when matching.  Am I missing something?
+
+Finally, I should mention that the variable declaration features of Atomese aren't just for :code:`LambdaLink` and functions.
+
+:code:`VariableList` and :code:`TypedVariableLink` can be used with any of the query link types, such as :code:`MeetLink`, :code:`QueryLink`, :code:`SatisfactionLink`, etc.
+Often including a :code:`VariableList` in a match expression is optional, because the variables can be inferred from the expression itself.
+When there is any ambiguity, however, including a :code:`VariableList` is required.
+
+In addition, including a :code:`TypedVariableLink` can help narrow down the possible matches that can satisfy a query.
 
 Looping with Tail Recursion
 ------------------------------------------------------------------------

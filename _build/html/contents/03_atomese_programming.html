@@ -339,8 +339,8 @@ Further explores <code class="code docutils literal notranslate"><span class="pr
 I recommend going through that example as well as the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/bindlink.scm">“bindlink.scm” example</a>.</p>
 </div>
 </div>
-<div class="section" id="schemas-factoring-and-functions-in-atomese">
-<h2>Schemas, Factoring and Functions in Atomese<a class="headerlink" href="#schemas-factoring-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="defines-schemas-lambdas-and-functions-in-atomese">
+<h2>Defines, Schemas, Lambdas and Functions in Atomese<a class="headerlink" href="#defines-schemas-lambdas-and-functions-in-atomese" title="Permalink to this headline">¶</a></h2>
 <p>Up until now, we’ve been using Scheme’s <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">define</span></span><span class="p"><span class="pre">)</span></span></code> mechanism to as a way to get a symbolic reference to an atom we intend to use later.
 But this mechanism has some limitations that we’re about to cover, not to mention its reliance on Scheme.
 Remember the Atomspace can theoretically be accessed from other non-Scheme environments.</p>
@@ -432,8 +432,79 @@ Atomese is very “assembly-language-like”, so very little is magically done f
 </div>
 <div class="section" id="typed-variables-and-variablelists-as-arguments">
 <h3>Typed Variables and VariableLists as Arguments<a class="headerlink" href="#typed-variables-and-variablelists-as-arguments" title="Permalink to this headline">¶</a></h3>
-<p>BORIS VariableList
-BORIS TypedVariableLink</p>
+<p><code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> takes a single atom to specify its argument, but what if we want to pass multiple arguments to a function?
+Enter the <code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> atom.  A <code class="code docutils literal notranslate"><span class="pre">VariableList</span></code>, as the name would suggest, is an ordered list to define multiple <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms.</p>
+<p>You can use it with a <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code>, as in the example below, where I’ve reimplemented simple multiplication using <code class="code docutils literal notranslate"><span class="pre">TimesLink</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;multiply&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableList</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;y&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">TimesLink</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;y&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>And we use a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> to pass the arguments, when we want to call it.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+        <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;multiply&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">List</span>
+            <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Number</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If your list doesn’t have enough arguments to match the <code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> of the <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> that you are calling, then it will cause an error.
+On the other hand, if you pass additional extraneous arguments they will be silently ignored.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> is one type of <code class="code docutils literal notranslate"><span class="pre">Connector</span></code>.  <code class="code docutils literal notranslate"><span class="pre">Connector</span></code> atoms are used to declare which atoms may be linked with which other atoms.  They are key to specifying custom grammars, which we will cover later on.</p>
+</div>
+<p>We have been using “naked” <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms, which can map onto any other atom whatsoever, irrespective of the atom’s type.
+In some situations we may want to constrain the types of atoms that our function accept as arguments.
+This is done with a <code class="code docutils literal notranslate"><span class="pre">TypedVariableLink</span></code>.</p>
+<p>Here is the “multiply” function from above, but using <code class="code docutils literal notranslate"><span class="pre">TypedVariableLink</span></code> atoms to declare that the parameters should be <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;multiply&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableList</span>
+            <span class="p">(</span><span class="nf">TypedVariableLink</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">TypeNode</span> <span class="s">&quot;NumberNode&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">TypedVariableLink</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;y&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">TypeNode</span> <span class="s">&quot;NumberNode&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">TimesLink</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;y&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">TypeNode</span></code> is an atom type that represents an atom type.  Whoa… that’s meta.
+It can refer to any of the built-in atom types we’ve used so far; in addition, new types can be defined.
+In a later chapter we’ll get deeper into Signatures and creating new atom types.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEBODY SMARTER THAN ME.  What is <code class="code docutils literal notranslate"><span class="pre">TypedVariableLink</span></code> actually useful for when used in a <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code>?  It seems to be ignored when executing lambdas.  I see how it gives extra criteria when matching.  Am I missing something?</p>
+</div>
+<p>Finally, I should mention that the variable declaration features of Atomese aren’t just for <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> and functions.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> and <code class="code docutils literal notranslate"><span class="pre">TypedVariableLink</span></code> can be used with any of the query link types, such as <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code>, <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code>, <code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code>, etc.
+Often including a <code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> in a match expression is optional, because the variables can be inferred from the expression itself.
+When there is any ambiguity, however, including a <code class="code docutils literal notranslate"><span class="pre">VariableList</span></code> is required.</p>
+<p>In addition, including a <code class="code docutils literal notranslate"><span class="pre">TypedVariableLink</span></code> can help narrow down the possible matches that can satisfy a query.</p>
 </div>
 </div>
 <div class="section" id="looping-with-tail-recursion">
@@ -841,7 +912,7 @@ He says “NumberNodes are problematic for the AtomSpace”.  It appears that nu
 <li class="toctree-l3"><a class="reference internal" href="#finding-atoms-with-a-query-inside-a-putlink">Finding Atoms with a Query Inside a PutLink</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#schemas-factoring-and-functions-in-atomese">Schemas, Factoring and Functions in Atomese</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#defines-schemas-lambdas-and-functions-in-atomese">Defines, Schemas, Lambdas and Functions in Atomese</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basic-subroutines">Basic Subroutines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lambdalink-lets-you-pass-function-arguments">LambdaLink Lets you Pass Function Arguments</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#typed-variables-and-variablelists-as-arguments">Typed Variables and VariableLists as Arguments</a></li>
