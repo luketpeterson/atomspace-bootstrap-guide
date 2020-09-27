@@ -429,6 +429,57 @@ Atomese is very “assembly-language-like”, so very little is magically done f
 </pre></div>
 </div>
 <p>The first argument is our <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>, and the second atom argument is the parameter we are passing to our function.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME.  For some reason I don’t fully understand, the below snippet doesn’t fully reduce when executed.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">State</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableList</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Plus</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">MeetLink</span>
+                <span class="p">(</span><span class="nf">State</span>
+                    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+        <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">List</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>RESULT</strong></p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="nv">$1</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">StateLink</span>
+<span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">PlusLink</span>
+    <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;2&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;1&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p><strong>EXPECTED RESULT</strong></p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="nv">$1</span> <span class="nv">=</span> <span class="p">(</span><span class="nf">StateLink</span>
+<span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;3&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Yet, if I remove the LambdaLink &amp; ExecutionOutputLink, it does what I would expect and the PutLink fully reduces.</p>
+</div>
 </div>
 <div class="section" id="typed-variables-and-variablelists-as-arguments">
 <h3>Typed Variables and VariableLists as Arguments<a class="headerlink" href="#typed-variables-and-variablelists-as-arguments" title="Permalink to this headline">¶</a></h3>
@@ -509,7 +560,183 @@ When there is any ambiguity, however, including a <code class="code docutils lit
 </div>
 <div class="section" id="looping-with-tail-recursion">
 <h2>Looping with Tail Recursion<a class="headerlink" href="#looping-with-tail-recursion" title="Permalink to this headline">¶</a></h2>
+<p>Atomese doesn’t have loops, in the way most iterative programming languages do.  Like most pure functional languages, looping behavior is done through recursion.
+To utilize recursion, you make the loop body into a function, and then you have the function call itself.
+Every recursive function fundamentally has two paths through it, one path that returns without further iterations, and one path that reduces the problem into a smaller problem and then calls itself to solve that new reduced problem.</p>
+<p>It’s mathematically proven than any algorithm that can be expressed with iteration can also be expressed with recursion.
+However, this says nothing about the gymnastics that are needed for the implementation of a particular algorithm.
+In any case, this is not the point of the guide and the topic is thoroughly covered elsewhere.</p>
+<p>The “Tail” in Tail Recursion means that self-calling is the very last thing the function does before exiting.
+Therefore, there is no need to retain the execution state for the “parent” function.
+Traditional recursion has a bad reputation for consumption of stack memory, because of potentially very deep call stacks.  Tail recursion makes this a non-issue.
+In fact, in some programming languages, tail recursion has been shown to be as fast as iterative looping.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Atomese is not a language designed for execution speed, so don’t expect your Atomese code to be fast compared to anything written in a more traditional programming language, or even an interpreted scripting language.</p>
+</div>
+<p>Below is an example that uses tail recursion to increment a counter repeatedly.
+This could stand-in for any for-loop.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">State</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">CondLink</span>
+            <span class="c1">; Check to see if the &quot;iterator&quot; parameter is &gt; 4</span>
+            <span class="p">(</span><span class="nf">GreaterThan</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1">; If so, we are done,</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+
+            <span class="c1">; If not, increment &quot;counter&quot; by one, and then call ourselves recursively</span>
+            <span class="p">(</span><span class="nf">ListLink</span>
+                <span class="p">(</span><span class="nf">PutLink</span>
+                    <span class="p">(</span><span class="nf">State</span>
+                        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">Plus</span>
+                            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                            <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="p">(</span><span class="nf">MeetLink</span>
+                        <span class="p">(</span><span class="nf">State</span>
+                            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="c1">; Here is the recursive call.  Call ourselves with a higher iterator</span>
+                <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+                    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Plus</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+        <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Number</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">CondLink</span>
+            <span class="c1">; Check to see if the &quot;iterator&quot; parameter is &gt; 5</span>
+            <span class="p">(</span><span class="nf">GreaterThan</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">6</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1">; If so, we are done,</span>
+            <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+
+            <span class="c1">; Here is the recursive call.  Call ourselves with a higher iterator</span>
+            <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+                <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Plus</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;iterator&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Plus</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">MeetLink</span>
+                <span class="p">(</span><span class="nf">State</span>
+                    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="nv">BORIS</span> <span class="nv">Why</span> <span class="nv">doesn</span><span class="ss">&#39;t</span> <span class="nv">this</span> <span class="nv">below</span> <span class="nv">reduce</span> <span class="nv">all</span> <span class="nv">the</span> <span class="nv">way?????</span>
+<span class="nv">Move</span> <span class="nv">this</span> <span class="nv">into</span> <span class="nv">a</span> <span class="nv">note</span> <span class="nv">at</span> <span class="nv">the</span> <span class="nv">end</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">Lambda</span> <span class="nv">section</span>
+
+<span class="p">(</span><span class="nf">State</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">VariableList</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Plus</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">MeetLink</span>
+                <span class="p">(</span><span class="nf">State</span>
+                    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutputLink</span>
+        <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">List</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">State</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">PutLink</span>
+        <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Plus</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">MeetLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;counter&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;our_num&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">DefinedSchema</span> <span class="s">&quot;increment_loop_body&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <p>BORIS  Implement a simple counter that increments a number 5 times using a DefinedSchemaLink</p>
+<p>BORIS NOTE: Are there links that let me do something like execute a Predicate against every item in a set?  a la MapReduce?  Seems like something Atomese should have.</p>
 <p>BORISYELTSIN, here’s where the new chapter starts…</p>
 <p>BORIS, Section below should be part of the lead-in to using SequentialAndLink and SequentialOrLink</p>
 <p>You may have already stumbled into this, but you can use a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> to execute multiple operations.

@@ -503,6 +503,63 @@ We call it like this:
 
 The first argument is our :code:`DefinedSchemaNode`, and the second atom argument is the parameter we are passing to our function.
 
+.. note::
+
+    QUESTION FOR SOMEONE SMARTER THAN ME.  For some reason I don't fully understand, the below snippet doesn't fully reduce when executed.
+
+    .. code-block:: scheme
+
+        (State (Concept "counter") (Number 2))
+
+        (DefineLink
+            (DefinedSchema "increment")
+            (LambdaLink
+                (VariableList)
+                (PutLink
+                    (State
+                        (Concept "counter")
+                        (Plus
+                            (Variable "our_num")
+                            (Number 1)
+                        )
+                    )
+                    (MeetLink
+                        (State
+                            (Concept "counter")
+                            (Variable "our_num")
+                        )
+                    )
+                )
+            )
+        )
+
+        (cog-execute!
+            (ExecutionOutputLink
+                (DefinedSchema "increment")
+                (List)
+            )
+        )
+    
+    **RESULT** 
+
+    .. code-block:: scheme
+
+        $1 = (StateLink
+        (ConceptNode "counter")
+        (PlusLink
+            (NumberNode "2")
+            (NumberNode "1")))
+
+    **EXPECTED RESULT**
+    
+    .. code-block:: scheme
+
+        $1 = (StateLink
+        (ConceptNode "counter")
+        (NumberNode "3"))
+
+    Yet, if I remove the LambdaLink & ExecutionOutputLink, it does what I would expect and the PutLink fully reduces.
+
 Typed Variables and VariableLists as Arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -591,7 +648,194 @@ In addition, including a :code:`TypedVariableLink` can help narrow down the poss
 Looping with Tail Recursion
 ------------------------------------------------------------------------
 
+Atomese doesn't have loops, in the way most iterative programming languages do.  Like most pure functional languages, looping behavior is done through recursion.
+To utilize recursion, you make the loop body into a function, and then you have the function call itself.
+Every recursive function fundamentally has two paths through it, one path that returns without further iterations, and one path that reduces the problem into a smaller problem and then calls itself to solve that new reduced problem.
+
+It's mathematically proven than any algorithm that can be expressed with iteration can also be expressed with recursion.
+However, this says nothing about the gymnastics that are needed for the implementation of a particular algorithm.
+In any case, this is not the point of the guide and the topic is thoroughly covered elsewhere.
+
+The "Tail" in Tail Recursion means that self-calling is the very last thing the function does before exiting.
+Therefore, there is no need to retain the execution state for the "parent" function.
+Traditional recursion has a bad reputation for consumption of stack memory, because of potentially very deep call stacks.  Tail recursion makes this a non-issue.
+In fact, in some programming languages, tail recursion has been shown to be as fast as iterative looping.
+
+.. note:: Atomese is not a language designed for execution speed, so don't expect your Atomese code to be fast compared to anything written in a more traditional programming language, or even an interpreted scripting language.
+
+Below is an example that uses tail recursion to increment a counter repeatedly.
+This could stand-in for any for-loop.
+
+.. code-block:: scheme
+
+    (State (Concept "counter") (Number 0))
+
+    (DefineLink
+        (DefinedSchema "increment_loop_body")
+        (LambdaLink
+            (VariableNode "iterator")
+            (CondLink
+                ; Check to see if the "iterator" parameter is > 4
+                (GreaterThan
+                    (VariableNode "iterator")
+                    (Number 4)
+                )
+
+                ; If so, we are done, 
+                (VariableNode "iterator")
+
+                ; If not, increment "counter" by one, and then call ourselves recursively
+                (ListLink
+                    (PutLink
+                        (State
+                            (Concept "counter")
+                            (Plus
+                                (Variable "our_num")
+                                (Number 1)
+                            )
+                        )
+                        (MeetLink
+                            (State
+                                (Concept "counter")
+                                (Variable "our_num")
+                            )
+                        )
+                    )
+
+                    ; Here is the recursive call.  Call ourselves with a higher iterator
+                    (ExecutionOutputLink
+                        (DefinedSchema "increment_loop_body")
+                        (Plus (Variable "iterator") (Number 1))
+                    )
+                )
+            )
+        )
+    )
+
+
+    (cog-execute!
+        (ExecutionOutputLink
+            (DefinedSchema "increment_loop_body")
+            (Number 0)
+        )
+    )
+
+
+    (DefineLink
+        (DefinedSchema "increment_loop_body")
+        (LambdaLink
+            (VariableNode "iterator")
+            (CondLink
+                ; Check to see if the "iterator" parameter is > 5
+                (GreaterThan
+                    (VariableNode "iterator")
+                    (Number 6)
+                )
+
+                ; If so, we are done, 
+                (VariableNode "iterator")
+
+                ; Here is the recursive call.  Call ourselves with a higher iterator
+                (ExecutionOutputLink
+                    (DefinedSchema "increment_loop_body")
+                    (Plus (Variable "iterator") (Number 1))
+                )
+            )
+        )
+    )
+
+    (DefineLink
+        (DefinedSchema "increment_loop_body")
+        (LambdaLink
+            (VariableNode "iterator")
+            (PutLink
+                (State
+                    (Concept "counter")
+                    (Plus
+                        (Variable "our_num")
+                        (Number 1)
+                    )
+                )
+                (MeetLink
+                    (State
+                        (Concept "counter")
+                        (Variable "our_num")
+                    )
+                )
+            )
+        )
+    )
+
+
+    BORIS Why doesn't this below reduce all the way?????
+    Move this into a note at the end of the Lambda section
+
+    (State (Concept "counter") (Number 2))
+
+    (DefineLink
+        (DefinedSchema "increment")
+        (LambdaLink
+            (VariableList)
+            (PutLink
+                (State
+                    (Concept "counter")
+                    (Plus
+                        (Variable "our_num")
+                        (Number 1)
+                    )
+                )
+                (MeetLink
+                    (State
+                        (Concept "counter")
+                        (Variable "our_num")
+                    )
+                )
+            )
+        )
+    )
+
+    (cog-execute!
+        (ExecutionOutputLink
+            (DefinedSchema "increment")
+            (List)
+        )
+    )
+
+    (State (Concept "counter") (Number 2))
+
+    (DefineLink
+        (DefinedSchema "increment")
+        (PutLink
+            (State
+                (Concept "counter")
+                (Plus
+                    (Variable "our_num")
+                    (Number 1)
+                )
+            )
+            (MeetLink
+                (State
+                    (Concept "counter")
+                    (Variable "our_num")
+                )
+            )
+        )
+    )
+
+    (cog-execute!
+        (DefinedSchema "increment_loop_body")
+    )
+
+
+
+
+
 BORIS  Implement a simple counter that increments a number 5 times using a DefinedSchemaLink
+
+
+BORIS NOTE: Are there links that let me do something like execute a Predicate against every item in a set?  a la MapReduce?  Seems like something Atomese should have.
+
+
 
 
     

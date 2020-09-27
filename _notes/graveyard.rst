@@ -134,3 +134,64 @@ The complete documentation for PutLink is here: BORIS. As you can see, it has ma
 
 
 
+
+
+
+
+BORIS This snippet tried to implement a recusrive iterative loop, but is BORKED because of a strange interplay between LambdaLink and PutLink
+
+.. code-block:: scheme
+
+    (State (Concept "counter") (Number 0))
+
+    (DefineLink
+        (DefinedSchema "increment_loop_body")
+        (LambdaLink
+            (VariableNode "iterator")
+            (CondLink
+                ; Check to see if the "iterator" parameter is > 4
+                (GreaterThan
+                    (VariableNode "iterator")
+                    (Number 4)
+                )
+
+                ; If so, we are done, 
+                (VariableNode "iterator")
+
+                ; If not, increment "counter" by one, and then call ourselves recursively
+                (SetLink
+                    (PutLink
+                        (State
+                            (Concept "counter")
+                            (Plus
+                                (Variable "our_num")
+                                (Number 1)
+                            )
+                        )
+                        (MeetLink
+                            (State
+                                (Concept "counter")
+                                (Variable "our_num")
+                            )
+                        )
+                    )
+
+                    ; Here is the recursive call.  Call ourselves with a higher iterator
+                    (ExecutionOutputLink
+                        (DefinedSchema "increment_loop_body")
+                        (Plus (Variable "iterator") (Number 1))
+                    )
+                )
+            )
+        )
+    )
+
+
+    (cog-execute!
+        (ExecutionOutputLink
+            (DefinedSchema "increment_loop_body")
+            (Number 0)
+        )
+    )
+
+
