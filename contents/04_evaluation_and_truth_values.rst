@@ -18,8 +18,8 @@ Personally found this very confusing initially, so I'll try to build it up bit b
 
 Hopefully we have enough foundation at this point that it'll make more sense for you than it did for me at first.
 
-Evaluating a Predicate Expression
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Evaluating Predicate Expressions
+------------------------------------------------------------------------
 
 We've gotten a lot of mileage out of :code:`cog-execute!`, but sometimes it doesn't do what we need.
 :code:`cog-evaluate!` is another similar operation, but instead of *executing* the atom, it is used to *evaluate* an atom forming a predicate expression.
@@ -60,8 +60,10 @@ Consider each of these examples:
 
 Each one of those examples above, and all other predicate expressions, can be evaluated to a single TruthValue; True, False, or somewhere in between.
 
-EvaluationLink has Two Important Roles
+EvaluationLink to Assert Stuff with PredicateNode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+EvaluationLink has two important roles.
 
 Very early in the `Atomspace examples <https://github.com/opencog/atomspace/blob/master/examples/atomspace/knowledge.scm>`_, :code:`EvaluationLink` pops up without any introduction.
 It says this:
@@ -76,15 +78,123 @@ It says this:
 
 The first thing to understand is that we are making an *assertion* here.
 We are telling the Atomspace that :scheme:`(Concept "make")` and :scheme:`(Concept "pottery")` are valid, aka *true*, arguments for :scheme:`(Predicate "_obj")`.
-In English, the above statement should be read as "Pottery can be Made.", or more pedantically, "Pottery is a valid Object for Make".
+In English, the above statement should be read as "Pottery can be Made.", or more pedantically, "**Pottery** is a valid **Object** for **Make**".
 
 So, when the first argument to :code:`EvaluationLink` is a :code:`PredicateNode` and the entire expression is grounded, this is how we *declare* that a predicate expression is true, for some given arguments.
 
-And once we've declared 
+And once we've declared it, we can query for it, just like any other relationship in the Atomspace.
 
-BORIS SatisfactionLink to test an asserted predicate.  Prove "makes pottery = true" "makes rain" = false.
+Can we make pottery?
 
-Let's use a 
+.. code-block:: scheme
+
+    (cog-evaluate!
+        (SatisfactionLink
+            (AndLink
+                (EvaluationLink
+                    (PredicateNode "_obj")
+                    (ListLink
+                        (ConceptNode "make")
+                        (Variable "predicate_object")
+                    )
+                )
+                (EqualLink
+                    (ConceptNode "pottery")
+                    (Variable "predicate_object")
+                )
+            )
+        )
+    )
+
+Yes, it seems we can.
+
+Can we make rain?  Let's see...
+
+.. code-block:: scheme
+
+    (cog-evaluate!
+        (SatisfactionLink
+            (AndLink
+                (EvaluationLink
+                    (PredicateNode "_obj")
+                    (ListLink
+                        (ConceptNode "make")
+                        (Variable "predicate_object")
+                    )
+                )
+                (EqualLink
+                    (ConceptNode "rain")
+                    (Variable "predicate_object")
+                )
+            )
+        )
+    )
+
+Unfortunately, no. :-(
+
+DefinedPredicateNode to Create Predicate Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the previous chapter, we looked at the :code:`DefinedSchemaNode` to name a function or subroutine.
+For predicates, there are some advantages to using :code:`DefinedPredicateNode` instead.
+
+Just like :code:`DefinedSchemaNode`, :code:`DefinedPredicateNode` is a naming node type that can be ued with a :code:`DefineNode`.
+But :code:`DefinedPredicateNode` tells the Atomspace that the function in question can be evaluated to a :code:`TruthValue`.
+
+Also, you may use a :code:`LambdaLink` as the body of a :code:`DefinedPredicateNode`, but it's not required unless you want to pass arguments.
+
+So, let's rewrite the :code:`SatisfactionLink` query above using a :code:`DefinedPredicateNode`.
+
+.. code-block:: scheme
+
+    (DefineLink
+        (DefinedPredicateNode "can_be_made?")
+        (LambdaLink
+            (Variable "test_object")
+            (SatisfactionLink
+                (AndLink
+                    (EvaluationLink
+                        (PredicateNode "_obj")
+                        (ListLink
+                            (ConceptNode "make")
+                            (Variable "predicate_object")
+                        )
+                    )        
+                    (EqualLink
+                        (Variable "test_object")
+                        (Variable "predicate_object")
+                    )
+                )
+            )
+        )
+    )
+
+So there's our predicate function.  Notice that we don't need the :code:`EqualLink` from above, because the :code:`ConceptNode` we're querying about is passed in as an argument.
+
+How do we call it?
+
+.. code-block:: scheme
+
+    (cog-evaluate!
+        (Evaluation
+            (DefinedPredicate "can_be_made?")
+            (ConceptNode "pottery")
+        )
+    )
+
+That's the other role of :code:`EvaluationLink` I was talking about.
+
+
+BORIS, just like EXECUTIONOUTPUT...  
+
+NOTE: SEGFAULT BORIS!!!  Write up a bug, after ensuring it crashes on TOT.
+
+BORIS
+NOTE: Is there a cleaner and more idiomatic way to evaluate EvaluationLink assertions??? Surely there is.  Look at the docs for "lessThanLink"
+
+
+
+
 
 
 Second, EvaluationLink with DefinedPredicate
@@ -170,9 +280,9 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
 .. code-block:: scheme
 
     (cog-evaluate!
-    (Evaluation
-        (DefinedPredicate "is_pos_integer?")
-        (Number 2)
+        (Evaluation
+            (DefinedPredicate "is_pos_integer?")
+            (Number 2)
         )
     )
 
