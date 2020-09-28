@@ -307,8 +307,8 @@ However, it is also possible to use multiple <code class="code docutils literal 
 </div>
 <p>We found Fido!</p>
 <p>Now, let’s go over the Links we just used, and I’ll explain the query along the way.</p>
-<div class="section" id="querylink-to-discard-intermediate-variables">
-<h3>QueryLink to Discard Intermediate Variables<a class="headerlink" href="#querylink-to-discard-intermediate-variables" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="querylink-to-format-query-results">
+<h3>QueryLink to Format Query Results<a class="headerlink" href="#querylink-to-format-query-results" title="Permalink to this headline">¶</a></h3>
 <p>Last time we encountered <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> we used it as a way to execute additional operations on our query result.
 Here we are using it to specify which portion of the query results we are interested in.
 To understand this better, try this nearly identical version of the query using <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code>.</p>
@@ -344,8 +344,8 @@ To understand this better, try this nearly identical version of the query using 
 </div>
 <p>That is because we explicitly told the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> atom that we were interested in <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dog_node&quot;)</span></code> as our result.  On the other hand, the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> atom created a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> referencing all of the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms in our query.</p>
 </div>
-<div class="section" id="andlink">
-<h3>AndLink<a class="headerlink" href="#andlink" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="andlink-for-multiple-query-criteria">
+<h3>AndLink for Multiple Query Criteria<a class="headerlink" href="#andlink-for-multiple-query-criteria" title="Permalink to this headline">¶</a></h3>
 <p><code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> is a link atom type for performing the binary “And” operation.  You probably guessed that from its name.
 So, for a query to match, both sides of the <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> must be satisfied.</p>
 <p>Back to our example:</p>
@@ -383,15 +383,15 @@ However, if your intuition comes from databases, you may want to think of the op
 “And” expressions narrow the <em>Satisfying Set</em> while “Or” expressions expand it.  Therefore you may need to be careful using <code class="code docutils literal notranslate"><span class="pre">Variable</span></code> nodes on both sides of an “Or” expression and expecting them to be consistent.  The behavior may not be what you intend.
 There is certinly more that could be said on this topic, but it feels like a rat hole at this point in the guide.</p>
 </div>
-<div class="section" id="greaterthanlink">
-<h3>GreaterThanLink<a class="headerlink" href="#greaterthanlink" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="greaterthanlink-to-filter-by-numeric-value">
+<h3>GreaterThanLink to Filter by Numeric Value<a class="headerlink" href="#greaterthanlink-to-filter-by-numeric-value" title="Permalink to this headline">¶</a></h3>
 <p>As the name suggests, <code class="code docutils literal notranslate"><span class="pre">GreaterThanLink</span></code> compares two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms using the “<strong>&gt;</strong>” operator.</p>
 <p>In the section above covering <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code>, we already explaind how the <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dogs_weight_node&quot;)</span></code> atom gets its meaning from the other side of the <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> expression.
 So this comparison evaluates to <em>true</em> if the numeric value of the atom matched by the Variable node is greater than <code class="code docutils literal notranslate"><span class="pre">(Number</span> <span class="pre">10)</span></code>.  All pretty self-explanatory so far.</p>
 <p>I’ll take this opportunity to introduce other link types along the same lines:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><a class="reference external" href="https://wiki.opencog.org/w/EqualLink">EqualLink</a> Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.  <strong>Be careful</strong> because <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms don’t get converted to values for comparison by <code class="code docutils literal notranslate"><span class="pre">EqualLink</span></code>, in the same way they would be converted by <code class="code docutils literal notranslate"><span class="pre">GreaterThanLink</span></code>.  For example, using <code class="code docutils literal notranslate"><span class="pre">EqualLink</span></code> to compare <code class="code docutils literal notranslate"><span class="pre">(FloatValue</span> <span class="pre">1.0)</span></code> with <code class="code docutils literal notranslate"><span class="pre">(NumberNode</span> <span class="pre">1.0)</span></code> will evaluate to <em>false</em>!</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/EqualLink">EqualLink</a> Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.</p></li>
 <li><p><a class="reference external" href="https://wiki.opencog.org/w/NotLink">NotLink</a> Is the logical “Not” operator.  Evaluates to <em>true</em> if the atom it references evaluates to <em>false</em> and vice-versa.  Things get a little more complicated when considering non-binary TruthValues, but that’s a topic we’ll cover later.</p></li>
 <li><p><a class="reference external" href="https://wiki.opencog.org/w/PlusLink">PlusLink</a> Is the arithmetic operator for addition.  It references two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms, and creates a third with the value of the sum of the other two.</p></li>
 <li><p><a class="reference external" href="https://wiki.opencog.org/w/MinusLink">MinusLink</a> Is the arithmetic operator for subtraction.  It references two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms, and creates a third with the value of first minus the second.</p></li>
@@ -402,19 +402,62 @@ So this comparison evaluates to <em>true</em> if the numeric value of the atom m
 <p>You may have noticed that “LessThanLink” is absent.  The less-than operator itself is just syntactic sugar because the argument order to <code class="code docutils literal notranslate"><span class="pre">GreaterThanLink</span></code> can implement a logically identical “LessThanLink”.  Personally I’ve often wondered why more programming languages don’t conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p><strong>Be careful</strong> Naked Values, e.g. <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code>, can’t be part of expressions in the Atomspace.  For example, using <code class="code docutils literal notranslate"><span class="pre">EqualLink</span></code> to compare <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">FloatValue</span></span> <span class="mf"><span class="pre">2.0</span></span><span class="p"><span class="pre">)</span></span></code> with <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mf"><span class="pre">1.0</span></span><span class="p"><span class="pre">)</span></span></code> will evaluate to <em>true</em>!  This happens because the <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code> vanishes when constructing the expression, and thus the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> is compared to itself!</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but equality for IEEE floats is problematic for many applications because values that are no longer representable with the mantissa bits become approximated leading to all kinds of unintended behavior.</p>
 </div>
 </div>
 </div>
-<div class="section" id="valueoflink-and-thinking-about-performance">
-<h2>ValueOfLink and Thinking About Performance<a class="headerlink" href="#valueoflink-and-thinking-about-performance" title="Permalink to this headline">¶</a></h2>
-<p>Coming full circle, let’s revisit values associated with atoms.  Let’s associate an age with Fido, using the Scheme snippet below:</p>
+<div class="section" id="valueoflink-and-setvaluelink">
+<h2>ValueOfLink and SetValueLink<a class="headerlink" href="#valueoflink-and-setvaluelink" title="Permalink to this headline">¶</a></h2>
+<p>Coming full circle, let’s revisit values associated with atoms.
+If you recall, last chapter, we used <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code> to associate a value with an atom.</p>
+<p>There is an Atomese equivalent: <code class="code docutils literal notranslate"><span class="pre">SetValueLink</span></code>.
+<code class="code docutils literal notranslate"><span class="pre">SetValueLink</span></code> behaves exactly like <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code>, except that it can be incorporated into another Atomese expressions.
+This will become important when we begin discussing Atomese programs in the next chapter.</p>
+<p>We might use <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code> to associate an age with Fido, invoking the OpenCog command below:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
    <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mi">3</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>It turns out you actually <em>can</em> query the Atomspace for atoms with some values that meet your query criteria.  You just need to be careful.
-Consider the query below:</p>
+<p>The Atomese equivalent to that would be:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">SetValueLink</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">3</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>These are <em>almost</em> the same, however, there is one important thing to remember: “Naked” Values can’t exist in the Atomspace.</p>
+<p>Notice that <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">FloatValue</span></span> <span class="mi"><span class="pre">3</span></span><span class="p"><span class="pre">)</span></span></code> is not exactly the same thing as <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">3</span></span><span class="p"><span class="pre">)</span></span></code>.
+The latter a reference to the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atom standing in for the numeric value, while the former is the actual floating point number itself.</p>
+<p>There is no way for the <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code> to be part of the Atomese exprssion we want to execute, because it can’t exist in the Atomspace at all.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME. Is this actually right???  This doesn’t feel right that there is no mechanism to make this work.</p>
+</div>
+<p>Conversely, we can access values associated with atoms in Atomese using <code class="code docutils literal notranslate"><span class="pre">ValueOfLink</span></code>.
+<code class="code docutils literal notranslate"><span class="pre">ValueOfLink</span></code> is the Atomese equivalent to the <code class="code docutils literal notranslate"><span class="pre">cog-value</span></code> command we introduced last chapter.</p>
+<p>So the Scheme snippet below:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">ValueOfLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Is equivalent to directly accessing the value like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="thinking-about-performance-querying-values">
+<h3>Thinking About Performance Querying Values<a class="headerlink" href="#thinking-about-performance-querying-values" title="Permalink to this headline">¶</a></h3>
+<p>Last chapter, I told you that values can’t be used as search criteria.
+I should have said that values can’t be searched <em>efficiently</em>.</p>
+<p>It turns out you actually <em>can</em> query the Atomspace for atoms with values that meet your query criteria.
+You just need to be careful.  Consider the query below to find dogs based on age:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
    <span class="p">(</span><span class="nf">Meet</span>
       <span class="p">(</span><span class="nf">GreaterThan</span>
@@ -463,6 +506,7 @@ However, this query will have considerably better performance characteristics as
 <p>Next Chapter: <a class="reference internal" href="03_atomese_programming.html#atomese-programming"><span class="std std-ref">Programming with Atomese</span></a></p>
 </div>
 </div>
+</div>
 
 
           </div>
@@ -490,16 +534,20 @@ However, this query will have considerably better performance characteristics as
 <li class="toctree-l2"><a class="reference internal" href="#a-basic-query-with-meetlink-variablenode">A Basic Query with MeetLink &amp; VariableNode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#querylink-to-utilize-query-results">QueryLink to Utilize Query Results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#more-elaborate-queries-with-other-link-types">More Elaborate Queries with other Link Types</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#querylink-to-discard-intermediate-variables">QueryLink to Discard Intermediate Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#andlink">AndLink</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#greaterthanlink">GreaterThanLink</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#querylink-to-format-query-results">QueryLink to Format Query Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#andlink-for-multiple-query-criteria">AndLink for Multiple Query Criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#greaterthanlink-to-filter-by-numeric-value">GreaterThanLink to Filter by Numeric Value</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#valueoflink-and-thinking-about-performance">ValueOfLink and Thinking About Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#valueoflink-and-setvaluelink">ValueOfLink and SetValueLink</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#thinking-about-performance-querying-values">Thinking About Performance Querying Values</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="03_atomese_programming.html">Programming with Atomese</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_evaluation_and_truth_values.html">Evaluation and Truth Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_logical_inferencing.html">Logical Inferencing</a></li>
 </ul>
 
 <div class="relations">

@@ -361,7 +361,7 @@ We found Fido!
 
 Now, let's go over the Links we just used, and I'll explain the query along the way.
 
-QueryLink to Discard Intermediate Variables
+QueryLink to Format Query Results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Last time we encountered :code:`QueryLink` we used it as a way to execute additional operations on our query result.
@@ -406,7 +406,7 @@ While the :code:`QueryLink` version returns just:
 
 That is because we explicitly told the :code:`QueryLink` atom that we were interested in :code:`(Variable "dog_node")` as our result.  On the other hand, the :code:`MeetLink` atom created a :code:`ListLink` referencing all of the :code:`VariableNode` atoms in our query.
 
-AndLink
+AndLink for Multiple Query Criteria
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :code:`AndLink` is a link atom type for performing the binary "And" operation.  You probably guessed that from its name.
@@ -455,7 +455,7 @@ If you're curious, the Atomspace has an :code:`OrLink` along with some other log
 "And" expressions narrow the *Satisfying Set* while "Or" expressions expand it.  Therefore you may need to be careful using :code:`Variable` nodes on both sides of an "Or" expression and expecting them to be consistent.  The behavior may not be what you intend.
 There is certinly more that could be said on this topic, but it feels like a rat hole at this point in the guide.
 
-GreaterThanLink
+GreaterThanLink to Filter by Numeric Value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As the name suggests, :code:`GreaterThanLink` compares two :code:`NumberNode` atoms using the "**>**" operator.
@@ -465,7 +465,7 @@ So this comparison evaluates to *true* if the numeric value of the atom matched 
 
 I'll take this opportunity to introduce other link types along the same lines:
 
-   - `EqualLink <https://wiki.opencog.org/w/EqualLink>`_ Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.  **Be careful** because :code:`NumberNode` atoms don't get converted to values for comparison by :code:`EqualLink`, in the same way they would be converted by :code:`GreaterThanLink`.  For example, using :code:`EqualLink` to compare :code:`(FloatValue 1.0)` with :code:`(NumberNode 1.0)` will evaluate to *false*!
+   - `EqualLink <https://wiki.opencog.org/w/EqualLink>`_ Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.
    - `NotLink <https://wiki.opencog.org/w/NotLink>`_ Is the logical "Not" operator.  Evaluates to *true* if the atom it references evaluates to *false* and vice-versa.  Things get a little more complicated when considering non-binary TruthValues, but that's a topic we'll cover later.
    - `PlusLink <https://wiki.opencog.org/w/PlusLink>`_ Is the arithmetic operator for addition.  It references two :code:`NumberNode` atoms, and creates a third with the value of the sum of the other two.
    - `MinusLink <https://wiki.opencog.org/w/MinusLink>`_ Is the arithmetic operator for subtraction.  It references two :code:`NumberNode` atoms, and creates a third with the value of first minus the second.
@@ -474,20 +474,73 @@ I'll take this opportunity to introduce other link types along the same lines:
 
 You may have noticed that "LessThanLink" is absent.  The less-than operator itself is just syntactic sugar because the argument order to :code:`GreaterThanLink` can implement a logically identical "LessThanLink".  Personally I've often wondered why more programming languages don't conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.
 
+.. note:: **Be careful** Naked Values, e.g. :code:`FloatValue`, can't be part of expressions in the Atomspace.  For example, using :code:`EqualLink` to compare :scheme:`(FloatValue 2.0)` with :scheme:`(NumberNode 1.0)` will evaluate to *true*!  This happens because the :code:`FloatValue` vanishes when constructing the expression, and thus the :code:`NumberNode` is compared to itself!
+
 .. note:: QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but equality for IEEE floats is problematic for many applications because values that are no longer representable with the mantissa bits become approximated leading to all kinds of unintended behavior.
 
-ValueOfLink and Thinking About Performance
+ValueOfLink and SetValueLink
 ------------------------------------------------------------------------
 
-Coming full circle, let's revisit values associated with atoms.  Let's associate an age with Fido, using the Scheme snippet below:
+Coming full circle, let's revisit values associated with atoms.
+If you recall, last chapter, we used :code:`cog-set-value` to associate a value with an atom.
+
+There is an Atomese equivalent: :code:`SetValueLink`.
+:code:`SetValueLink` behaves exactly like :code:`cog-set-value`, except that it can be incorporated into another Atomese expressions.
+This will become important when we begin discussing Atomese programs in the next chapter.
+
+We might use :code:`cog-set-value` to associate an age with Fido, invoking the OpenCog command below:
 
 .. code-block:: scheme
 
    (cog-set-value! (Concept "Fido the Dog")
       (Predicate "age") (FloatValue 3))
 
-It turns out you actually *can* query the Atomspace for atoms with some values that meet your query criteria.  You just need to be careful.
-Consider the query below:
+The Atomese equivalent to that would be:
+
+.. code-block:: scheme
+
+   (cog-execute!
+      (SetValueLink (Concept "Fido the Dog")
+         (Predicate "age") (NumberNode 3)
+      )
+   )
+
+These are *almost* the same, however, there is one important thing to remember: "Naked" Values can't exist in the Atomspace.
+
+Notice that :scheme:`(FloatValue 3)` is not exactly the same thing as :scheme:`(NumberNode 3)`.
+The latter a reference to the :code:`NumberNode` atom standing in for the numeric value, while the former is the actual floating point number itself.
+
+There is no way for the :code:`FloatValue` to be part of the Atomese exprssion we want to execute, because it can't exist in the Atomspace at all.
+
+.. note:: QUESTION FOR SOMEONE SMARTER THAN ME. Is this actually right???  This doesn't feel right that there is no mechanism to make this work.
+
+Conversely, we can access values associated with atoms in Atomese using :code:`ValueOfLink`.
+:code:`ValueOfLink` is the Atomese equivalent to the :code:`cog-value` command we introduced last chapter.
+
+So the Scheme snippet below:
+
+.. code-block:: scheme
+
+   (cog-execute!
+      (ValueOfLink
+         (Concept "Fido the Dog") (Predicate "age")
+      )
+   )
+
+Is equivalent to directly accessing the value like this:
+
+.. code-block:: scheme
+
+   (cog-value (Concept "Fido the Dog") (Predicate "age"))
+
+Thinking About Performance Querying Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Last chapter, I told you that values can't be used as search criteria.
+I should have said that values can't be searched *efficiently*.
+
+It turns out you actually *can* query the Atomspace for atoms with values that meet your query criteria.
+You just need to be careful.  Consider the query below to find dogs based on age:
 
 .. code-block:: scheme
 
