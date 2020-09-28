@@ -771,6 +771,10 @@ This is the “Map” part.  The result is another <code class="code docutils li
 <span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEBODY SMARTER THAN ME.  Is there a better way to do this Map-Reduce pattern???  It seems wrong that we don’t tell the system that one PutLink has no inter-dependence and can execute in parallel and the other does have interdependence and needs to execute serially.  Unless there is some kind of code inspection going on it’s either not able to parallelize or it’s going to break when it tries to parallelize.  Both are not ideal.</p>
+</div>
 <p>Now let’s call it with the “squares_set” we created earlier.</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="c1">; Sum up all the elements in the squares_set</span>
 <span class="p">(</span><span class="nf">cog-execute!</span>
