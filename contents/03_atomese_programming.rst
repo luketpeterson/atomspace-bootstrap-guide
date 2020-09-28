@@ -878,6 +878,8 @@ Now here is our function.  It increments "sum" by the number that's passed in, a
         )
     )
 
+.. note:: QUESTION FOR SOMEBODY SMARTER THAN ME.  Is there a better way to do this Map-Reduce pattern???  It seems wrong that we don't tell the system that one PutLink has no inter-dependence and can execute in parallel and the other does have interdependence and needs to execute serially.  Unless there is some kind of code inspection going on it's either not able to parallelize or it's going to break when it tries to parallelize.  Both are not ideal.
+
 Now let's call it with the "squares_set" we created earlier.
 
 .. code-block:: scheme

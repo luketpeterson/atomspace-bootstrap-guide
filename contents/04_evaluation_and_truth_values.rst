@@ -11,6 +11,84 @@ Previous Chapter: :ref:`Programming with Atomese <03_atomese_programming>`
 Evaluation and Truth Values
 ========================================================================
 
+Somehow, we've managed to get pretty far without talking much about what it means to evaluate a predicate expression.
+
+This is a big topic, but it is key to understanding how to use the Atomspace effectively.
+Personally found this very confusing initially, so I'll try to build it up bit by bit.
+
+Hopefully we have enough foundation at this point that it'll make more sense for you than it did for me at first.
+
+Evaluating a Predicate Expression
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We've gotten a lot of mileage out of :code:`cog-execute!`, but sometimes it doesn't do what we need.
+:code:`cog-evaluate!` is another similar operation, but instead of *executing* the atom, it is used to *evaluate* an atom forming a predicate expression.
+:code:`cog-evaluate!` will always return a *TruthValue*, but :code:`cog-execute!` is free to return just about anything at all.
+
+We've already been using predicate expressions as part of other expressions throughout the guide.
+I just didn't put a spotlight on it until now.
+
+Consider each of these examples:
+
+.. code-block:: scheme
+
+    (cog-evaluate! 
+        (GreaterThan (Number 20) (Number 15))
+    )
+
+    (cog-evaluate! 
+        (FalseLink)
+    )
+
+    (cog-evaluate! 
+        (SatisfactionLink
+            (AndLink
+                (StateLink
+                    (ListLink
+                        (Concept "Fido the Dog")
+                        (Predicate "weight_in_kg")
+                    )
+                    (VariableNode "dogs_weight_node")
+                )
+                (GreaterThan
+                    (VariableNode "dogs_weight_node")
+                    (Number 10)
+                )
+            )
+        )
+    )
+
+Each one of those examples above, and all other predicate expressions, can be evaluated to a single TruthValue; True, False, or somewhere in between.
+
+EvaluationLink has Two Important Roles
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Very early in the `Atomspace examples <https://github.com/opencog/atomspace/blob/master/examples/atomspace/knowledge.scm>`_, :code:`EvaluationLink` pops up without any introduction.
+It says this:
+
+.. code-block:: scheme
+
+    (EvaluationLink
+        (PredicateNode "_obj")
+        (ListLink
+            (ConceptNode "make")
+            (ConceptNode "pottery")))
+
+The first thing to understand is that we are making an *assertion* here.
+We are telling the Atomspace that :scheme:`(Concept "make")` and :scheme:`(Concept "pottery")` are valid, aka *true*, arguments for :scheme:`(Predicate "_obj")`.
+In English, the above statement should be read as "Pottery can be Made.", or more pedantically, "Pottery is a valid Object for Make".
+
+So, when the first argument to :code:`EvaluationLink` is a :code:`PredicateNode` and the entire expression is grounded, this is how we *declare* that a predicate expression is true, for some given arguments.
+
+And once we've declared 
+
+BORIS SatisfactionLink to test an asserted predicate.  Prove "makes pottery = true" "makes rain" = false.
+
+Let's use a 
+
+
+Second, EvaluationLink with DefinedPredicate
+
 
 
 
@@ -317,34 +395,9 @@ NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN
 
 
 
-Intro.
-We will also cover the difference between the execution and the evaluation context.
-
-We've gotten a lot of mileage out of :code:`cog-execute!`, but BORIS YELTSIN
-
-So we saw above how we could use :code:`cog-evaluate!` to evaluate a atom to generate a TruthValue.
-But how do we utilize that result to control what our program does next?
-In other words, what are the Atomese equivalents for program-flow constructs like If-Then statements, Case statements, etc.?
-
-
-
 
 LP: See if I can get the AndLink stuff to work for partial conditionals, testing it with the side-effect-full eval path from the recursive-loop.scm example
 
-
-In a simple form, like this:
-
-.. code-block:: scheme
-
-    (cog-evaluate!
-        (GreaterThan
-            (Number 10)
-            (Number 2)
-        )
-    )
-
-Notice that we've traded :code:`cog-execute!` for :code:`cog-evaluate!`.
-These OpenCog functions are similar, but where :code:`cog-execute!` may return anything at all, :code:`cog-evaluate!` will always return a *TruthValue*.
 
 The Philosophy of Truth
 ------------------------------------------------------------------------
