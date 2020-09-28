@@ -31,7 +31,8 @@ Let's begin.
    contents/01_getting_oriented
    contents/02_representing_knowledge
    contents/03_atomese_programming
-   contents/04_logical_inferencing
+   contents/04_evaluation_and_truth_values
+   contents/05_logical_inferencing
 
 
 Indices and tables

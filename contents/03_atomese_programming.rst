@@ -773,7 +773,7 @@ So here's one way to improve our solution to only require n iterations as oppose
         )
     )
 
-This appraoch requires us to "seed" our sequence with some earlier terms, but it is considerably more efficient than the earlier solution.
+This appraoch requires us to "seed" our sequence with some starting terms, but it is considerably more efficient than the earlier solution.
 Here is an example of how we might call it:
 
 .. code-block:: scheme
@@ -790,9 +790,138 @@ Here is an example of how we might call it:
         )
     )
 
-.. note:: QUESTION FOR SOMEONE SMARTER THAN ME.  This is where I'd like to say "There is this feature for default arguments", but I didn't find anything like that... Does it exist?
+.. note:: QUESTION FOR SOMEONE SMARTER THAN ME.  This is where I'd like to say "LambdaLink has this feature for default arguments", but I couldn't find anything like that... Does it exist?
 
-.. note:: QUESTION FOR SOMEONE SMARTER THAN ME.  Are there links that let me do something like execute a Schema against every item in a set?  An alternative to looping, a la MapReduce?  Seems like a natural fit for the Atomspace, but I didn't find anything.  Maybe I wasn't looking in the right place.
+PutLink as an Alternative to a ForEach Loop
+------------------------------------------------------------------------
+
+As someone who grew up on procedural programming, the loop is second-nature to me.
+And one of the most common reasons I reach for a loop is to do an operation for every item in a set or sequence.
+The :code:`foreach` loop pattern, if you will.
+
+But often, the order in which we process elements is irrelevant to the algorithm we are executing.
+In this case, we really shouldn't be thinking of a :code:`foreach` operation as a sequential loop at all.
+We could just as easily think of it as the code taking a separate parallel branch for every item of the set we're operating on.
+
+This idea has been formalized recently as the `Map-Reduce Pattern <https://en.wikipedia.org/wiki/MapReduce>`_ and the fundamental concepts have been in use for decades before that.
+
+In Atomese, this pattern can be implemented with :code:`PutLink`.
+Let's say we want to implement a "Sum-of-Squares" routine to compute the sum of the squared values of a set of numbers.
+Following the Map-Reduce pattern, we'll do it in two parts.
+
+Below is a Scheme snippet to compute the square of each of series of numbers.
+This is the "Map" part.  The result is another :code:`SetLink` containing the squares.
+
+.. code-block:: scheme
+
+    ; Iterate over every number in the set and square it
+    (define squares_set
+        (cog-execute!
+            (PutLink
+                (TimesLink
+                    (Variable "our_number")
+                    (Variable "our_number")
+                )
+                (SetLink
+                    (Number 2)
+                    (Number 3)
+                    (Number 4)
+                    (Number 5)
+                )
+            )
+        )
+    )
+
+As you can see, the first argument to :code:`PutLink` is ther operation to perform on each element, and the second argument is the set of elements.
+
+We can examine the output set to prove to ourselves that everything followed our expectations.
+
+.. code-block:: scheme
+
+    (display squares_set)
+
+.. note:: :code:`SetLink` is an unordered link, so the order of the result elements probably won't match the order of the input elements.
+
+Now, for the "Reduce" part, we'll use another :code:`PutLink` that calls a :code:`LambdaLink`.  Let's start by resetting our counter to 0 (Zero).
+
+.. code-block:: scheme
+
+    ; Reset our "sum"
+    (cog-execute!
+        (SetValue
+            (Concept "sum")
+            (Predicate "numeric_value")
+            (Number 0)
+        )
+    )
+
+Now here is our function.  It increments "sum" by the number that's passed in, and should execute on every element of the set:
+
+.. code-block:: scheme
+
+    ; Function to add a number argument to the "sum"
+    (DefineLink
+        (DefinedSchema "add_stuff")
+        (LambdaLink
+            (Variable "our_number")
+            (SetValue
+                (Concept "sum")
+                (Predicate "numeric_value")
+                (PlusLink
+                    (ValueOf
+                        (Concept "sum")
+                        (Predicate "numeric_value")
+                    )
+                    (Variable "our_number")
+                )
+            )
+        )
+    )
+
+Now let's call it with the "squares_set" we created earlier.
+
+.. code-block:: scheme
+
+    ; Sum up all the elements in the squares_set
+    (cog-execute!
+        (PutLink
+            (ExecutionOutputLink
+                (DefinedSchema "add_stuff")
+                (Variable "our_number")
+            )
+            squares_set
+        )
+    )
+
+And lastly, we retrieve our result by examining the :scheme:`(Predicate "numeric_value")` value associated with the the :scheme:`(Concept "sum")` atom.
+
+.. code-block:: scheme
+
+    (cog-execute! (ValueOf (Concept "sum") (Predicate "numeric_value") ) )
 
 
+.. note::
+
+    QUESTION FOR SOMEBODY SMARTER THAN ME.  Why do I need a LambdaLink to make this execute???  Why won't the below code work equivalently?
+
+    .. code-block:: scheme
+
+        ; Iterate over every number in the set, and add it to the "sum"
+        (PutLink
+            (SetValue
+                (Concept "sum")
+                (Predicate "numeric_value")
+                (PlusLink
+                    (ValueOf
+                        (Concept "sum")
+                        (Predicate "numeric_value")
+                    )
+                    (Variable "our_number")
+                )
+            )
+            squares_set
+        )
+
+
+Next Chapter: :ref:`Evaluation and Truth Values <04_evaluation_and_truth_values>`
 

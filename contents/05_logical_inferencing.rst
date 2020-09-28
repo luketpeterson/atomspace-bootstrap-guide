@@ -1,7 +1,7 @@
 .. role:: scheme(code)
    :language: scheme
 
-.. _03_logical_inferencing:
+.. _05_logical_inferencing:
 
 Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 

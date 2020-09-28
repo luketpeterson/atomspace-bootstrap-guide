@@ -1,3 +1,16 @@
+.. role:: scheme(code)
+   :language: scheme
+.. role:: c(code)
+   :language: c
+
+.. _04_evaluation_and_truth_values:
+
+Previous Chapter: :ref:`Programming with Atomese <03_atomese_programming>`
+
+========================================================================
+Evaluation and Truth Values
+========================================================================
+
 
 
 
