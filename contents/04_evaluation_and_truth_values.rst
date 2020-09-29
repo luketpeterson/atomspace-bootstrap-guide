@@ -63,7 +63,11 @@ Each one of those examples above, and all other predicate expressions, can be ev
 EvaluationLink to Assert Stuff with PredicateNode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-EvaluationLink has two important roles.
+:code:`EvaluationLink` is the central mechanism that allows arbitrary predicates to be evaluated.
+It has two important roles where it takes on what feel to me like two disparate functions.
+Personally, I don't know why separeate atom types weren't used.  Perhaps somebody with more expertise can shed some light on that question.
+
+Anyway, the first role of :code:`EvaluationLink` is to associate a TruthValue with a :code:`PredicateNode` expression.
 
 Very early in the `Atomspace examples <https://github.com/opencog/atomspace/blob/master/examples/atomspace/knowledge.scm>`_, :code:`EvaluationLink` pops up without any introduction.
 It says this:
@@ -84,7 +88,7 @@ So, when the first argument to :code:`EvaluationLink` is a :code:`PredicateNode`
 
 And once we've declared it, we can query for it, just like any other relationship in the Atomspace.
 
-Can we make pottery?
+Can we make pottery?  Let's ask:
 
 .. code-block:: scheme
 
@@ -134,6 +138,8 @@ Unfortunately, no. :-(
 
 DefinedPredicateNode to Create Predicate Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To understand the second role of :code:`EvaluationLink`, we should talk about defining predicate functions whose TruthValue is a function of the arguments passed in.
 
 In the previous chapter, we looked at the :code:`DefinedSchemaNode` to name a function or subroutine.
 For predicates, there are some advantages to using :code:`DefinedPredicateNode` instead.
@@ -190,93 +196,46 @@ Here :code:`EvaluationLink` wraps the dispatch of a :code:`DefinedPredicateNode`
 
 .. note:: QUESTION FOR SOMEONE SMARTER THAN ME.  Is there a cleaner and more idiomatic way to evaluate EvaluationLink assertions???  The documentation for EvaluationLink defines a "LessThan" PredicateNode.  But is there a way to call that Predicate without a SatisfactionLink???  Even if it doesn't function like a true numeric LessThan, and only knows about the number pairs that have been asserted.
 
+SequentialAndLink & SequentialOrLink Flow Control
+------------------------------------------------------------------------
 
+Last chapter, we introduced :code:`CondLink` for program flow management.
+:code:`CondLink` operates in an execution context, to execute one atome vs. another depending on the outcome of evaluating a predicate expression.
+If you're operating in an evaluation context, e.g. in the process evaluating a predicate, then logical *And* & *Or* operators can dictate your program flow.
 
+To elaborate: consider the statement "The car must stop if the light is yellow or red."
+When evaluating the "Light is yellow or red" expression to determine if the car must stop, and "Light is yellow" is true, there is no need to evaluate "Light is red".
+You already know the expression is true.
 
+"And" expressions have the same property for false components.  If you are looking for someone "Tall and Handsome", you can stop if you find that one criteria is not met and there is no need to evaluate the other.
 
+The implication of statements composed of logical "And" and "Or" operators is that it is irrelevant to the outcomem, whether or not one branch of the expression is evaluated if another branch has already determined the outcome.
 
+Atomese takes this one step further with the :code:`SequentialAndLink` & :code:`SequentialOrLink` atoms.
+They provide the guarantee that branches will be evaluated in sequence and that the evaluation will stop once the outcome of the whole expressions is conclusively determined.
 
+Therefore, :code:`SequentialAndLink` and :code:`SequentialOrLink` can be used as general purpose flow control primitives from which you can construct complex predicate expressions.
 
+This works even in situations where evaluating one branch of the expression may produce a side effect, such as the examples from RobotOS, cited in the documentation.
 
+In addition, :code:`SequentialAndLink` & :code:`SequentialOrLink` can take an argument list of arbitrary length, unlike their strictly binary logical peers in other languages.
 
+So, in summary, :code:`SequentialAndLink` will evaluate each branch in sequence unless a branch evaluates to false, in which case it will cease evaluating subsequent branches and will return false.
+If all branches evaluate to true, the :code:`SequentialAndLink` itself will evaluate to true.
 
+:code:`SequentialOrLink` is similar, but will continue evaluation as long as each branch evaluates to false, and will terminate evaluation after evaluating the first branch that evaluates to true.
+:scheme:`(SequentialOrLink A B C)` is equivalent to :scheme:`(Not (SequentialAndLink (Not A) (Not B) (Not C)))`.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-BORIS, Section below should be part of the lead-in to using SequentialAndLink and SequentialOrLink
-
-You may have already stumbled into this, but you can use a :code:`ListLink` to execute multiple operations.
-Here's an example: 
-
-.. code-block:: scheme
-
-    (DefineLink
-        (DefinedSchemaNode "make_nighttime")
-        (ListLink
-            (PutLink
-                (State
-                    (Variable "switch_placeholder")
-                    (Concept "On")
-                )
-                (Concept "Moonlight")
-            )
-            (PutLink
-                (State
-                    (Variable "switch_placeholder")
-                    (Concept "Off")
-                )
-                (Concept "Sunlight")
-            )
-        )
-    )
-
-
-
-Local Variables
+IsPrime? An Example in Atomese Code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BORIS, I can't actually figure out how to use local variables in Lambdas, but I'm also not convinced they are needed.
+Pulling together many of the concepts we've covered up to this point, here is a predicate expression to determine whether a number is prime.
 
-Distilling the benefits of functions down to just argument passing really doesn't do justice to the concept.
-Functions provide a means manage the side-effects that a subroutine can produce.
-In other words, if a function produces 
-
-
-BORIS.  Create a return value from a function.
-Then create an increment function where the value passes through a local variable, think up a way that the function would cross-talk with itself from one calling to the next.
-BORIS BEST IDEA, Make a recursive function that have 2-dimensions so it interferes with itself.
-Consider implementing a "list_of_n_primes" function.  That might be the best way to contrive a variable confict, and if not it'll still be good practice.
-Read the parallelism OpenCog Example.
-
-
-
-
-BORIS CHAPTER FLOW IDEAS.
-In the next chapter, introduce EvaluationLink and DefinedPredicate.
-Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs to compose programs.
-
+But first, one of the building blocks of that is a function to determine if a number is a positive integer, or a real number that is not a positive integer.
+The function below checks this using a "level-crossing" algorithm.  In other words, all positive integers will eventually equal 1 if 1 is subtracted from them an arbitrary number of times.
+I admit this is not a good solution for many many reasons, but Atomese gave me a limited palette of primitive operations to work with. 
 
 .. code-block:: scheme
-
-    (cog-evaluate!
-        (Evaluation
-            (DefinedPredicate "is_pos_integer?")
-            (Number 2)
-        )
-    )
-
 
     (Define
         (DefinedPredicateNode "is_pos_integer?")
@@ -310,11 +269,16 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
+    ; Test our "is_pos_integer?" function
+    (cog-evaluate!
+        (Evaluation
+            (DefinedPredicate "is_pos_integer?")
+            (Number 2)
+        )
+    )
 
-    BORIS, looks like I will need to explain DefinedPredicate, which means I'll probably need to explain evaluation
-    BORIS, write up SequentialAnd & SequentialOr, and how they fit in, 
-        This will require drawing a diagram of AND, OR, and NOT gates.
-    BORIS, look at PredicateFormula, it Constructs a TruthValue from two number values
+So, with our :code:`is_pos_integer?` function implemented above, we can create our :code:`is_prime?` function.
+We need to split our funtion into two parts to facilitate recursion, following the same pattern we used last chapter for our :code:`fibonacci_iterative` function.
 
 .. code-block:: scheme
 
@@ -322,7 +286,7 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         (DefinedPredicateNode "is_prime_helper")
         ; Determines whether "x" is evenly divisible by "i" or another integer greater than "i"
         ; In otherwords, returns partial NOT prime.  Intended to be called by "is_prime?"
-        ; If called with i=2, false = x is prime, true = x is not prime
+        ; If called with i=2, false means "x is prime", true means "x is not prime"
 
         (Lambda
             (VariableList
@@ -353,6 +317,7 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
+    ; Test our "is_prime_helper" function
     (cog-evaluate!
     (Evaluation
         (DefinedPredicate "is_prime_helper")
@@ -379,6 +344,7 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
+    ; Test our "is_prime?" function
     (cog-evaluate!
     (Evaluation
         (DefinedPredicate "is_prime?")
@@ -386,11 +352,63 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
         )
     )
 
-    
+.. note::
 
-    BORIS, Include discussion about FFI, like a printf debug funcrtion
+    QUESTION FOR SOMEONE SMARTER THAN ME.  What's the best "chaining" link for the execution context??? i.e. what link type should I use to say "first execute this, then that, then this other thing"?
 
-    BORIS look at "execute.scm"
+    I've tried with :code:`ListLink` and :code:`SetLink` and the results have been mixed.  It seems to work in some situations, but in other it seems to go horribly wrong.
+
+    This below works, but then if I put it into a LambdaLink instead of a "raw" Define then it stops working.  What's the right way to do this instead?
+
+    .. code-block:: scheme
+
+        (DefineLink
+            (DefinedSchemaNode "make_nighttime")
+            (ListLink
+                (PutLink
+                    (State
+                        (Variable "switch_var")
+                        (Concept "On")
+                    )
+                    (Concept "Moonlight")
+                )
+                (PutLink
+                    (State
+                        (Variable "switch_var")
+                        (Concept "Off")
+                    )
+                    (Concept "Sunlight")
+                )
+            )
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BORIS, Include discussion about FFI, like a printf debug funcrtion
+
+BORIS look at "execute.scm"
 
 .. code-block:: scheme
 
@@ -489,7 +507,7 @@ BORIS introduce StrengthOf & CondfidenceOf
 BORIS, include the fact that a truthValue is attached to an atom with a special key.  Explained in values.scm example.
 
 BORIS PredicateFOrmula as a way to compose Truth Values
-
+BORIS, look at PredicateFormula, it Constructs a TruthValue from two number values
 
 So, as you can see, this is a step beyond simple bivalent (crisp true or false) logic in both reasoning ability and complexity.
 
