@@ -97,23 +97,3 @@ A dog has 0 wheels.  Dog implies Animal, Animal has 0 wheels.
 
 
 
-Defining new Types
-------------------------------------------------------------------------
-Building up our own grammar.
-BORIS Defining some 
-
-Check out this guide:
-https://wiki.opencog.org/w/Adding_New_Atom_Types
-
-A DefineLink??? https://wiki.opencog.org/w/DefineLink
-
-It is advised to use an EquivalenceLink instead of a DefineLink
-https://wiki.opencog.org/w/EquivalenceLink
-
-
-
-
-Is TypedAtomLink the way???  https://wiki.opencog.org/w/TypedAtomLink
-Or SignatureLink??  https://wiki.opencog.org/w/SignatureLink
-
-

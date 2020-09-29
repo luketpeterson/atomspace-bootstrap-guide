@@ -152,6 +152,7 @@ So, let's rewrite the :code:`SatisfactionLink` query above using a :code:`Define
         (LambdaLink
             (Variable "test_object")
             (SatisfactionLink
+                (Variable "predicate_object")
                 (AndLink
                     (EvaluationLink
                         (PredicateNode "_obj")
@@ -169,7 +170,9 @@ So, let's rewrite the :code:`SatisfactionLink` query above using a :code:`Define
         )
     )
 
-So there's our predicate function.  Notice that we don't need the :code:`EqualLink` from above, because the :code:`ConceptNode` we're querying about is passed in as an argument.
+So there's our predicate function.  Notice that we need to declare both :code:`VariableNode` atoms now,
+one gets its value from the :code:`LambdaLink` as an argument and the other gets its value as part of the query in :code:`SatisfactionLink`.
+If we don't do this, the Atomspace has no way of knowing which :code:`VariableNode` is which.
 
 How do we call it?
 
@@ -182,22 +185,10 @@ How do we call it?
         )
     )
 
-That's the other role of :code:`EvaluationLink` I was talking about.
+This is the other role of :code:`EvaluationLink` I was talking about.
+Here :code:`EvaluationLink` wraps the dispatch of a :code:`DefinedPredicateNode`, in the same way that we used :code:`ExecutionOutputLink` in the previous chapter.
 
-
-BORIS, just like EXECUTIONOUTPUT...  
-
-NOTE: SEGFAULT BORIS!!!  Write up a bug, after ensuring it crashes on TOT.
-
-BORIS
-NOTE: Is there a cleaner and more idiomatic way to evaluate EvaluationLink assertions??? Surely there is.  Look at the docs for "lessThanLink"
-
-
-
-
-
-
-Second, EvaluationLink with DefinedPredicate
+.. note:: QUESTION FOR SOMEONE SMARTER THAN ME.  Is there a cleaner and more idiomatic way to evaluate EvaluationLink assertions???  The documentation for EvaluationLink defines a "LessThan" PredicateNode.  But is there a way to call that Predicate without a SatisfactionLink???  Even if it doesn't function like a true numeric LessThan, and only knows about the number pairs that have been asserted.
 
 
 
@@ -399,6 +390,8 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
 
     BORIS, Include discussion about FFI, like a printf debug funcrtion
 
+    BORIS look at "execute.scm"
+
 .. code-block:: scheme
 
     (define (scm-display-wrapper-exec atom)
@@ -444,49 +437,32 @@ Then go on to cover the use of SequentialAnd, SequentialOr, and other constructs
 
 Boris end of FFI section
 
-.. code-block:: scheme
-
-
-    (Define
-        ; Calculates the next prime number, greater than the number supplied
-        (DefinedSchemaNode "next_prime")
-        (Lambda
-            (Variable "x")
-
-            ; temp = x+1
-            (SetValue (Variable "x") (Predicate ""))
-            
-            ; Check to see if temp is prime
-
-            ; If it is, return it, if not, recurse to find the value after temp
-        )
-    )
-
-BORIS, need to explain the SetValue and ValueOf Links in Chapter 2.  It fits with the "optimization" section
-
-.. code-block:: scheme
-
-    (Define
-        (DefinedSchemaNode "list_of_n_primes")
-        (Lambda
-            (VariableNode "n")
-
-        )
-    )
 
     
-
-
-
-
-BORIS
-Look at explaining DefinedPredicateNode
 
 
 BORIS. Check out the https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm example.  
 BORIS SignatureLink and DefinedTypeNode
 Let's start with data structures.  In C, for example, there is the :c:`struct` keyword, to declares a collection of variables that are packaged up together as a unified code object.
 
+BORIS (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
+
+Defining new Types
+------------------------------------------------------------------------
+Building up our own grammar.
+BORIS Defining some 
+
+Check out this guide:
+https://wiki.opencog.org/w/Adding_New_Atom_Types
+
+A DefineLink??? https://wiki.opencog.org/w/DefineLink
+
+It is advised to use an EquivalenceLink instead of a DefineLink
+https://wiki.opencog.org/w/EquivalenceLink
+
+
+Is TypedAtomLink the way???  https://wiki.opencog.org/w/TypedAtomLink
+Or SignatureLink??  https://wiki.opencog.org/w/SignatureLink
 
 
 
@@ -494,19 +470,6 @@ Let's start with data structures.  In C, for example, there is the :c:`struct` k
 
 
 
-
-
-
-
-
-
-NEXT CHAPTER BEGINS SOON.  BORIS YELTSIN
-
-
-
-
-
-LP: See if I can get the AndLink stuff to work for partial conditionals, testing it with the side-effect-full eval path from the recursive-loop.scm example
 
 
 The Philosophy of Truth
@@ -520,6 +483,13 @@ When you run that :code:`cog-evaluate!` snippet above, you should get this:
 
 "stv" in this case stands for *Simple Truth Value*, and an STV is composed of two floating point numbers: *Strength* and *Confidence*.
 In our case, they are both exactly 1.  The expression was 100% true, and we are 100% sure of that.
+
+BORIS introduce StrengthOf & CondfidenceOf
+
+BORIS, include the fact that a truthValue is attached to an atom with a special key.  Explained in values.scm example.
+
+BORIS PredicateFOrmula as a way to compose Truth Values
+
 
 So, as you can see, this is a step beyond simple bivalent (crisp true or false) logic in both reasoning ability and complexity.
 
@@ -564,80 +534,12 @@ And the complete PLN book can be downloaded (for now) here: `<https://aiatadams.
 BORIS HERE
 
 
-Now, we want to put him into a "Big Dog" or a "Small Dog" set, depending on his weight.
-But first, we need to define a predicate that will evaluate to true if his weight is above a threshold.
-
-
-BORIS Unnatural Break
-
-So unlike the other query link types, :code:`SatisfactionLink` is appropriate to use in an evaluation context rather than in an execution context.  In fact, 
-
-
-Let's stop here, and just evaluate our new predicate.
-
-.. code-block:: scheme
-
-    (cog-evaluate! fido_is_big?)
-
-You should get back :scheme:`(stv 0 1)`, aka false.  Fido is not heavier than 15kg.  If you're not convinced, try tweaking Fido's weight or the predicate to get the answer you want.
-
-BORIS Unnatural Break
-
-Continuing on, we can now create the appropriate :code:`MemberLink`, depending on how our predicate evaluates.
-
-.. code-block:: scheme
-
-    (cog-evaluate!
-        (OrLink
-            (AndLink
-                fido_is_big?
-                (MemberLink
-                    (Concept "Fido the Dog")
-                    (Predicate "Big Dog")
-                )
-            )
-            (MemberLink
-                (Concept "Fido the Dog")
-                (Predicate "Small Dog")
-            )
-        )
-    )
-    
-
-BORIS this is BORKED.  The trouble is that those memberlinks end up existing in the atomspace BECAUSE they exist as part of the query!!!
-
-.. code-block:: scheme
-
-    (cog-evaluate!
-        (OrLink
-            (AndLink
-                fido_is_big?
-                (StateLink
-                    (Concept "Fido the Dog")
-                    (Predicate "Big Dog")
-                )
-            )
-            (StateLink
-                (Concept "Fido the Dog")
-                (Predicate "Small Dog")
-            )
-        )
-    )
-
-
-    (cog-evaluate!
-        (MemberLink (stv 1 1)
-            (Concept "Fido the Dog")
-            (Predicate "Small Dog")
-        )
-    )
 
 
 
+LP: See if I can get the AndLink stuff to work for partial conditionals, testing it with the side-effect-full eval path from the recursive-loop.scm example
 
 BORIS, talk about how both sides can potentially execute, and it's just up to the end to decide which side to use.  How there isn't a program counter, as in precedural programming.
-
-
 
 Boris, what happens if something has a truth value of 0.5???  Which link is created???  Both.
 
@@ -647,62 +549,15 @@ Talk about side-effect-free vs. side-effects, SequentialAndLink
 
 
 
-BORIS introduce StrengthOf & CondfidenceOf
-
-
-
-Declaring EvaluationLinks
-------------------------------------------------------------------------
-
-BORIS, talk about grounding and checking if an assertion is true or not
-
-Assert, (Come up with an example that isn't an "isa" relationship.  Dogs chew bones, goats chew leaves)
-
-BORIS Below is WRONG!
-In the previous chapter, we showed how :code:`cog-execute!` could execute certain *Active* links, resulting in an atom or value being created and returned.
-For *Declarative*, aka passive links, the :code:`cog-evaluate!` OpenCog function is its counterpart.
-Unlike Active Links, Declarative links always evaluate to a *TruthValue*.
-
-
-
-BORIS, include the fact that a truthValue is attached to an atom with a special key.  Explained in values.scm example.
-
-
-BORIS Let's ask the Atomspace a true/false question.  "Is Fido an Animal?"
-
-
-BORIS What to say about EvaluationLink??  We've already introduced them above, GreaterThanLink is an EvalLink.
-
-
-
-BORIS.  Explain AnchorNodes and VariableLists
+BORIS.  Explain AnchorNodes??
 
 
 
 
-BORIS Revisit PredicateNode
-
-BORIS EvaluationLink
-BORIS two views, as an assertion with a truth value, or as a way to evaluate the truth of a proposition
-
-
-BORIS BORIS, How do I query whether something is part of another set
-
-
-BORIS PredicateFOrmula
-
-
-
-BORIS Cover using PutLink to find a location and update it.  For example, search the Atomspace, and put all dogs heavier than 10kg is the "Big Dogs" set.
-
-
-BORIS (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
-BORIS Next Chapter
-We'll also talk about the FFI, like using ExecutionOutput and GroundedSchema, or GroundedPredicate, look at "execute.scm"
 
 
 
 
 
 BORIS.  Understand how Values become Atoms sometimes...  A clue is dropped in the documentation on SleepLink https://wiki.opencog.org/w/SleepLink
-He says "NumberNodes are problematic for the AtomSpace".  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.
+It says "NumberNodes are problematic for the AtomSpace".  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.
