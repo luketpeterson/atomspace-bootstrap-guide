@@ -411,7 +411,7 @@ We pass one atom as an argument from Atomese, and the sceme function then displa
         )
     )
 
-.. note::  There is nothing special about :scheme:`(Concept "done")` as a return value, but the execution context requires that some valid atom be returned, and this was as good as any.
+.. note::  There is nothing special about :scheme:`(Concept "done")` as a return value, but the execution context requires that some valid atom be returned, and this was as good as any other.
 
 Now here is an example calling :scheme:`display` in an evaluation context with :code:`GroundedPredicateNode`.
 
@@ -472,18 +472,19 @@ Many of the benefits of representing code and formulas in the Atomspace can't be
     
 
 
-BORIS. Check out the https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm example.  
-BORIS SignatureLink and DefinedTypeNode
+
+Signatures and Defining new Atom Types
+------------------------------------------------------------------------
+
+TODO Building up our own grammar.
+
+TODO. Check out the https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm example.  
+TODO SignatureLink and DefinedTypeNode
 Let's start with data structures.  In C, for example, there is the :c:`struct` keyword, to declares a collection of variables that are packaged up together as a unified code object.
 
-BORIS (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
+TODO (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)
 
-Defining new Types
-------------------------------------------------------------------------
-Building up our own grammar.
-BORIS Defining some 
-
-Check out this guide:
+TODO Check out this guide:
 https://wiki.opencog.org/w/Adding_New_Atom_Types
 
 Understand this!!  It is advised to use an EquivalenceLink instead of a DefineLink
@@ -500,24 +501,24 @@ Or SignatureLink??  https://wiki.opencog.org/w/SignatureLink
 
 
 
-The Philosophy of Truth
+TruthValues
 ------------------------------------------------------------------------
 
-When you run that :code:`cog-evaluate!` snippet above, you should get this:
+When you run :code:`cog-evaluate!` you get something along these lines:
 
 .. code-block:: scheme
 
     (stv 1 1)
 
+I've said previously that it means "true", but why the complexity?  Why not just say "True" or "#t" or something more straightforward?
+
+You probably already picked up on this but the Atomspace supports more than just Yes/No or True/False crisp TruthValues.
+
 "stv" in this case stands for *Simple Truth Value*, and an STV is composed of two floating point numbers: *Strength* and *Confidence*.
 In our case, they are both exactly 1.  The expression was 100% true, and we are 100% sure of that.
 
-BORIS introduce StrengthOf & CondfidenceOf
-
-BORIS, include the fact that a truthValue is attached to an atom with a special key.  Explained in values.scm example.
-
-BORIS PredicateFOrmula as a way to compose Truth Values
-BORIS, look at PredicateFormula, it Constructs a TruthValue from two number values
+The Philosophy of Truth
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 So, as you can see, this is a step beyond simple bivalent (crisp true or false) logic in both reasoning ability and complexity.
 
@@ -558,26 +559,115 @@ For now, you can read an introductory paper on PLNs here: `<https://aiatadams.fi
 
 And the complete PLN book can be downloaded (for now) here: `<https://aiatadams.files.wordpress.com/2016/02/pln_book_6_27_08.pdf>`_
 
+Working with TruthValues
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BORIS HERE
+So far, we've seen TruthValues that are produced by evaluating a predicate expression, as in :code:`cog-evaluate!`.
+And we've also seen places where a predicate expression that evaluates to a TruthValue is expressly required, as in :code:`CondLink`.
+
+But it turns out that we can attach a TruthValue to any atom we want.
+So, actually we *can* make rain, in some limited situations, so we'll say that assertion is 20% true.
+
+.. code-block:: scheme
+
+    (EvaluationLink
+        (SimpleTruthValue 0.2 1.0)
+        (PredicateNode "_obj")
+        (ListLink
+            (ConceptNode "make")
+            (ConceptNode "rain")))
+
+.. note::  If typing :scheme:`(SimpleTruthValue 0.2 1.0)` gets tiring, we can also abbreviate it to (stv 0.2 1)
+
+Now, to access the TruthValue attached to that :code:`EvaluationLink` atom, we have a few options.
+We can just read it back as an AtomSpace value, using the :code:`TruthValueOfLink`, like this:
+
+.. code-block:: scheme
+
+    (define make_rain_assertion
+        (EvaluationLink
+            (stv 0.2 1.0)
+            (PredicateNode "_obj")
+            (ListLink
+                (ConceptNode "make")
+                (ConceptNode "rain")
+            )
+        )
+    )
+
+    (cog-execute! (TruthValueOf make_rain_assertion))
+
+Or we can examine the individual components of the TruthValue, using the :code:`StrengthOfLink` and :code:`ConfidenceOfLink` atoms.
+
+.. code-block:: scheme
+
+    (cog-execute! (StrengthOf make_rain_assertion))
+
+    (cog-execute! (ConfidenceOf make_rain_assertion))
+
+.. note::
+
+    Under the hood, TruthValues attached to atoms are represented just like any other value attached to the atom, in the atom's key-value store.
+
+    The special key: :scheme:`(PredicateNode "*-TruthValueKey-*")` is used to store the TruthValue.
+    Just like any other value, you can see an atom's TruthValue using the :code:`cog-keys->alist` OpenCog function, or any of the other methods to access and modify values.
+
+Predicate vs. Atom-attached TruthValues
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The truthValue that you get when evaluating an atom is **NOT** the same as the truthValue attached to the atom!!!
+Sorry about the exclamation marks, but this fact took me took me a few hours to discover, and it was an immensely annoying few hours when nothing seemed to follow my intuition.
+
+Compare the results of these two expressions:
+
+.. code-block:: scheme
+
+    (cog-evaluate!
+        (FalseLink)
+    )
+
+    (cog-execute!
+        (TruthValueOf
+            (FalseLink)
+        )
+    )
+
+The first one is the result of evaluating :code:`FalseLink`. :code:`stv (0, 1)`.
+
+The second is the result of trying to get the TruthValue attached to the :code:`FalseLink` atom.
+Since it doesn't have one, The :code:`TruthValueOfLink` uses the *Default* TruthValue: :code:`stv(1, 0)`, which is assumed for all atoms that haven't been assigned TruthValues through some other mechanism.  
+
+If you want to evaluate a predicate expression, and set the result as an atom's TruthValue, use the :code:`SetTVLink`.
+Here is an example that takes the result of evaluating the :code:`FalseLink` atom, and sets it on :scheme:`(Concept "New Atom")`:
+
+.. code-block:: scheme
+
+    (cog-execute!
+        (SetTV
+            (Concept "New Atom")
+            (FalseLink)
+        )
+    )
+
+If you want to do the reverse and use a TruthValue attached to an atom for a predicate expression, you need the :code:`PredicateFormulaLink`.
+
+.. code-block:: scheme
+
+    (cog-evaluate!
+        (PredicateFormula
+            (StrengthOf (Concept "New Atom"))
+            (ConfidenceOf (Concept "New Atom"))
+        )
+    )
+
+:code:`PredicateFormulaLink` is actually an important building block, and can be used instead of :code:`LambdaLink` for defining predicate expressions with :code:`DefinedPredicateNode`.
+
+.. note::  QUESTION FOR SOMEONE SMARTER THAN ME.  Is there a single-argument equivalent to PredicateFormulaLink???  Something that takes a single TruthValue rather than requiring it to be decomposed into Strength and Confidence?
 
 
 
 
 
-LP: See if I can get the AndLink stuff to work for partial conditionals, testing it with the side-effect-full eval path from the recursive-loop.scm example
-
-BORIS, talk about how both sides can potentially execute, and it's just up to the end to decide which side to use.  How there isn't a program counter, as in precedural programming.
-
-Boris, what happens if something has a truth value of 0.5???  Which link is created???  Both.
-
-
-BORIS YELTSIN
-Talk about side-effect-free vs. side-effects, SequentialAndLink
-
-
-
-BORIS.  Explain AnchorNodes??
 
 
 
@@ -586,6 +676,12 @@ BORIS.  Explain AnchorNodes??
 
 
 
+TODO: section on :code:`DynamicFormulaLink`, :code:`FormulaTruthValue`, etc.  May make sense to postpone until I've explained value-flows better.
 
-BORIS.  Understand how Values become Atoms sometimes...  A clue is dropped in the documentation on SleepLink https://wiki.opencog.org/w/SleepLink
+TODO: See if I can get the AndLink stuff to work for partial conditionals, e.g. if I can get a predicate to evaluate to partially-true, can I then cause both sides of a conditional expression to be evaluated, and the the results muxxed together???  Should probably study PLN because this can get explosive quickly.
+Talk about side-effect-free vs. side-effects.
+
+TODO.  Explain AnchorNodes??
+
+TODO.  Understand how Values become Atoms sometimes...  A clue is dropped in the documentation on SleepLink https://wiki.opencog.org/w/SleepLink
 It says "NumberNodes are problematic for the AtomSpace".  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.

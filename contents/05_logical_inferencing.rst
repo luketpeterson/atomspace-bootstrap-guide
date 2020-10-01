@@ -16,18 +16,16 @@ Inferencing is a broad topic and there are many techniques and strategies that c
 In this chapter, we will only touch on a small set of them, but hopefully it's enough to familiarize you with the set of general ideas.
 
 
-Boris Yeltsin
-
-Look at "Unified Rule Engine"
+TODO Look at "Unified Rule Engine"
 
 3 Possibilities for Inferencing to look at.  1.) InheritanceLinks do it automagically.  2.) It's a complex recursive query 3.) Need to use some inference engine module.
 
 
-BORIS Say something about PLNs??
+TODO Say something about PLNs??
 
 
 
-BORIS MEMBERLINK!!!!
+TODO MEMBERLINK!!!!
 
 A Few Simple Links - InheritanceLink, MemberLink, ListLink
 ------------------------------------------------------------------------
@@ -70,20 +68,16 @@ While they may make complimentary assertions, the referant order for SubsetLink 
 Logical Inference
 ------------------------------------------------------------------------
 
-BORIS
+TODO
 
 Let's start out by assigning a property to some concepts.  In this case, let's define the number of wheels each object has with this Scheme snippet.
 
 
 
-BORIS HOW to EXPRESS SOME statements, e.g. how many wheels does something have.  Bicycle: 2. Car 4. Animal 0.
+TODO HOW to EXPRESS SOME statements, e.g. how many wheels does something have.  Bicycle: 2. Car 4. Animal 0.
 
 
-BORIS HOW TO query the number of wheels.
-
-BORIS EvaluationLink???
-
-A dog has 0 wheels.  Dog implies Animal, Animal has 0 wheels.
+TODO HOW TO query the number of wheels?   A dog has 0 wheels.  Dog implies Animal, Animal has 0 wheels.
 
 
 
