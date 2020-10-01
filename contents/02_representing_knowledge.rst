@@ -304,11 +304,11 @@ This is a good place to introduce the concepts of *Grounded* vs *Ungrounded* exp
 The formal definition is that ungrounded expressions contain 1 or more *Free* :code:`VariableNode` atoms, while grounded expressions don't contain any.
 Personally, the way I think about it is that grounded expressions are statements and ungrounded expressions are questions.
 
-Just as in English, questions and statements can take a similar gramatical form.  Consider this example. 
+Just as in English, questions and statements can take a similar grammatical form.  Consider this example. 
 Statement: "The man is running."  Question: "Who is running?" Answer: "The man".
 
 The question-word "Who" in this example is like a :code:`VariableNode`.
-When the question is matched against the statement, the relative gramatical position of the word "Who" indicates which part of the statement will appropriately answer the question.
+When the question is matched against the statement, the relative grammatical position of the word "Who" indicates which part of the statement will appropriately answer the question.
 
 So, another intuition for :code:`MeetLink` and :code:`QueryLink` is that they take an ungrounded expression and produce a grounded expression.
 Or said another way, it takes a question and returns an answer.
