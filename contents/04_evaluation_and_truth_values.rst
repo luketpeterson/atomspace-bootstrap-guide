@@ -354,7 +354,7 @@ We need to split our funtion into two parts to facilitate recursion, following t
 
 .. note::
 
-    QUESTION FOR SOMEONE SMARTER THAN ME.  What's the best "chaining" link for the execution context??? i.e. what link type should I use to say "first execute this, then that, then this other thing"?
+    QUESTION FOR SOMEONE SMARTER THAN ME.  What's the best "chaining" link for the execution context??? i.e. what link type should I use to say "first execute this, then that, then this other thing" inside of a DefinedSchema?  Or alternatively, execute all these things in some undefined order.
 
     I've tried with :code:`ListLink` and :code:`SetLink` and the results have been mixed.  It seems to work in some situations, but in other it seems to go horribly wrong.
 
@@ -382,41 +382,28 @@ We need to split our funtion into two parts to facilitate recursion, following t
             )
         )
 
+Interfacing Outside Atomese (FFI)
+------------------------------------------------------------------------
 
+At this point you may be feeling the limitations of Atomese as a programming language.
+Luckily, you can suppliment the functinality of Atomese with functions implemented in other programming environments through a Foreign Function Interface (FFI) mechanism.
 
+The mechanisms for doing this are the :code:`GroundedSchemaNode` and :code:`GroundedPredicateNode`.
+In the same way that the :code:`DefinedSchemaNode` can be used to declares an Atomese function, you can use :code:`GroundedSchemaNode` the same way.
+The equivalent to :code:`DefinedPredicateNode` is :code:`GroundedPredicateNode`.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-BORIS, Include discussion about FFI, like a printf debug funcrtion
-
-BORIS look at "execute.scm"
+In this example below we're using Scheme's :scheme:`display` to implement a DebugPrint style atom that we can then call in Atomese.
+We pass one atom as an argument from Atomese, and the sceme function then displays the argument atom, and finally returns the :scheme:`(Concept "done")` atom back to Atomese as the result.
 
 .. code-block:: scheme
 
-    (define (scm-display-wrapper-exec atom)
-        (display atom)
+    ; The Scheme Function we're calling from Atomese
+    (define (scm-display-wrapper-exec the_atom_arg)
+        (display the_atom_arg)
         (Concept "done")
     )
 
+    ; The Atomese call to invoke the foreign Scheme function
     (cog-execute!
         (ExecutionOutput
             (GroundedSchema "scm: scm-display-wrapper-exec")
@@ -424,8 +411,15 @@ BORIS look at "execute.scm"
         )
     )
 
-    (define (scm-display-wrapper-eval atom)
-        (display atom)
+.. note::  There is nothing special about :scheme:`(Concept "done")` as a return value, but the execution context requires that some valid atom be returned, and this was as good as any.
+
+Now here is an example calling :scheme:`display` in an evaluation context with :code:`GroundedPredicateNode`.
+
+.. code-block:: scheme
+
+    ; The Scheme Function we're calling from Atomese
+    (define (scm-display-wrapper-eval the_atom_arg)
+        (display the_atom_arg)
         (stv 1 1)
     )
 
@@ -435,6 +429,13 @@ BORIS look at "execute.scm"
             (Concept "Hi")
         )
     )
+
+As you can see, it's pretty much the same, except for the fact that we swapped :code:`GroundedSchemaNode` for :code:`GroundedPredicateNode`, and that our Scheme function now returns :code:`(stv 1 1)` instead of :code:`(Concept "done")`.
+
+You must be conscious that the *arity* (the number of arguments) of the Scheme function matches the invocation from Atomese.
+Here is an example where two atoms are passed as arguments.
+
+.. code-block:: scheme
 
     (define (scm-display-wrapper-eval-2-arg atom1 atom2)
         (display atom1)
@@ -452,8 +453,20 @@ BORIS look at "execute.scm"
         )
     )
 
+The Atomese FFI can also be used to invoke functions from Python as well.
+Examples of calling into Python code can be found in `the "execute.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/execute.scm>`_.
 
-Boris end of FFI section
+It is also conceivable that the :code:`GroundedSchemaNode` and :code:`GroundedPredicateNode` could provide a good template to extend an Atomspace interface to other languages.
+However, the comments from the `the "execute.scm" example <https://github.com/opencog/atomspace/blob/master/examples/atomspace/execute.scm>`_ warn against leaning too heavily on this mechanism.
+
+One issue is that FFI calls are "black boxes" from the point of view of code analysis and reasoning.
+Many of the benefits of representing code and formulas in the Atomspace can't be realized when using opaque FFI calls.
+
+
+
+
+
+
 
 
     
@@ -473,11 +486,8 @@ BORIS Defining some
 Check out this guide:
 https://wiki.opencog.org/w/Adding_New_Atom_Types
 
-A DefineLink??? https://wiki.opencog.org/w/DefineLink
-
-It is advised to use an EquivalenceLink instead of a DefineLink
+Understand this!!  It is advised to use an EquivalenceLink instead of a DefineLink
 https://wiki.opencog.org/w/EquivalenceLink
-
 
 Is TypedAtomLink the way???  https://wiki.opencog.org/w/TypedAtomLink
 Or SignatureLink??  https://wiki.opencog.org/w/SignatureLink
