@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evaluation and Truth Values &#8212; Luke&#39;s Atomspace Quickstart Guide 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Logical Inferencing" href="05_logical_inferencing.html" />
+    <link rel="prev" title="Programming with Atomese" href="03_atomese_programming.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p id="evaluation-and-truth-values">Previous Chapter: <a class="reference internal" href="03_atomese_programming.html#atomese-programming"><span class="std std-ref">Programming with Atomese</span></a></p>
+<div class="section" id="id1">
+<h1>Evaluation and Truth Values<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>Somehow, we’ve managed to get pretty far without talking much about what it means to evaluate a predicate expression.</p>
+<p>This is a big topic, but it is key to understanding how to use the Atomspace effectively.
+Personally found this very confusing initially, so I’ll try to build it up bit by bit.</p>
+<p>Hopefully we have enough foundation at this point that it’ll make more sense for you than it did for me at first.</p>
+<div class="section" id="evaluating-predicate-expressions">
+<h2>Evaluating Predicate Expressions<a class="headerlink" href="#evaluating-predicate-expressions" title="Permalink to this headline">¶</a></h2>
+<p>We’ve gotten a lot of mileage out of <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code>, but sometimes it doesn’t do what we need.
+<code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> is another similar operation, but instead of <em>executing</em> the atom, it is used to <em>evaluate</em> an atom forming a predicate expression.
+<code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> will always return a <em>TruthValue</em>, but <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> is free to return just about anything at all.</p>
+<p>We’ve already been using predicate expressions as part of other expressions throughout the guide.
+I just didn’t put a spotlight on it until now.</p>
+<p>Consider each of these examples:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">GreaterThan</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">20</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">15</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">FalseLink</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">SatisfactionLink</span>
+        <span class="p">(</span><span class="nf">AndLink</span>
+            <span class="p">(</span><span class="nf">StateLink</span>
+                <span class="p">(</span><span class="nf">ListLink</span>
+                    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">GreaterThan</span>
+                <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Each one of those examples above, and all other predicate expressions, can be evaluated to a single TruthValue; True, False, or somewhere in between.</p>
+<div class="section" id="evaluationlink-to-assert-stuff-with-predicatenode">
+<h3>EvaluationLink to Assert Stuff with PredicateNode<a class="headerlink" href="#evaluationlink-to-assert-stuff-with-predicatenode" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> is the central mechanism that allows arbitrary predicates to be evaluated.
+It has two important roles where it takes on what feel to me like two disparate functions.
+Personally, I don’t know why separeate atom types weren’t used.  Perhaps somebody with more expertise can shed some light on that question.</p>
+<p>Anyway, the first role of <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> is to associate a TruthValue with a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> expression.</p>
+<p>Very early in the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/knowledge.scm">Atomspace examples</a>, <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> pops up without any introduction.
+It says this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">EvaluationLink</span>
+    <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">ListLink</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;pottery&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>The first thing to understand is that we are making an <em>assertion</em> here.
+We are telling the Atomspace that <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“make”</span></span><span class="p"><span class="pre">)</span></span></code> and <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“pottery”</span></span><span class="p"><span class="pre">)</span></span></code> are valid, aka <em>true</em>, arguments for <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“_obj”</span></span><span class="p"><span class="pre">)</span></span></code>.
+In English, the above statement should be read as “Pottery can be Made.”, or more pedantically, “<strong>Pottery</strong> is a valid <strong>Object</strong> for <strong>Make</strong>”.</p>
+<p>So, when the first argument to <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> is a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> and the entire expression is grounded, this is how we <em>declare</em> that a predicate expression is true, for some given arguments.</p>
+<p>And once we’ve declared it, we can query for it, just like any other relationship in the Atomspace.</p>
+<p>Can we make pottery?  Let’s ask:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">SatisfactionLink</span>
+        <span class="p">(</span><span class="nf">AndLink</span>
+            <span class="p">(</span><span class="nf">EvaluationLink</span>
+                <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">ListLink</span>
+                    <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">EqualLink</span>
+                <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;pottery&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Yes, it seems we can.</p>
+<p>Can we make rain?  Let’s see…</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">SatisfactionLink</span>
+        <span class="p">(</span><span class="nf">AndLink</span>
+            <span class="p">(</span><span class="nf">EvaluationLink</span>
+                <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">ListLink</span>
+                    <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">EqualLink</span>
+                <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;rain&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Unfortunately, no. :-(</p>
+</div>
+<div class="section" id="definedpredicatenode-to-create-predicate-functions">
+<h3>DefinedPredicateNode to Create Predicate Functions<a class="headerlink" href="#definedpredicatenode-to-create-predicate-functions" title="Permalink to this headline">¶</a></h3>
+<p>To understand the second role of <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code>, we should talk about defining predicate functions whose TruthValue is a function of the arguments passed in.</p>
+<p>In the previous chapter, we looked at the <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> to name a function or subroutine.
+For predicates, there are some advantages to using <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code> instead.</p>
+<p>Just like <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code>, <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code> is a naming node type that can be ued with a <code class="code docutils literal notranslate"><span class="pre">DefineNode</span></code>.
+But <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code> tells the Atomspace that the function in question can be evaluated to a <code class="code docutils literal notranslate"><span class="pre">TruthValue</span></code>.</p>
+<p>Also, you may use a <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> as the body of a <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>, but it’s not required unless you want to pass arguments.</p>
+<p>So, let’s rewrite the <code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code> query above using a <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;can_be_made?&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">LambdaLink</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;test_object&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">SatisfactionLink</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">AndLink</span>
+                <span class="p">(</span><span class="nf">EvaluationLink</span>
+                    <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">ListLink</span>
+                        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="p">(</span><span class="nf">EqualLink</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;test_object&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;predicate_object&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>So there’s our predicate function.  Notice that we need to declare both <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms now,
+one gets its value from the <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> as an argument and the other gets its value as part of the query in <code class="code docutils literal notranslate"><span class="pre">SatisfactionLink</span></code>.
+If we don’t do this, the Atomspace has no way of knowing which <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> is which.</p>
+<p>How do we call it?</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;can_be_made?&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;pottery&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This is the other role of <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> I was talking about.
+Here <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> wraps the dispatch of a <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>, in the same way that we used <code class="code docutils literal notranslate"><span class="pre">ExecutionOutputLink</span></code> in the previous chapter.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME.  Is there a cleaner and more idiomatic way to evaluate EvaluationLink assertions???  The documentation for EvaluationLink defines a “LessThan” PredicateNode.  But is there a way to call that Predicate without a SatisfactionLink???  Even if it doesn’t function like a true numeric LessThan, and only knows about the number pairs that have been asserted.</p>
+</div>
+</div>
+</div>
+<div class="section" id="sequentialandlink-sequentialorlink-flow-control">
+<h2>SequentialAndLink &amp; SequentialOrLink Flow Control<a class="headerlink" href="#sequentialandlink-sequentialorlink-flow-control" title="Permalink to this headline">¶</a></h2>
+<p>Last chapter, we introduced <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> for program flow management.
+<code class="code docutils literal notranslate"><span class="pre">CondLink</span></code> operates in an execution context, to execute one atome vs. another depending on the outcome of evaluating a predicate expression.
+If you’re operating in an evaluation context, e.g. in the process evaluating a predicate, then logical <em>And</em> &amp; <em>Or</em> operators can dictate your program flow.</p>
+<p>To elaborate: consider the statement “The car must stop if the light is yellow or red.”
+When evaluating the “Light is yellow or red” expression to determine if the car must stop, and “Light is yellow” is true, there is no need to evaluate “Light is red”.
+You already know the expression is true.</p>
+<p>“And” expressions have the same property for false components.  If you are looking for someone “Tall and Handsome”, you can stop if you find that one criteria is not met and there is no need to evaluate the other.</p>
+<p>The implication of statements composed of logical “And” and “Or” operators is that it is irrelevant to the outcomem, whether or not one branch of the expression is evaluated if another branch has already determined the outcome.</p>
+<p>Atomese takes this one step further with the <code class="code docutils literal notranslate"><span class="pre">SequentialAndLink</span></code> &amp; <code class="code docutils literal notranslate"><span class="pre">SequentialOrLink</span></code> atoms.
+They provide the guarantee that branches will be evaluated in sequence and that the evaluation will stop once the outcome of the whole expressions is conclusively determined.</p>
+<p>Therefore, <code class="code docutils literal notranslate"><span class="pre">SequentialAndLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">SequentialOrLink</span></code> can be used as general purpose flow control primitives from which you can construct complex predicate expressions.</p>
+<p>This works even in situations where evaluating one branch of the expression may produce a side effect, such as the examples from RobotOS, cited in the documentation.</p>
+<p>In addition, <code class="code docutils literal notranslate"><span class="pre">SequentialAndLink</span></code> &amp; <code class="code docutils literal notranslate"><span class="pre">SequentialOrLink</span></code> can take an argument list of arbitrary length, unlike their strictly binary logical peers in other languages.</p>
+<p>So, in summary, <code class="code docutils literal notranslate"><span class="pre">SequentialAndLink</span></code> will evaluate each branch in sequence unless a branch evaluates to false, in which case it will cease evaluating subsequent branches and will return false.
+If all branches evaluate to true, the <code class="code docutils literal notranslate"><span class="pre">SequentialAndLink</span></code> itself will evaluate to true.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">SequentialOrLink</span></code> is similar, but will continue evaluation as long as each branch evaluates to false, and will terminate evaluation after evaluating the first branch that evaluates to true.
+<code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">SequentialOrLink</span></span> <span class="nv"><span class="pre">A</span></span> <span class="nv"><span class="pre">B</span></span> <span class="nv"><span class="pre">C</span></span><span class="p"><span class="pre">)</span></span></code> is equivalent to <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Not</span></span> <span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">SequentialAndLink</span></span> <span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Not</span></span> <span class="nv"><span class="pre">A</span></span><span class="p"><span class="pre">)</span></span> <span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Not</span></span> <span class="nv"><span class="pre">B</span></span><span class="p"><span class="pre">)</span></span> <span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Not</span></span> <span class="nv"><span class="pre">C</span></span><span class="p"><span class="pre">)))</span></span></code>.</p>
+<div class="section" id="isprime-an-example-in-atomese-code">
+<h3>IsPrime? An Example in Atomese Code<a class="headerlink" href="#isprime-an-example-in-atomese-code" title="Permalink to this headline">¶</a></h3>
+<p>Pulling together many of the concepts we’ve covered up to this point, here is a predicate expression to determine whether a number is prime.</p>
+<p>But first, one of the building blocks of that is a function to determine if a number is a positive integer, or a real number that is not a positive integer.
+The function below checks this using a “level-crossing” algorithm.  In other words, all positive integers will eventually equal 1 if 1 is subtracted from them an arbitrary number of times.
+I admit this is not a good solution for many many reasons, but Atomese gave me a limited palette of primitive operations to work with.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether &quot;x&quot; is a positive integer, i.e. ?(x &gt; 0 &amp;&amp; x % 1 == 0)</span>
+    <span class="c1">; The lack of a native % (mod) fn turns a constant-time op into an order n op. :-(</span>
+    <span class="c1">; Also not numerically stable for high values of x, due to floating point rounding</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">SequentialAndLink</span>
+
+            <span class="c1">; As long as x is greater-than-or-equal-to 1, we can continue</span>
+            <span class="c1">; Otherwise we will return false</span>
+            <span class="p">(</span><span class="nf">NotLink</span> <span class="p">(</span><span class="nf">GreaterThanLink</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+            <span class="p">(</span><span class="nf">SequentialOrLink</span>
+
+                <span class="c1">; See if our number is exactly 1, return true if so</span>
+                <span class="p">(</span><span class="nf">EqualLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1">; Recurse with 1 minus our number</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">MinusLink</span>
+                        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                        <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1">; Test our &quot;is_pos_integer?&quot; function</span>
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>So, with our <code class="code docutils literal notranslate"><span class="pre">is_pos_integer?</span></code> function implemented above, we can create our <code class="code docutils literal notranslate"><span class="pre">is_prime?</span></code> function.
+We need to split our funtion into two parts to facilitate recursion, following the same pattern we used last chapter for our <code class="code docutils literal notranslate"><span class="pre">fibonacci_iterative</span></code> function.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether &quot;x&quot; is evenly divisible by &quot;i&quot; or another integer greater than &quot;i&quot;</span>
+    <span class="c1">; In otherwords, returns partial NOT prime.  Intended to be called by &quot;is_prime?&quot;</span>
+    <span class="c1">; If called with i=2, false means &quot;x is prime&quot;, true means &quot;x is not prime&quot;</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">VariableList</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">SequentialAndLink</span>
+
+            <span class="c1">; If i is greater-than-or-equal-to x, return false because we&#39;ve tried all possibilities, so it must be prime</span>
+            <span class="c1">; Ideally we could stop at sqrt(x), but if I cared about efficiency, I&#39;d implement native modulo first</span>
+            <span class="p">(</span><span class="nf">GreaterThan</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="c1">; greater-than-or-equal is the same as not-less-than</span>
+
+            <span class="p">(</span><span class="nf">SequentialOrLink</span>
+                <span class="c1">; Check to see if x is evenly divisible by i, if so, return true</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_pos_integer?&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">DivideLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">))</span>
+                <span class="p">)</span>
+
+                <span class="c1">; Recurse with i++</span>
+                <span class="p">(</span><span class="nf">Evaluation</span>
+                    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="nf">PlusLink</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;i&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Number</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1">; Test our &quot;is_prime_helper&quot; function</span>
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+<span class="p">(</span><span class="nf">Evaluation</span>
+    <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">Define</span>
+    <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime?&quot;</span><span class="p">)</span>
+    <span class="c1">; Determines whether a number supplied is prime or not</span>
+
+    <span class="p">(</span><span class="nf">Lambda</span>
+        <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+
+        <span class="c1">; Call our recursive helper function</span>
+        <span class="p">(</span><span class="nf">NotLink</span>
+            <span class="p">(</span><span class="nf">Evaluation</span>
+                <span class="p">(</span><span class="nf">DefinedPredicateNode</span> <span class="s">&quot;is_prime_helper&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;x&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Number</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1">; Test our &quot;is_prime?&quot; function</span>
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+<span class="p">(</span><span class="nf">Evaluation</span>
+    <span class="p">(</span><span class="nf">DefinedPredicate</span> <span class="s">&quot;is_prime?&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Number</span> <span class="mi">37</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME.  What’s the best “chaining” link for the execution context??? i.e. what link type should I use to say “first execute this, then that, then this other thing” inside of a DefinedSchema?  Or alternatively, execute all these things in some undefined order.</p>
+<p>I’ve tried with <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> and the results have been mixed.  It seems to work in some situations, but in other it seems to go horribly wrong.</p>
+<p>This below works, but then if I put it into a LambdaLink instead of a “raw” Define then it stops working.  What’s the right way to do this instead?</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">DefineLink</span>
+    <span class="p">(</span><span class="nf">DefinedSchemaNode</span> <span class="s">&quot;make_nighttime&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">ListLink</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_var&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;On&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Moonlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="p">(</span><span class="nf">PutLink</span>
+            <span class="p">(</span><span class="nf">State</span>
+                <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;switch_var&quot;</span><span class="p">)</span>
+                <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Off&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Sunlight&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="interfacing-outside-atomese-ffi">
+<h2>Interfacing Outside Atomese (FFI)<a class="headerlink" href="#interfacing-outside-atomese-ffi" title="Permalink to this headline">¶</a></h2>
+<p>At this point you may be feeling the limitations of Atomese as a programming language.
+Luckily, you can suppliment the functinality of Atomese with functions implemented in other programming environments through a Foreign Function Interface (FFI) mechanism.</p>
+<p>The mechanisms for doing this are the <code class="code docutils literal notranslate"><span class="pre">GroundedSchemaNode</span></code> and <code class="code docutils literal notranslate"><span class="pre">GroundedPredicateNode</span></code>.
+In the same way that the <code class="code docutils literal notranslate"><span class="pre">DefinedSchemaNode</span></code> can be used to declares an Atomese function, you can use <code class="code docutils literal notranslate"><span class="pre">GroundedSchemaNode</span></code> the same way.
+The equivalent to <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code> is <code class="code docutils literal notranslate"><span class="pre">GroundedPredicateNode</span></code>.</p>
+<p>In this example below we’re using Scheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">display</span></span></code> to implement a DebugPrint style atom that we can then call in Atomese.
+We pass one atom as an argument from Atomese, and the sceme function then displays the argument atom, and finally returns the <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“done”</span></span><span class="p"><span class="pre">)</span></span></code> atom back to Atomese as the result.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="c1">; The Scheme Function we&#39;re calling from Atomese</span>
+<span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-exec</span> <span class="nv">the_atom_arg</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">the_atom_arg</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;done&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1">; The Atomese call to invoke the foreign Scheme function</span>
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">ExecutionOutput</span>
+        <span class="p">(</span><span class="nf">GroundedSchema</span> <span class="s">&quot;scm: scm-display-wrapper-exec&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Hi&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is nothing special about <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“done”</span></span><span class="p"><span class="pre">)</span></span></code> as a return value, but the execution context requires that some valid atom be returned, and this was as good as any other.</p>
+</div>
+<p>Now here is an example calling <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">display</span></span></code> in an evaluation context with <code class="code docutils literal notranslate"><span class="pre">GroundedPredicateNode</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="c1">; The Scheme Function we&#39;re calling from Atomese</span>
+<span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-eval</span> <span class="nv">the_atom_arg</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">the_atom_arg</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">stv</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">GroundedPredicate</span> <span class="s">&quot;scm: scm-display-wrapper-eval&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Hi&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see, it’s pretty much the same, except for the fact that we swapped <code class="code docutils literal notranslate"><span class="pre">GroundedSchemaNode</span></code> for <code class="code docutils literal notranslate"><span class="pre">GroundedPredicateNode</span></code>, and that our Scheme function now returns <code class="code docutils literal notranslate"><span class="pre">(stv</span> <span class="pre">1</span> <span class="pre">1)</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">(Concept</span> <span class="pre">&quot;done&quot;)</span></code>.</p>
+<p>You must be conscious that the <em>arity</em> (the number of arguments) of the Scheme function matches the invocation from Atomese.
+Here is an example where two atoms are passed as arguments.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scm-display-wrapper-eval-2-arg</span> <span class="nv">atom1</span> <span class="nv">atom2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom1</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb">display </span><span class="nv">atom2</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">stv</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">Evaluation</span>
+        <span class="p">(</span><span class="nf">GroundedPredicate</span> <span class="s">&quot;scm: scm-display-wrapper-eval-2-arg&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">List</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;One&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Two&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The Atomese FFI can also be used to invoke functions from Python as well.
+Examples of calling into Python code can be found in <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/execute.scm">the “execute.scm” example</a>.</p>
+<p>It is also conceivable that the <code class="code docutils literal notranslate"><span class="pre">GroundedSchemaNode</span></code> and <code class="code docutils literal notranslate"><span class="pre">GroundedPredicateNode</span></code> could provide a good template to extend an Atomspace interface to other languages.
+However, the comments from the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/execute.scm">the “execute.scm” example</a> warn against leaning too heavily on this mechanism.</p>
+<p>One issue is that FFI calls are “black boxes” from the point of view of code analysis and reasoning.
+Many of the benefits of representing code and formulas in the Atomspace can’t be realized when using opaque FFI calls.</p>
+</div>
+<div class="section" id="signatures-and-defining-new-atom-types">
+<h2>Signatures and Defining new Atom Types<a class="headerlink" href="#signatures-and-defining-new-atom-types" title="Permalink to this headline">¶</a></h2>
+<p>TODO Building up our own grammar.</p>
+<p>TODO. Check out the <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm">https://github.com/opencog/atomspace/blob/master/examples/pattern-matcher/type-signature.scm</a> example.
+TODO SignatureLink and DefinedTypeNode
+Let’s start with data structures.  In C, for example, there is the <code class="code c docutils literal notranslate"><span class="k"><span class="pre">struct</span></span></code> keyword, to declares a collection of variables that are packaged up together as a unified code object.</p>
+<p>TODO (CAN I DEFINE MY OWN TYPES, from an atom-uniqueness standpoint???)</p>
+<p>TODO Check out this guide:
+<a class="reference external" href="https://wiki.opencog.org/w/Adding_New_Atom_Types">https://wiki.opencog.org/w/Adding_New_Atom_Types</a></p>
+<p>Understand this!!  It is advised to use an EquivalenceLink instead of a DefineLink
+<a class="reference external" href="https://wiki.opencog.org/w/EquivalenceLink">https://wiki.opencog.org/w/EquivalenceLink</a></p>
+<p>Is TypedAtomLink the way???  <a class="reference external" href="https://wiki.opencog.org/w/TypedAtomLink">https://wiki.opencog.org/w/TypedAtomLink</a>
+Or SignatureLink??  <a class="reference external" href="https://wiki.opencog.org/w/SignatureLink">https://wiki.opencog.org/w/SignatureLink</a></p>
+</div>
+<div class="section" id="truthvalues">
+<h2>TruthValues<a class="headerlink" href="#truthvalues" title="Permalink to this headline">¶</a></h2>
+<p>When you run <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code> you get something along these lines:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">stv</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>I’ve said previously that it means “true”, but why the complexity?  Why not just say “True” or “#t” or something more straightforward?</p>
+<p>You probably already picked up on this but the Atomspace supports more than just Yes/No or True/False crisp TruthValues.</p>
+<p>“stv” in this case stands for <em>Simple Truth Value</em>, and an STV is composed of two floating point numbers: <em>Strength</em> and <em>Confidence</em>.
+In our case, they are both exactly 1.  The expression was 100% true, and we are 100% sure of that.</p>
+<div class="section" id="the-philosophy-of-truth">
+<h3>The Philosophy of Truth<a class="headerlink" href="#the-philosophy-of-truth" title="Permalink to this headline">¶</a></h3>
+<p>So, as you can see, this is a step beyond simple bivalent (crisp true or false) logic in both reasoning ability and complexity.</p>
+<p>But what precisely does it mean for something to be half-true?  Well… It’s complicated.</p>
+<p>Consider the statement “Charlie is tall.”  If Charlie were 210cm tall, most people today would judge that true.
+If he were 120cm, most would judge it false.  But what if Charlie were 175cm?  In this case, the statement might be “half-true”.</p>
+<p>This line of reasoning was formalized as <a class="reference external" href="https://en.wikipedia.org/wiki/Fuzzy_logic">Fuzzy Logic</a>, by Lotfi Zadeh, whom I was lucky enough to chat with for half an hour, mostly about self-driving cars, back in the year 2000 when I was 19 years old, but I digress…</p>
+<p>Using fuzzy logic, we can define a set of all tall people, and then a person with a height of 175cm could have a 50% membership in that set.
+In traditional set theory, an object or data point either belongs or doesn’t belong in a set, based on the set membership function.  In other words, traditional sets always have a crisp boundary.  In fuzzy logic, the membership function returns a value between 0 and 1, so there can be a continuous transition from outside the set to inside the set.</p>
+<p>But consider the conceptual difference between our statement about Charlie and the statement “The train from Birmingham arrives every day at 10:42am.”  Given the legendary unreliability of the London Midland train service, you’d certainly assign that statement a low truth value.
+But this is a probabilistic truth rather than a fuzzy truth.  Some days, the train will indeed arrive on time, but on the majority of days it will not.  This kind of truth value is meant to express a probability that the statement is true.</p>
+<p>So in summary, a fuzzy truth value represents the <strong>degree</strong> to which a statement is true, while a probabilistic truth value represents the <strong>chance</strong> that it is true.
+Fuzzy truth values are useful for tracking, well fuzzy, statements of known facts, while probabilistic truth values are useful for tracking predictions and known uncertainties.
+They are related concepts, but they aren’t mathmatically interchangeable.</p>
+<p>Those are two interpretations of the <em>strength</em> component; what about the the <em>confidence</em> component?
+Strength represents the known aspect of the truth value and confidence is the unknown aspect.
+Consider a truth value of <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">stv</span></span> <span class="mf"><span class="pre">0.5</span></span> <span class="mf"><span class="pre">1.0</span></span><span class="p"><span class="pre">)</span></span></code> for the statement “A coin-flip will land on heads.”  If somebody offered you a bet with better-than-even odds on that coin, you could be confident that your expected return would be positive.
+But consider the same statement about an unknown coin <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">stv</span></span> <span class="mf"><span class="pre">0.5</span></span> <span class="mf"><span class="pre">0.0</span></span><span class="p"><span class="pre">)</span></span></code>.  It might be a weighted coin that lands on tails 99% of the time.  From that TruthValue you just don’t know.</p>
+<p>OpenCog and the Atomspace support additional types of more complicated TruthValues to cover different situations.
+For example there is the <a class="reference external" href="https://wiki.opencog.org/w/FormulaTruthValue">FormulaTruthValue</a> for situations where the truth of an assertion depends on additional factors.  These are good for representing probability distribution functions.
+Also there is the <a class="reference external" href="https://wiki.opencog.org/w/TruthValue#CountTruthValue">CountTruthValue</a> for situations where the system continues to collect new observations and refine its assesment of the probability.</p>
+<p>Partial truth is a very big topic, and we’re not going to be able to do it justice in this guide.  This section is just a superficial introduction to make you aware of the problem-space.</p>
+<p>In general, you can read the official OpenCog reference for TruthValue here: <a class="reference external" href="https://wiki.opencog.org/w/TruthValue">https://wiki.opencog.org/w/TruthValue</a></p>
+<p>And now we’ll introduce <em>Probabilistic Logic Networks</em>, or <em>PLNs</em> for short.  PLNs are a way to reason with partial truth values.
+OpenCog and PLNs have a shared heritage, and many ideas from PLNs deeply inform the architecture of OpenCog.  We’ll talk a lot more about PLNs in the coming chapters.</p>
+<p>For now, you can read an introductory paper on PLNs here: <a class="reference external" href="https://aiatadams.files.wordpress.com/2016/02/invited_paper_3.pdf">https://aiatadams.files.wordpress.com/2016/02/invited_paper_3.pdf</a></p>
+<p>And the complete PLN book can be downloaded (for now) here: <a class="reference external" href="https://aiatadams.files.wordpress.com/2016/02/pln_book_6_27_08.pdf">https://aiatadams.files.wordpress.com/2016/02/pln_book_6_27_08.pdf</a></p>
+</div>
+<div class="section" id="working-with-truthvalues">
+<h3>Working with TruthValues<a class="headerlink" href="#working-with-truthvalues" title="Permalink to this headline">¶</a></h3>
+<p>So far, we’ve seen TruthValues that are produced by evaluating a predicate expression, as in <code class="code docutils literal notranslate"><span class="pre">cog-evaluate!</span></code>.
+And we’ve also seen places where a predicate expression that evaluates to a TruthValue is expressly required, as in <code class="code docutils literal notranslate"><span class="pre">CondLink</span></code>.</p>
+<p>But it turns out that we can attach a TruthValue to any atom we want.
+So, actually we <em>can</em> make rain, in some limited situations, so we’ll say that assertion is 20% true.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">EvaluationLink</span>
+    <span class="p">(</span><span class="nf">SimpleTruthValue</span> <span class="mf">0.2</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+    <span class="p">(</span><span class="nf">ListLink</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;rain&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If typing <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">SimpleTruthValue</span></span> <span class="mf"><span class="pre">0.2</span></span> <span class="mf"><span class="pre">1.0</span></span><span class="p"><span class="pre">)</span></span></code> gets tiring, we can also abbreviate it to (stv 0.2 1)</p>
+</div>
+<p>Now, to access the TruthValue attached to that <code class="code docutils literal notranslate"><span class="pre">EvaluationLink</span></code> atom, we have a few options.
+We can just read it back as an AtomSpace value, using the <code class="code docutils literal notranslate"><span class="pre">TruthValueOfLink</span></code>, like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">make_rain_assertion</span>
+    <span class="p">(</span><span class="nf">EvaluationLink</span>
+        <span class="p">(</span><span class="nf">stv</span> <span class="mf">0.2</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">PredicateNode</span> <span class="s">&quot;_obj&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">ListLink</span>
+            <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;make&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;rain&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">TruthValueOf</span> <span class="nv">make_rain_assertion</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Or we can examine the individual components of the TruthValue, using the <code class="code docutils literal notranslate"><span class="pre">StrengthOfLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">ConfidenceOfLink</span></code> atoms.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">StrengthOf</span> <span class="nv">make_rain_assertion</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span> <span class="p">(</span><span class="nf">ConfidenceOf</span> <span class="nv">make_rain_assertion</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Under the hood, TruthValues attached to atoms are represented just like any other value attached to the atom, in the atom’s key-value store.</p>
+<p>The special key: <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">PredicateNode</span></span> <span class="s"><span class="pre">“*-TruthValueKey-*”</span></span><span class="p"><span class="pre">)</span></span></code> is used to store the TruthValue.
+Just like any other value, you can see an atom’s TruthValue using the <code class="code docutils literal notranslate"><span class="pre">cog-keys-&gt;alist</span></code> OpenCog function, or any of the other methods to access and modify values.</p>
+</div>
+</div>
+<div class="section" id="predicate-vs-atom-attached-truthvalues">
+<h3>Predicate vs. Atom-attached TruthValues<a class="headerlink" href="#predicate-vs-atom-attached-truthvalues" title="Permalink to this headline">¶</a></h3>
+<p>The truthValue that you get when evaluating an atom is <strong>NOT</strong> the same as the truthValue attached to the atom!!!
+Sorry about the exclamation marks, but this fact took me took me a few hours to discover, and it was an immensely annoying few hours when nothing seemed to follow my intuition.</p>
+<p>Compare the results of these two expressions:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">FalseLink</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">TruthValueOf</span>
+        <span class="p">(</span><span class="nf">FalseLink</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The first one is the result of evaluating <code class="code docutils literal notranslate"><span class="pre">FalseLink</span></code>. <code class="code docutils literal notranslate"><span class="pre">stv</span> <span class="pre">(0,</span> <span class="pre">1)</span></code>.</p>
+<p>The second is the result of trying to get the TruthValue attached to the <code class="code docutils literal notranslate"><span class="pre">FalseLink</span></code> atom.
+Since it doesn’t have one, The <code class="code docutils literal notranslate"><span class="pre">TruthValueOfLink</span></code> uses the <em>Default</em> TruthValue: <code class="code docutils literal notranslate"><span class="pre">stv(1,</span> <span class="pre">0)</span></code>, which is assumed for all atoms that haven’t been assigned TruthValues through some other mechanism.</p>
+<p>If you want to evaluate a predicate expression, and set the result as an atom’s TruthValue, use the <code class="code docutils literal notranslate"><span class="pre">SetTVLink</span></code>.
+Here is an example that takes the result of evaluating the <code class="code docutils literal notranslate"><span class="pre">FalseLink</span></code> atom, and sets it on <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Concept</span></span> <span class="s"><span class="pre">“New</span> <span class="pre">Atom”</span></span><span class="p"><span class="pre">)</span></span></code>:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+    <span class="p">(</span><span class="nf">SetTV</span>
+        <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;New Atom&quot;</span><span class="p">)</span>
+        <span class="p">(</span><span class="nf">FalseLink</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If you want to do the reverse and use a TruthValue attached to an atom for a predicate expression, you need the <code class="code docutils literal notranslate"><span class="pre">PredicateFormulaLink</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-evaluate!</span>
+    <span class="p">(</span><span class="nf">PredicateFormula</span>
+        <span class="p">(</span><span class="nf">StrengthOf</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;New Atom&quot;</span><span class="p">))</span>
+        <span class="p">(</span><span class="nf">ConfidenceOf</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;New Atom&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">PredicateFormulaLink</span></code> is actually an important building block, and can be used instead of <code class="code docutils literal notranslate"><span class="pre">LambdaLink</span></code> for defining predicate expressions with <code class="code docutils literal notranslate"><span class="pre">DefinedPredicateNode</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME.  Is there a single-argument equivalent to PredicateFormulaLink???  Something that takes a single TruthValue rather than requiring it to be decomposed into Strength and Confidence?</p>
+</div>
+<p>TODO: section on <code class="code docutils literal notranslate"><span class="pre">DynamicFormulaLink</span></code>, <code class="code docutils literal notranslate"><span class="pre">FormulaTruthValue</span></code>, etc.  May make sense to postpone until I’ve explained value-flows better.</p>
+<p>TODO: See if I can get the AndLink stuff to work for partial conditionals, e.g. if I can get a predicate to evaluate to partially-true, can I then cause both sides of a conditional expression to be evaluated, and the the results muxxed together???  Should probably study PLN because this can get explosive quickly.
+Talk about side-effect-free vs. side-effects.</p>
+<p>TODO.  Explain AnchorNodes??</p>
+<p>TODO.  Understand how Values become Atoms sometimes…  A clue is dropped in the documentation on SleepLink <a class="reference external" href="https://wiki.opencog.org/w/SleepLink">https://wiki.opencog.org/w/SleepLink</a>
+It says “NumberNodes are problematic for the AtomSpace”.  It appears that numeric values can exist temporarily, and under certain situations then crystalize into nodes.  Hippo has something similar.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Luke's Atomspace Quickstart Guide</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_representing_knowledge.html">Structured Knowledge &amp; Simple Queries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_atomese_programming.html">Programming with Atomese</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluation and Truth Values</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#evaluating-predicate-expressions">Evaluating Predicate Expressions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#evaluationlink-to-assert-stuff-with-predicatenode">EvaluationLink to Assert Stuff with PredicateNode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#definedpredicatenode-to-create-predicate-functions">DefinedPredicateNode to Create Predicate Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sequentialandlink-sequentialorlink-flow-control">SequentialAndLink &amp; SequentialOrLink Flow Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#isprime-an-example-in-atomese-code">IsPrime? An Example in Atomese Code</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#interfacing-outside-atomese-ffi">Interfacing Outside Atomese (FFI)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#signatures-and-defining-new-atom-types">Signatures and Defining new Atom Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#truthvalues">TruthValues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-philosophy-of-truth">The Philosophy of Truth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-truthvalues">Working with TruthValues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#predicate-vs-atom-attached-truthvalues">Predicate vs. Atom-attached TruthValues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="05_logical_inferencing.html">Logical Inferencing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="03_atomese_programming.html" title="previous chapter">Programming with Atomese</a></li>
+      <li>Next: <a href="05_logical_inferencing.html" title="next chapter">Logical Inferencing</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Luke Peterson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/contents/04_evaluation_and_truth_values.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

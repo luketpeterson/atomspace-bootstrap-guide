@@ -1,0 +1,600 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Structured Knowledge &amp; Simple Queries &#8212; Luke&#39;s Atomspace Quickstart Guide 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Programming with Atomese" href="03_atomese_programming.html" />
+    <link rel="prev" title="Getting Oriented &amp; Basic Concepts" href="01_getting_oriented.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p id="representing-knowledge">Previous Chapter: <a class="reference internal" href="01_getting_oriented.html#getting-oriented"><span class="std std-ref">Getting Oriented</span></a></p>
+<div class="section" id="structured-knowledge-simple-queries">
+<h1>Structured Knowledge &amp; Simple Queries<a class="headerlink" href="#structured-knowledge-simple-queries" title="Permalink to this headline">¶</a></h1>
+<p>In the last chapter, we learned how we can think of the Atomspace as a database of documents.  Each Atom is like a document that can contain a set of key-value pairs.
+But document-store database solutions are already plentiful and the value of the Atomspace comes from other capabilities.</p>
+<p>So now we’ll begin to explore the Atomspace as a knowledge representation format, or <em>Knowledge Base</em>; Often abbreviated as <em>KB</em>.</p>
+<p>KBs hold a collection of concepts and define them in relationship to other concepts.  KBs are a relatively old idea, not unique to the Atomspace, and there is a Wikipedia page covering the basics: <a class="reference external" href="https://en.wikipedia.org/wiki/Knowledge_base">https://en.wikipedia.org/wiki/Knowledge_base</a></p>
+<p>This guide and nearly every other piece of documentation on KBs I’ve encountered describe the primitives of knowledge representation using concrete examples from the real world, such as “A dog is an animal.”  This is helpful for learning the particulars of the KB because the fundamental conceptual relationships are already familiar to most people.
+However, I believe a large amount of the value of KBs and ontologies come from the ability to reason within an abstract systems of precise relationships where that precision has been imposed elsewhere, at another level, or where ambiguity never existed to begin with.  For example, a KB could be used to reason about the behavior of a computer program, given a hypothetical set of inputs.</p>
+<p>In general, strictly regular KBs have many limitations when representing data from real world.  For example, the <a class="reference external" href="https://wiki.opencog.org/w/InheritanceLink">InheritanceLink</a> documentation points out the difference between Extensional vs. Intentional Inheritance.  I’d argue this is just the tip of the iceberg when trying to formalize knowledge about the fuzzy real world into a crisp ontology.
+That being said, the Atomspace is better than most other KB formats, because of the tools it provides for expressing nuance, partial truth and uncertainty.  All the same, in my opinion, a symbolic KB alone is not sufficient for many aspects of real-world knowledge representation.  Regardless, I’ll attempt to refrain from injecting too much of my own personal opinions and conclusions into this guide dedicated to understanding the Atomspace.</p>
+<p>Ultimately, any formal language is only as precise as the axioms and definitions it is built upon, and you will have to define your own meanings and maybe even your own grammar.  Personally I view the Atomspace less as a language and instead as the building-blocks out of which a language can be created.
+Some people have used the Atomspace to represent tokens and grammar from a natural language such as English, while others have used it to represent interactions between proteins and genes.  In its purest form, the Atomspace is a system where data and rules about how the data can interact can be described side-by-side, and then queried and simulated.</p>
+<div class="section" id="predicatenode-links-to-make-statements">
+<h2>PredicateNode &amp; Links to make statements<a class="headerlink" href="#predicatenode-links-to-make-statements" title="Permalink to this headline">¶</a></h2>
+<p>We touched on <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> in the last chapter when we used them as keys for values we associated with other atoms.
+In grammar, a statement is divided into subject(s) and a predicate.  “The dog barks.”  ‘Barks” is the predicate.
+In the statement: “The dog is happy”, “is happy” is the predicate.</p>
+<p>It’s just like that <cite>SchoolHouse Rock video &lt;https://www.youtube.com/watch?v=CLV3eMvW73g&gt;</cite> would sing.  The video is unlikely to further elucidate anything at all, but if you’re a child of the 80s like me, it’s a fun diversion down memory lane.</p>
+<p>The important thing about predicates is that they allow assertions to be made.  Concepts by themselves don’t say anything, they merely exist (or don’t exist), but predicates allow for statements.</p>
+<p>In the Atomspace, a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> provides a label for these predicate concepts.
+A more formal description of a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> in the Atomspace is here: <a class="reference external" href="https://wiki.opencog.org/w/PredicateNode">https://wiki.opencog.org/w/PredicateNode</a>  Formally, a <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> is a node that can be evaluated to create a <em>TruthValue</em>.  In the next chapter we’ll cover exactly how predicates are evaluated, but for now it’s ok if this idea is a little vague.</p>
+<p>As seen in previous chapter, the below Scheme snippet is one possible way to tell the Atomspace that “Fido the Dog’s weight is 12.5kg”.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mf">12.5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now, I can retrieve the <code class="code docutils literal notranslate"><span class="pre">weight_in_kg</span></code> using the <code class="code docutils literal notranslate"><span class="pre">cog-value</span></code> command, as demonstrated previously, but say I want to search for all dogs in the Atomspace whose weight is under 15kg.
+Values associated with atoms are not indexed, so a query like that would be inefficient.</p>
+<p>If I have the atom, I can get a value attached to it in constant time, but if I am looking for atoms with an associated value that meets some criteria, this is generally a bad idea as the time required for the search grows with the number of atoms being examined.</p>
+<p>Here is another way to express the statement “Fido the Dog’s weight in kg is 12.5”.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">StateLink</span>
+   <span class="p">(</span><span class="nf">ListLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mf">12.5</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s break down exactly what we just did.  We created two new link atoms and a new <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> node atom.</p>
+<a class="reference internal image-reference" href="../_images/fidos_weight.svg"><img alt="Fido's Weight Graphic" class="align-center" height="300px" src="../_images/fidos_weight.svg" width="450px" /></a>
+<p>Here is a graphical representation of the atom relationships we just expressed.</p>
+<p>In the inner-part of the expression, we created a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom that references <code class="code docutils literal notranslate"><span class="pre">(Concept</span> <span class="pre">&quot;Fido</span> <span class="pre">the</span> <span class="pre">Dog&quot;)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(Predicate</span> <span class="pre">&quot;weight_in_kg&quot;)</span></code>.
+This <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> is just a simple association between the other two node atoms.</p>
+<p>The formal description of <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> tells us we should think of this as an argument list, and from a programming language perspective this makes sense.
+Personally, however, I prefer to think about it from a natural language perspective.
+By definition, this particular <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom is <em>the</em> <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> atom that references <code class="code docutils literal notranslate"><span class="pre">(Concept</span> <span class="pre">&quot;Fido</span> <span class="pre">the</span> <span class="pre">Dog&quot;)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(Predicate</span> <span class="pre">&quot;weight_in_kg&quot;)</span></code> in that order.
+Therefore, in this context, you can think of it as the atom that means “Fido the Dog’s weight in kg”.
+Basically, a single atom, i.e. our new link atom, is able to represent a compound concept created by combining two other atoms.</p>
+<p>The documentation for <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/ListLink">https://wiki.opencog.org/w/ListLink</a>, if you want to understand it more precisely.</p>
+<p>Moving on, the outer part of the expression creates a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>.  The <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom that we just made references our newly-created <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> and a newly-created <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> that has the “label” of “12.5”.
+A <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is like a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> insofar as it also references other atoms and provides a way to reference this newly combined concept as an atom itself.</p>
+<p>The main feature of a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is that there can be only one <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> for each referant in position 0 (Zero) of the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code>’s outbound set.
+So, referring back to our example, “Fido the Dog’s weight in kg” can only have one <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> that points to it as the link’s first referenced atom.
+In plain English, “Fido the Dog’s weight in kg” can only be one thing at a time.  His weight can’t simultaneously be 12.5kg and 15kg.  Setting it to 15kg will update the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom that’s already there, rather than creating a new <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atom.</p>
+<p>The documentation for <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/StateLink">https://wiki.opencog.org/w/StateLink</a>.</p>
+<p>In addition, more documentation and examples along these lines can be found in these OpenCog examples: <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/state.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/state.scm</a> &amp; <a class="reference external" href="https://github.com/opencog/atomspace/blob/master/examples/atomspace/property.scm">https://github.com/opencog/atomspace/blob/master/examples/atomspace/property.scm</a></p>
+</div>
+<div class="section" id="executing-atoms">
+<h2>Executing Atoms<a class="headerlink" href="#executing-atoms" title="Permalink to this headline">¶</a></h2>
+<p>Atoms in the Atomspace can represent both data as well as the transformations and operations that can be done to the data.
+The code and the data exist side-by-side.  From the perspective of the Atomspace, they’re all just atoms.</p>
+<p>We just saw how we can use a link atom to create a compound concept, i.e. “Fido the Dog’s weight_in_kg”.
+Take a look at another compound concept formed with a link:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">PlusLink</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">2</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>In English, those 3 atoms would be interpreted as the sentence fragment “The sum of 2 and 3”.
+If you paste the above Scheme snippet into the Guile interpreter, it just puts those 3 atoms into the Atomspace.  Boring!</p>
+<p>But <code class="code docutils literal notranslate"><span class="pre">PlusLink</span></code> has a special property; it is an <em>Active</em> or “executable” atom type.</p>
+<p>So far, the atoms we’ve seen, like the <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> we used above, have been declarative, but <em>Active</em> atoms can be executed.
+Executing an atom means some computational operation is performed.  The behavior varies from one atom type to another, and the effects can range from synthesizing a new Value, creating new atoms in the Atomspace or even deleting existing atoms.</p>
+<p>Some Link types may be Active as well as declarative, and which operation occurs depends on the context in which the link is accessed.</p>
+<p>We execute an atom with the <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> OpenCog function call.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">PlusLink</span>
+      <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">3</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>If you just ran the Scheme snippet above, you probably noticed that it returned <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">5</span></span><span class="p"><span class="pre">)</span></span></code>.  And if you were being very thorough, you also may have also noticed that the (NumberNode 5) atom was created and added to the Atomspace.
+When the output of <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> is an atom, it will be added to the Atomspace.</p>
+<p>Remember, Atoms can’t exist outside the Atomspace, so even atoms that are created for a temporary operation are added to the Atomspace and remain there until something explicitly removes them.  Sometimes this is desireable.  Sometimes this is annoying.  For now, it’s just something to be aware of.</p>
+</div>
+<div class="section" id="a-basic-query-with-meetlink-variablenode">
+<h2>A Basic Query with MeetLink &amp; VariableNode<a class="headerlink" href="#a-basic-query-with-meetlink-variablenode" title="Permalink to this headline">¶</a></h2>
+<p>Back to Fido the Dog.  Now that we’ve told the Atomspace that “Fido the Dog’s weight in kg is 12.5”, how can we retrieve that information?  How do we ask “What is Fido the Dog’s weight in kg?”</p>
+<p>Like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">MeetLink</span>
+      <span class="p">(</span><span class="nf">StateLink</span>
+         <span class="p">(</span><span class="nf">ListLink</span>
+            <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We’ll go through what we just did, step by step.  But first, I want to rewrite the above statement so our code can be a little less verbose and we can focus on what really matters.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">fidos_weight_link</span> <span class="p">(</span><span class="nf">List</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Since Fido’s weight is something we’re referencing often, we can use Scheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">define</span></span></code> feature to create a single token to refer to it.</p>
+<p>Now our query looks like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Meet</span>
+      <span class="p">(</span><span class="nf">State</span>
+         <span class="nv">fidos_weight_link</span>
+         <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Just like we abbreviated <code class="code docutils literal notranslate"><span class="pre">ConceptNode</span></code> and <code class="code docutils literal notranslate"><span class="pre">PredicateNode</span></code> earlier, we can abbreviate <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> as just <code class="code docutils literal notranslate"><span class="pre">List</span></code> and <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> as <code class="code docutils literal notranslate"><span class="pre">State</span></code>.
+Now that I’ve introduced them, I’ll also start abbreviating <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> as <code class="code docutils literal notranslate"><span class="pre">Meet</span></code>, <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> as <code class="code docutils literal notranslate"><span class="pre">Variable</span></code>, etc.  You get the idea, so I won’t explicitly explain abbreviations from here onward.</p>
+<p>Anyway, let’s get to the meat of what we just did. (No pun! I swear it.)  <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> is one of the Active, aka executable, link types.
+Executing a <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> performs a query in the Atomspace, and returns the atoms found by the query.</p>
+<p>Let’s look at the atom that our <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> is referencing.  This atom is our query:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">State</span>
+   <span class="nv">fidos_weight_link</span>
+   <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This can be thought of as a “Match Expression”, because executing the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> will search the Atomspace for all atoms that match this atom we provided.
+The <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> can then be thought of as the wildcard.  The wildcard can match any other atom.
+If you are familiar with <a class="reference external" href="https://www.regular-expressions.info/quickstart.html">Regular Expressions</a>, this is the same principle.</p>
+<p>So, you might interpret this query expression as saying “Find all the <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> atoms that connect <code class="code docutils literal notranslate"><span class="pre">fidos_weight_link</span></code> to <em>something</em>.
+What are all the <em>somethings</em> that you found?”</p>
+<p>When we execute our query, it should return:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">QueueValue</span>  <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;12.5&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>You probably spotted our <code class="code docutils literal notranslate"><span class="pre">(NumberNode</span> <span class="pre">&quot;12.5&quot;)</span></code> atom.  It’s here because it was matched by the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> in the query, but what’s with the <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code>?</p>
+<p>A <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> is a list of atoms or other values.
+<code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> returns a <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> instead of a “naked” node atom because a query may match more than one atom and there is no way to know the number of results that will be found, in the general case.</p>
+</div>
+<div class="section" id="querylink-to-utilize-query-results">
+<h2>QueryLink to Utilize Query Results<a class="headerlink" href="#querylink-to-utilize-query-results" title="Permalink to this headline">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> is another way to execute a query.  It is just like the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> atom that we used in the previous examples, except that <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> allows us to specify what we want to do with the query results.</p>
+<p>Last chapter, we used Scheme to add 50 to Fido’s weight.  Now let’s do it with Atoms alone.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">QueryLink</span>
+      <span class="p">(</span><span class="nf">StateLink</span>
+         <span class="nv">fidos_weight_link</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;fidos_weight_number_node&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+      <span class="p">(</span><span class="nf">PlusLink</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;fidos_weight_number_node&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Number</span> <span class="mi">50</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> takes two arguments; the first is the query atom, in exactly the same format as <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code>, and the second atom is the operation to perform on each query result.
+So, in our example, the first atom supplied to the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> matches the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> example above, and the second atom is a variant of the <code class="code docutils literal notranslate"><span class="pre">PlusLink</span></code> example.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The query atom in the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> example named the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> as <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Variable</span></span> <span class="s"><span class="pre">“$v1”</span></span><span class="p"><span class="pre">)</span></span></code> while the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> example uses <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">VariableNode</span></span> <span class="s"><span class="pre">“fidos_weight_number_node”</span></span><span class="p"><span class="pre">)</span></span></code>.
+These are just different labels for the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atom.  There is a convention in some documentation to prepend variable names with the ‘$’ sigil, but I find the sigil unnecessary, and I prefer a descriptive name to the obtuse “v1”.</p>
+</div>
+<p>You can think of <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> as performing two operations in sequence.  First, it performs a query to search for matching atoms, and then it performs a subsequent atom execution to format each result.</p>
+<p>You’ve probably noticed the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> appears in both the query atom and the result output format atom.
+Personally, I think of this as the variable acquiring its <em>meaning</em>?? in the query <strong>(better word?? binding?? / grounding?? / I won’t say Value because that word is taken, but if this were another programming language then I’d say value.)</strong>
+And thus the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> refers to a concrete atom when it is used in the output format atom.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Much of the documentation and examples are written to feature <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code>, and <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code>.
+The only semantic difference between these is that <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> return results as a <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> which is transient,
+while <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> return a <code class="code docutils literal notranslate"><span class="pre">SetLink</span></code> which will become part of the Atomspace until it is deleted.
+To avoid cluttering up the Atomspace and the performance costs associated with that, the <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> functions are better.</p>
+<p>The OpenCog examples covering <code class="code docutils literal notranslate"><span class="pre">BindLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">GetLink</span></code> apply equally well to <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code>.</p>
+</div>
+<p>Lastly, let’s get our query result back into Scheme.  Let’s use the Scheme snippet below to multiply the new value by 10.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="k">define </span><span class="nv">fidos_weight_plus_50_query</span>
+   <span class="p">(</span><span class="nf">QueryLink</span>
+      <span class="p">(</span><span class="nf">StateLink</span>
+         <span class="nv">fidos_weight_link</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;Fidos_weight_number_node&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+      <span class="p">(</span><span class="nf">PlusLink</span>
+         <span class="p">(</span><span class="nf">VariableNode</span> <span class="s">&quot;Fidos_weight_number_node&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Number</span> <span class="mi">50</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="p">(</span><span class="nf">*</span>
+   <span class="p">(</span><span class="nf">cog-number</span>
+      <span class="p">(</span><span class="nf">car</span>
+         <span class="p">(</span><span class="nf">cog-value-&gt;list</span>
+            <span class="p">(</span><span class="nf">cog-execute!</span> <span class="nv">fidos_weight_plus_50_query</span><span class="p">)</span>
+         <span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+   <span class="mi">10</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Because <code class="code docutils literal notranslate"><span class="pre">cog-execute!</span></code> returns a <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> to us, we must get the first element of the <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code>, which will be a <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code>.  We can then extract the numerical value from that <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code>.</p>
+<p>We use the <code class="code docutils literal notranslate"><span class="pre">cog-value-&gt;list</span></code> OpenCog function to convert the <code class="code docutils literal notranslate"><span class="pre">QueueValue</span></code> into a Scheme list, and then use Sheme’s <code class="code scheme docutils literal notranslate"><span class="nv"><span class="pre">car</span></span></code> to extract the first element of that list.
+Finally, we can use the <code class="code docutils literal notranslate"><span class="pre">cog-number</span></code> OpenCog function to convert the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> into a Scheme number, before performing the arithmetic in Scheme.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION for someone smarter than me. Why does (cog-value-ref) give me “index out of range” errors on QueueValues??  Conceptually, it seems like this should be something that should work.  If not, what are the preferred semantics (most efficient) for dequeueing an element from a QueueValue?</p>
+</div>
+<p>That’s probably enough on this simple query.  If you want a more complete explanation, the documentation for <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/VariableNode">https://wiki.opencog.org/w/VariableNode</a> and the documentation for <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/MeetLink">https://wiki.opencog.org/w/MeetLink</a> and <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> is here: <a class="reference external" href="https://wiki.opencog.org/w/QueryLink">https://wiki.opencog.org/w/QueryLink</a></p>
+</div>
+<div class="section" id="more-elaborate-queries-with-other-link-types">
+<h2>More Elaborate Queries with other Link Types<a class="headerlink" href="#more-elaborate-queries-with-other-link-types" title="Permalink to this headline">¶</a></h2>
+<p>This is a good place to introduce the concepts of <em>Grounded</em> vs <em>Ungrounded</em> expressions.  These terms come from formal logic, which you can read about on Wikipedia here: <a class="reference external" href="https://en.wikipedia.org/wiki/Ground_expression">https://en.wikipedia.org/wiki/Ground_expression</a>
+The formal definition is that ungrounded expressions contain 1 or more <em>Free</em> <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms, while grounded expressions don’t contain any.
+Personally, the way I think about it is that grounded expressions are statements and ungrounded expressions are questions.</p>
+<p>Just as in English, questions and statements can take a similar gramatical form.  Consider this example.
+Statement: “The man is running.”  Question: “Who is running?” Answer: “The man”.</p>
+<p>The question-word “Who” in this example is like a <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code>.
+When the question is matched against the statement, the relative gramatical position of the word “Who” indicates which part of the statement will appropriately answer the question.</p>
+<p>So, another intuition for <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> and <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> is that they take an ungrounded expression and produce a grounded expression.
+Or said another way, it takes a question and returns an answer.</p>
+<p>So let’s flip our previous question inside out.  Consider this query:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Meet</span>
+      <span class="p">(</span><span class="nf">State</span>
+         <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;$v1&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Number</span> <span class="mf">12.5</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Our previous question was: “What is Fido the Dog’s weight in kg?”.  Now our question is Jeopardy style: “<em>Blank</em> has a value is 12.5.”
+Executing that snippet should return our <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> that represents Fido’s weight.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Often we’ll want to compose compound questions.  Sometimes a compound question has one unknown and more than one criteria, for example,
+the English question: “What cities in Germany are on the river Danube?” is a compound question because it has two parts, “In Germany” and “On the river Danube”.
+However, it is also possible to use multiple <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms within the query, and that’s the situation we’re about to cover.</p>
+</div>
+<p>Now, I want to ask the Atomspace to find the dogs that have a weight over 10kg.  My query looks like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">QueryLink</span>
+      <span class="p">(</span><span class="nf">And</span>
+         <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">List</span>
+               <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">GreaterThan</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Number</span> <span class="mi">10</span><span class="p">)</span>
+         <span class="p">)</span>
+      <span class="p">)</span>
+      <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>We found Fido!</p>
+<p>Now, let’s go over the Links we just used, and I’ll explain the query along the way.</p>
+<div class="section" id="querylink-to-format-query-results">
+<h3>QueryLink to Format Query Results<a class="headerlink" href="#querylink-to-format-query-results" title="Permalink to this headline">¶</a></h3>
+<p>Last time we encountered <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> we used it as a way to execute additional operations on our query result.
+Here we are using it to specify which portion of the query results we are interested in.
+To understand this better, try this nearly identical version of the query using <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code>.</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Meet</span>
+      <span class="p">(</span><span class="nf">And</span>
+         <span class="p">(</span><span class="nf">State</span>
+            <span class="p">(</span><span class="nf">List</span>
+               <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+               <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">GreaterThan</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Number</span> <span class="mi">10</span><span class="p">)</span>
+         <span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>As you can see, it also returns <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">ConceptNode</span></span> <span class="s"><span class="pre">“Fido</span> <span class="pre">the</span> <span class="pre">Dog”</span></span><span class="p"><span class="pre">)</span></span></code>.  But unlike the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> version, the result is a bit more cluttered.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> version returns:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">QueueValue</span>  <span class="p">(</span><span class="nf">ListLink</span>
+   <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="s">&quot;12.5&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>While the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> version returns just:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">QueueValue</span>  <span class="p">(</span><span class="nf">ConceptNode</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>That is because we explicitly told the <code class="code docutils literal notranslate"><span class="pre">QueryLink</span></code> atom that we were interested in <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dog_node&quot;)</span></code> as our result.  On the other hand, the <code class="code docutils literal notranslate"><span class="pre">MeetLink</span></code> atom created a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> referencing all of the <code class="code docutils literal notranslate"><span class="pre">VariableNode</span></code> atoms in our query.</p>
+</div>
+<div class="section" id="andlink-for-multiple-query-criteria">
+<h3>AndLink for Multiple Query Criteria<a class="headerlink" href="#andlink-for-multiple-query-criteria" title="Permalink to this headline">¶</a></h3>
+<p><code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> is a link atom type for performing the binary “And” operation.  You probably guessed that from its name.
+So, for a query to match, both sides of the <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> must be satisfied.</p>
+<p>Back to our example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">And</span>
+   <span class="p">(</span><span class="nf">State</span>
+      <span class="p">(</span><span class="nf">List</span>
+         <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+         <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+      <span class="p">)</span>
+      <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+   <span class="p">(</span><span class="nf">GreaterThan</span>
+      <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dogs_weight_node&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Number</span> <span class="mi">10</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This query’s use of <code class="code docutils literal notranslate"><span class="pre">And</span></code> is essentially saying “Find an atom connected to the <em>weight_in_kg</em> atom with a <code class="code docutils literal notranslate"><span class="pre">ListLink</span></code> that itself is connected to another atom by a <code class="code docutils literal notranslate"><span class="pre">StateLink</span></code> <strong>AND</strong> the numerical value of that other atom is greater than 10.”</p>
+<p>Let’s try experimenting a bit with this query.  For example, we’ll give Fido a friend by executing the Scheme snippet here:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">StateLink</span>
+   <span class="p">(</span><span class="nf">ListLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fluffy the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;weight_in_kg&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+   <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">9</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, if we change the query to compare against <code class="code docutils literal notranslate"><span class="pre">(Number</span> <span class="pre">8)</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">(Number</span> <span class="pre">10)</span></code>, we’ll will find the query returns both Fido and Fluffy.</p>
+<p>Moving on, notice that the <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dogs_weight_node&quot;)</span></code> atom appears on both sides of the <code class="code docutils literal notranslate"><span class="pre">And</span></code> expression.  This is important.</p>
+<p>Echoing what I said above, Speaking as somebody with a strong background in procedural programming, the way I think about this is that the <code class="code docutils literal notranslate"><span class="pre">Variable</span></code> node is “defined” or temporarily given a concrete meaning by the first side of the <code class="code docutils literal notranslate"><span class="pre">And</span></code> expression, and then that concrete atom is used when evaluating the second side.
+However, if your intuition comes from databases, you may want to think of the operation as an “INNER JOIN” from SQL.  These mental models are functionally equivalent.</p>
+<p>If you’re curious, the Atomspace has an <code class="code docutils literal notranslate"><span class="pre">OrLink</span></code> along with some other logical link types.  However, if your intention is to perform an “OUTER JOIN”, you probably want to use <code class="code docutils literal notranslate"><span class="pre">ChoiceLink</span></code> instead of <code class="code docutils literal notranslate"><span class="pre">OrLink</span></code>.
+“And” expressions narrow the <em>Satisfying Set</em> while “Or” expressions expand it.  Therefore you may need to be careful using <code class="code docutils literal notranslate"><span class="pre">Variable</span></code> nodes on both sides of an “Or” expression and expecting them to be consistent.  The behavior may not be what you intend.
+There is certinly more that could be said on this topic, but it feels like a rat hole at this point in the guide.</p>
+</div>
+<div class="section" id="greaterthanlink-to-filter-by-numeric-value">
+<h3>GreaterThanLink to Filter by Numeric Value<a class="headerlink" href="#greaterthanlink-to-filter-by-numeric-value" title="Permalink to this headline">¶</a></h3>
+<p>As the name suggests, <code class="code docutils literal notranslate"><span class="pre">GreaterThanLink</span></code> compares two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms using the “<strong>&gt;</strong>” operator.</p>
+<p>In the section above covering <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code>, we already explaind how the <code class="code docutils literal notranslate"><span class="pre">(Variable</span> <span class="pre">&quot;dogs_weight_node&quot;)</span></code> atom gets its meaning from the other side of the <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code> expression.
+So this comparison evaluates to <em>true</em> if the numeric value of the atom matched by the Variable node is greater than <code class="code docutils literal notranslate"><span class="pre">(Number</span> <span class="pre">10)</span></code>.  All pretty self-explanatory so far.</p>
+<p>I’ll take this opportunity to introduce other link types along the same lines:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/EqualLink">EqualLink</a> Determines whether two atoms are actually the same atom, or whether they become the same atom when they are evaluated.</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/NotLink">NotLink</a> Is the logical “Not” operator.  Evaluates to <em>true</em> if the atom it references evaluates to <em>false</em> and vice-versa.  Things get a little more complicated when considering non-binary TruthValues, but that’s a topic we’ll cover later.</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/PlusLink">PlusLink</a> Is the arithmetic operator for addition.  It references two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms, and creates a third with the value of the sum of the other two.</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/MinusLink">MinusLink</a> Is the arithmetic operator for subtraction.  It references two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms, and creates a third with the value of first minus the second.</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/TimesLink">TimesLink</a> Is the arithmetic operator for multiplication.  It references two <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atoms, and creates a third with the value of the product of the other two.</p></li>
+<li><p><a class="reference external" href="https://wiki.opencog.org/w/DivideLink">DivideLink</a> Is the arithmetic operator for division.  I’m sure you’ve spotted the pattern by now.</p></li>
+</ul>
+</div></blockquote>
+<p>You may have noticed that “LessThanLink” is absent.  The less-than operator itself is just syntactic sugar because the argument order to <code class="code docutils literal notranslate"><span class="pre">GreaterThanLink</span></code> can implement a logically identical “LessThanLink”.  Personally I’ve often wondered why more programming languages don’t conserve the less-than operator this way.  Presumably the cost is tiny compared with improved code readability.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Be careful</strong> Naked Values, e.g. <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code>, can’t be part of expressions in the Atomspace.  For example, using <code class="code docutils literal notranslate"><span class="pre">EqualLink</span></code> to compare <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">FloatValue</span></span> <span class="mf"><span class="pre">2.0</span></span><span class="p"><span class="pre">)</span></span></code> with <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mf"><span class="pre">1.0</span></span><span class="p"><span class="pre">)</span></span></code> will evaluate to <em>true</em>!  This happens because the <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code> vanishes when constructing the expression, and thus the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> is compared to itself!</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION for someone smarter than me. How does one check for numerical equality?  In other words, a link or other operator that can sucessfully compare a NumberNode with a numerical value.  Also, I saw the note about the absence of (IntValue) etc., but equality for IEEE floats is problematic for many applications because values that are no longer representable with the mantissa bits become approximated leading to all kinds of unintended behavior.</p>
+</div>
+</div>
+</div>
+<div class="section" id="valueoflink-and-setvaluelink">
+<h2>ValueOfLink and SetValueLink<a class="headerlink" href="#valueoflink-and-setvaluelink" title="Permalink to this headline">¶</a></h2>
+<p>Coming full circle, let’s revisit values associated with atoms.
+If you recall, last chapter, we used <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code> to associate a value with an atom.</p>
+<p>There is an Atomese equivalent: <code class="code docutils literal notranslate"><span class="pre">SetValueLink</span></code>.
+<code class="code docutils literal notranslate"><span class="pre">SetValueLink</span></code> behaves exactly like <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code>, except that it can be incorporated into another Atomese expressions.
+This will become important when we begin discussing Atomese programs in the next chapter.</p>
+<p>We might use <code class="code docutils literal notranslate"><span class="pre">cog-set-value</span></code> to associate an age with Fido, invoking the OpenCog command below:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The Atomese equivalent to that would be:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">SetValueLink</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+      <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">3</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>These are <em>almost</em> the same, however, there is one important thing to remember: “Naked” Values can’t exist in the Atomspace.</p>
+<p>Notice that <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">FloatValue</span></span> <span class="mi"><span class="pre">3</span></span><span class="p"><span class="pre">)</span></span></code> is not exactly the same thing as <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">NumberNode</span></span> <span class="mi"><span class="pre">3</span></span><span class="p"><span class="pre">)</span></span></code>.
+The latter a reference to the <code class="code docutils literal notranslate"><span class="pre">NumberNode</span></code> atom standing in for the numeric value, while the former is the actual floating point number itself.</p>
+<p>There is no way for the <code class="code docutils literal notranslate"><span class="pre">FloatValue</span></code> to be part of the Atomese exprssion we want to execute, because it can’t exist in the Atomspace at all.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>QUESTION FOR SOMEONE SMARTER THAN ME. Is this actually right???  This doesn’t feel right that there is no mechanism to make this work.</p>
+</div>
+<p>Conversely, we can access values associated with atoms in Atomese using <code class="code docutils literal notranslate"><span class="pre">ValueOfLink</span></code>.
+<code class="code docutils literal notranslate"><span class="pre">ValueOfLink</span></code> is the Atomese equivalent to the <code class="code docutils literal notranslate"><span class="pre">cog-value</span></code> command we introduced last chapter.</p>
+<p>So the Scheme snippet below:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">ValueOfLink</span>
+      <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Is equivalent to directly accessing the value like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-value</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="thinking-about-performance-querying-values">
+<h3>Thinking About Performance Querying Values<a class="headerlink" href="#thinking-about-performance-querying-values" title="Permalink to this headline">¶</a></h3>
+<p>Last chapter, I told you that values can’t be used as search criteria.
+I should have said that values can’t be searched <em>efficiently</em>.</p>
+<p>It turns out you actually <em>can</em> query the Atomspace for atoms with values that meet your query criteria.
+You just need to be careful.  Consider the query below to find dogs based on age:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Meet</span>
+      <span class="p">(</span><span class="nf">GreaterThan</span>
+         <span class="p">(</span><span class="nf">ValueOf</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">))</span>
+         <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>It returns Fido, just like you probably expected.  But not so fast!  Literally.</p>
+<p>Executing this query involves iterating over every single atom in the Atomspace, and checking to see if it has the <code class="code scheme docutils literal notranslate"><span class="p"><span class="pre">(</span></span><span class="nf"><span class="pre">Predicate</span></span> <span class="s"><span class="pre">“age”</span></span><span class="p"><span class="pre">)</span></span></code> key,
+and if it does, then performing the comparison.  It may have appeared to be quick enough, but that’s because you probably don’t have many atoms in your atomspace.
+Consider what would happen if your atomspace contained millions of atoms!</p>
+<p>You can still use <code class="code docutils literal notranslate"><span class="pre">ValueOf</span></code> links in queries, but be careful that they are only applied to sets of a tractable size, and not all of the atoms in the Atomspace.</p>
+<p>One strategy for accelerating this query is to create a link that tracks whether a given node contains a key.  Here is an example:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-set-value!</span> <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">FloatValue</span> <span class="mi">3</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">Member</span>
+   <span class="p">(</span><span class="nf">Concept</span> <span class="s">&quot;Fido the Dog&quot;</span><span class="p">)</span>
+   <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">MemberLink</span></code> atom, in this case, is acting as a sentinel that says “Fido the Dog has an age key-value pair.”
+Mathmatically, it is saying “Fido the Dog is a member of the age set”, where the “age” set is understood (by our convention) to contain all atoms that have an age value.</p>
+<p>Now that we have a link we can query, we can compose a query using an <code class="code docutils literal notranslate"><span class="pre">AndLink</span></code>, like this:</p>
+<div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-execute!</span>
+   <span class="p">(</span><span class="nf">Meet</span>
+      <span class="p">(</span><span class="nf">And</span>
+         <span class="p">(</span><span class="nf">Member</span>
+            <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span>
+            <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">)</span>
+         <span class="p">)</span>
+         <span class="p">(</span><span class="nf">GreaterThan</span>
+            <span class="p">(</span><span class="nf">ValueOf</span> <span class="p">(</span><span class="nf">Variable</span> <span class="s">&quot;dog_node&quot;</span><span class="p">)</span> <span class="p">(</span><span class="nf">Predicate</span> <span class="s">&quot;age&quot;</span><span class="p">))</span>
+            <span class="p">(</span><span class="nf">NumberNode</span> <span class="mi">2</span><span class="p">)</span>
+         <span class="p">)</span>
+      <span class="p">)</span>
+   <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This query will also find Fido and all other dogs older than 2, just like our first version.  As you can see, the second branch of the query is identical to the one above.
+However, this query will have considerably better performance characteristics as the number of atoms in the Atomspace grows.</p>
+<p>Next Chapter: <a class="reference internal" href="03_atomese_programming.html#atomese-programming"><span class="std std-ref">Programming with Atomese</span></a></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Luke's Atomspace Quickstart Guide</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="01_getting_oriented.html">Getting Oriented &amp; Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structured Knowledge &amp; Simple Queries</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#predicatenode-links-to-make-statements">PredicateNode &amp; Links to make statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#executing-atoms">Executing Atoms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-basic-query-with-meetlink-variablenode">A Basic Query with MeetLink &amp; VariableNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#querylink-to-utilize-query-results">QueryLink to Utilize Query Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-elaborate-queries-with-other-link-types">More Elaborate Queries with other Link Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#querylink-to-format-query-results">QueryLink to Format Query Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#andlink-for-multiple-query-criteria">AndLink for Multiple Query Criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#greaterthanlink-to-filter-by-numeric-value">GreaterThanLink to Filter by Numeric Value</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#valueoflink-and-setvaluelink">ValueOfLink and SetValueLink</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#thinking-about-performance-querying-values">Thinking About Performance Querying Values</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="03_atomese_programming.html">Programming with Atomese</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_evaluation_and_truth_values.html">Evaluation and Truth Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_logical_inferencing.html">Logical Inferencing</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="01_getting_oriented.html" title="previous chapter">Getting Oriented &amp; Basic Concepts</a></li>
+      <li>Next: <a href="03_atomese_programming.html" title="next chapter">Programming with Atomese</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Luke Peterson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/contents/02_representing_knowledge.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
