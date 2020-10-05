@@ -615,8 +615,8 @@ Or we can examine the individual components of the TruthValue, using the :code:`
 Predicate vs. Atom-attached TruthValues
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The truthValue that you get when evaluating an atom is **NOT** the same as the truthValue attached to the atom!!!
-Sorry about the exclamation marks, but this fact took me took me a few hours to discover, and it was an immensely annoying few hours when nothing seemed to follow my intuition.
+The truthValue that results from evaluating an atom is **NOT** the same as the truthValue attached to that atom!!!
+Sorry about the exclamation marks, but this fact took me took me a few hours to pin down, and it was an immensely annoying few hours when nothing seemed to follow my intuition.
 
 Compare the results of these two expressions:
 

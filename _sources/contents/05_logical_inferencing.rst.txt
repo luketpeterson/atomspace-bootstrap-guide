@@ -6,7 +6,7 @@
 Previous Chapter: :ref:`Structured Knowledge <02_representing_knowledge>`
 
 ========================================================================
-Logical Inferencing
+Logical Inferencing **INCOMPLETE!!**
 ========================================================================
 
 In the previous chapters, we looked at how we could query the Atomspace for knowledge that was represented explicitly.

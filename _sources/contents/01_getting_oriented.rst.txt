@@ -75,11 +75,11 @@ You can read more about Scheme at: `<http://www.shido.info/lisp/idx_scm_e.html>`
 I often find it handy to have the Scheme environment right at my fingertips.
 
 But we're here in a Scheme shell because Scheme is a (**the??**) first-class interface to the atomspace.  
-However it's important to point out that the atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn't "Running in Scheme".
+However it's important to point out that the Atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn't "Running in Scheme".
 
 Furthermore, irrespective of Scheme, the Atomspace itself can also behave as a Turing-complete program execution environment for Atomese, the language of the Atomspace.
 I found this a bit confusing because it means there are at least two ways to do most things within an OpenCog Scheme shell.
-However, the point of this guide is to focus on the atomspace, so I'll do my best to keep the Scheme stuff to a minimum from here onwards.
+However, the point of this guide is to focus on the atomspace, so I'll do my best to keep the Scheme stuff to a minimum from here onward.
 
 Creating some Node Atoms
 ------------------------------------------------------------------------
@@ -112,7 +112,7 @@ Also, you can print an atom using Scheme's :scheme:`display` function.  If the a
 
    (display dog_concept)
 
-Now, you can see all of the atoms in the Atomspace with this function:
+Now, you can see all the atoms in the Atomspace with this function:
 
 .. code-block:: scheme
 

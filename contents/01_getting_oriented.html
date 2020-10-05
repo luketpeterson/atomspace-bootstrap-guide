@@ -86,10 +86,10 @@ You can verify this by executing <code class="code docutils literal notranslate"
 <p>You can read more about Scheme at: <a class="reference external" href="http://www.shido.info/lisp/idx_scm_e.html">http://www.shido.info/lisp/idx_scm_e.html</a> among many other places.  Within the OpenCog Scheme shell you can use <em>cons</em>, <em>car</em> and <em>cdr</em> ‘til the cows come home.
 I often find it handy to have the Scheme environment right at my fingertips.</p>
 <p>But we’re here in a Scheme shell because Scheme is a (<strong>the??</strong>) first-class interface to the atomspace.
-However it’s important to point out that the atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn’t “Running in Scheme”.</p>
+However it’s important to point out that the Atomspace and the scheme language are conceptually distinct software components.  Neither one strictly relies on the other.  Scheme is an interface to the Atomspace, but the Atomspace isn’t “Running in Scheme”.</p>
 <p>Furthermore, irrespective of Scheme, the Atomspace itself can also behave as a Turing-complete program execution environment for Atomese, the language of the Atomspace.
 I found this a bit confusing because it means there are at least two ways to do most things within an OpenCog Scheme shell.
-However, the point of this guide is to focus on the atomspace, so I’ll do my best to keep the Scheme stuff to a minimum from here onwards.</p>
+However, the point of this guide is to focus on the atomspace, so I’ll do my best to keep the Scheme stuff to a minimum from here onward.</p>
 </div>
 <div class="section" id="creating-some-node-atoms">
 <h2>Creating some Node Atoms<a class="headerlink" href="#creating-some-node-atoms" title="Permalink to this headline">¶</a></h2>
@@ -111,7 +111,7 @@ However, the point of this guide is to focus on the atomspace, so I’ll do my b
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">display </span><span class="nv">dog_concept</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now, you can see all of the atoms in the Atomspace with this function:</p>
+<p>Now, you can see all the atoms in the Atomspace with this function:</p>
 <div class="highlight-scheme notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nf">cog-prt-atomspace</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -292,7 +292,11 @@ I understand maps can be created by embedded atoms for each sub-dictionary, and 
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Oriented &amp; Basic Concepts</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-getting-to-the-scheme-shell">Installation &amp; Getting to the Scheme Shell</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#option-1-run-guile-in-the-docker-terminal">Option 1, Run Guile in the Docker terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#option-2-telnet-into-the-opencog-server">Option 2, Telnet into the OpenCog Server</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#poking-around-in-scheme">Poking around in Scheme</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#creating-some-node-atoms">Creating some Node Atoms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#values-associated-with-atoms">Values associated with Atoms</a></li>
@@ -300,8 +304,9 @@ I understand maps can be created by embedded atoms for each sub-dictionary, and 
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="02_representing_knowledge.html">Structured Knowledge &amp; Simple Queries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03_truth_values_and_evaluation.html">TruthValues &amp; Predicate Evaluation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="04_logical_inferencing.html">Logical Inferencing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_atomese_programming.html">Programming with Atomese</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_evaluation_and_truth_values.html">Evaluation and Truth Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_logical_inferencing.html">Logical Inferencing <strong>INCOMPLETE!!</strong></a></li>
 </ul>
 
 <div class="relations">
